@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# AnyLogic: ficheiros temporários e de build
+*.alp.bak
+*.alpx.bak
+*~
+bin/
+build/
+*.class
+*.log
+
+# Office: ficheiros de bloqueio
+~$*
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Saídas das corridas do AnyLogic (grandes; os resultados finais vão para data/processed)
+model/output/
