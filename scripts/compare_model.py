@@ -1,4 +1,4 @@
-"""Calibração: compara as estatísticas do modelo com as do BCP real.
+"""Calibração: compara o modelo com os factos estilizados do BCP real (docs/FACTOS_ESTILIZADOS.md).
 
 Uso (depois de correr o cenário baseline no AnyLogic):
     python scripts/compare_model.py              # usa todas as corridas com label a começar por "baseline"
@@ -16,10 +16,18 @@ ROOT = Path(__file__).resolve().parent.parent
 PRICES = ROOT / "model" / "output" / "precos.csv"
 OUT_DIR = ROOT / "data" / "processed"
 DAY = 510          # minutos por dia de negociação no modelo
-TOL = 0.25         # "bate" se o modelo estiver a ±25% do valor real
 
 COLS = ["label", "run", "time", "price", "bid", "ask", "volume"]
-CHECK = ["volatilidade_diaria", "curtose_excesso", "pct_dias_var_maior_3pct", "autocorr_abs_retornos_lag1"]
+
+# Os mesmos critérios de "bate" de docs/FACTOS_ESTILIZADOS.md: (métrica, função(real, modelo) -> bool)
+FACTS = [
+    ("volatilidade_diaria", lambda r, m: abs(m - r) <= 0.25 * abs(r)),
+    ("curtose_excesso", lambda r, m: m > 1 and abs(m - r) <= 0.5 * abs(r)),
+    ("autocorr_abs_retornos_lag1", lambda r, m: m > 0.05 and np.sign(m) == np.sign(r)),
+    ("autocorr_retornos_lag1", lambda r, m: -0.1 <= m <= 0.1),
+    ("pct_dias_var_maior_3pct", lambda r, m: abs(m - r) <= 0.5 * abs(r)),
+    ("corr_volume_absret", lambda r, m: m > 0),
+]
 
 
 def model_stats(prefix):
@@ -29,8 +37,10 @@ def model_stats(prefix):
         raise SystemExit(f"Não há corridas com label a começar por '{prefix}' em {PRICES}")
     runs = []
     for _, g in df.groupby("run"):
-        close = g.assign(day=(g["time"] // DAY).astype(int)).groupby("day")["price"].last()
-        runs.append(stats_from_returns(np.log(close).diff()))
+        daily = g.assign(day=(g["time"] // DAY).astype(int)).groupby("day").agg(price=("price", "last"),
+                                                                               cumvol=("volume", "last"))
+        vol = daily["cumvol"].diff()                      # o modelo grava o volume acumulado
+        runs.append(stats_from_returns(np.log(daily["price"]).diff(), vol))
     return pd.DataFrame(runs).mean(), len(runs)
 
 
@@ -39,11 +49,8 @@ def main():
     real = compute("2023-01-01", "2024-12-31")
     model, n = model_stats(prefix)
 
-    rows = []
-    for k in CHECK:
-        r, m = real[k], model[k]
-        ok = abs(m - r) <= TOL * abs(r) if r != 0 else abs(m) < 0.01
-        rows.append({"estatistica": k, "BCP real": r, "modelo": m, "bate": "sim" if ok else "NAO"})
+    rows = [{"facto": k, "BCP real": real[k], "modelo": model[k], "bate": "sim" if ok(real[k], model[k]) else "NAO"}
+            for k, ok in FACTS]
     table = pd.DataFrame(rows)
     print(f"Modelo: {n} corridas com label '{prefix}*'\n")
     print(table.to_string(index=False, float_format=lambda x: f"{x:.4f}"))

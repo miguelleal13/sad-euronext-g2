@@ -19,13 +19,14 @@ OUT_DIR = ROOT / "data" / "processed"
 def compute(start, end):
     df = pd.read_csv(RAW, index_col=0, parse_dates=True)
     px = df.loc[start:end, "Adj Close" if "Adj Close" in df.columns else "Close"].dropna()
-    return {"periodo": f"{start} a {end}", **stats_from_returns(np.log(px).diff())}
+    vol = df.loc[start:end, "Volume"] if "Volume" in df.columns else None
+    return {"periodo": f"{start} a {end}", **stats_from_returns(np.log(px).diff(), vol)}
 
 
-def stats_from_returns(r):
-    """Estatísticas de uma série de retornos diários (logarítmicos)."""
+def stats_from_returns(r, volume=None):
+    """Estatísticas de uma série de retornos diários (logarítmicos) e, se houver, do volume diário."""
     r = pd.Series(r).dropna()
-    return {
+    out = {
         "n_dias": len(r),
         "volatilidade_diaria": r.std(),
         "volatilidade_anual": r.std() * np.sqrt(252),
@@ -37,6 +38,11 @@ def stats_from_returns(r):
         "pior_dia": r.min(),
         "melhor_dia": r.max(),
     }
+    if volume is not None:
+        v = pd.Series(volume).reindex(r.index).astype(float)
+        out["corr_volume_absret"] = v.corr(r.abs())   # volume e volatilidade andam juntos
+        out["autocorr_volume_lag1"] = v.autocorr(1)
+    return out
 
 
 def main():

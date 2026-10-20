@@ -208,27 +208,33 @@ MIGUEL = [
     ("h1", "Resumo das tuas semanas"),
     ("table", [
         ["Semana", "Entrega concreta"],
-        ["1 (17–24 out)", "GitHub (feito pelo Claude Code). Modelo base: Order, Stock com filas, matching e noise traders. **Até quinta o preço mexe num gráfico.**"],
-        ["2 (24–31 out)", "Statechart do Stock com colares (±3%/±8%), reservas de 3/10 min e leilão de reabertura. Integrar o fundamentalista do João e a instrumentação da Margarida."],
+        ["1 (17–24 out)", "Livro de ordens em Java (Order, Stock, matching) **e os testes do livro a passar**, antes de "
+                          "qualquer agente. Depois os noise traders. **Até quinta o preço mexe num gráfico.**"],
+        ["2 (24–31 out)", "Statechart do Stock com colares (±3%/±8%), reservas de 3/10 min e leilão de reabertura, com "
+                          "testes. Integrar o fundamentalista do João e a instrumentação da Margarida."],
         ["3 (31 out–7 nov)", "Integrar tudo (chartists, criador de mercado, notícias, dashboard). **Fase 1 a correr.**"],
         ["4 (7–14 nov)", "Velocidade do modelo e apoio à calibração."],
-        ["5 (14–21 nov)", "Integrar a Fase 2 (LeveragedTrader da Margarida, Broker da Matilde) e corrigir erros."],
+        ["5 (14–21 nov)", "Corrigir o que a verificação da Matilde encontrar; apoio às corridas finais."],
         ["6 (21–28 nov)", "Congelar o modelo; introdução, problema e livro de ordens no relatório."],
     ], [3.2, 12.8]),
-    ("p", "A proposta diz que o livro de ordens é um **sistema de filas** feito com a Process Modeling Library. Por isso "
-          "cada ordem é um agente `Order` que entra num fluxograma dentro do `Stock`: fila de espera, Hold (retém as "
-          "ordens durante a reserva), filas de compra e de venda ordenadas por preço, e saída por execução ou por "
-          "cancelamento (timeout = desistência)."),
+    ("p", "Os professores avisaram que o livro de ordens vai ser **sobretudo código Java** e que deve ser **construído e "
+          "testado primeiro**. Por isso cada ordem é um objeto Java (não um agente) e o livro são duas filas com "
+          "prioridade (`PriorityQueue`) dentro do `Stock`. Isto tem ainda outra vantagem: um modelo cria milhões de "
+          "ordens, e se cada uma fosse um agente era provável ultrapassar os limites da versão PLE do AnyLogic."),
+    ("p", "Continua a ser teoria das filas: cada lado do livro é uma fila servida por prioridade de preço e, no mesmo "
+          "preço, por ordem de chegada (FCFS); as ordens expiram (desistência) e, durante a reserva, ficam retidas numa "
+          "fila de espera até ao leilão."),
     ("h1", "1. Criar o modelo (semana 1)"),
     ("ol", [
         "AnyLogic: **File → New → Model**. Model name `Euronext_Main`; Location: a pasta `model/` do repositório; "
         "**Model time units: minutes**.",
         "No `Main` cria os **parâmetros** (Palette → Agent → Parameter): `nNoise` int 30, `initialPrice` 0.5, "
-        "`tickSize` 0.0001, `haltShort` 3, `haltLong` 10, `noiseRate` 1, `noiseSigma` 0.002.",
+        "`tickSize` 0.0001, `haltShort` 3, `haltLong` 10, `noiseRate` 1, `noiseSigma` 0.002, `orderLife` 35 (minutos de vida média de uma ordem), `runTests` boolean false.",
         "E as **variáveis** (Palette → Agent → Variable): `fundamentalValue` double (Initial value `initialPrice`), "
         "`nextOrderId` long 0, `dynamicThreshold` double 0.03, `staticThreshold` double 0.08, `collarsActive` boolean true.",
         "O resto do Main (cenários, ficheiros de saída e KPIs: `collarSet`, `label`, `runId`, `logEvent`…) é feito "
         "pela **Margarida** na semana 2, na cópia dela. Tu só o integras (secção 6).",
+        "Main → **On startup**: `if (runTests) stock.testBook();`",
     ]),
     ("h2", "Funções do Main"),
     ("p", "**roundTick** (Returns value, double; argumento `p` double):"),
@@ -249,41 +255,37 @@ if (t instanceof NoiseTrader) { NoiseTrader x = (NoiseTrader) t; x.position += s
 // news.statechart.receiveMessage(msg);
 traceln(time() + "  " + msg);
 """),
-    ("h1", "2. Agente Order"),
-    ("ol", [
-        "Palette → Agent → arrasta **Agent** para o Main → **Agent type only** → Name `Order` → Animation *None* → Finish.",
-        "Dentro de `Order` cria 6 variáveis: `id` long, `side` int, `price` double, `qty` int, `tSubmit` double, "
-        "`trader` (Type *Other…* → `Agent`).",
-    ]),
-    ("h1", "3. Agente Stock: o livro de ordens como filas"),
+    ("h1", "2. Classe Order (Java)"),
+    ("p", "Projects → botão direito em `Euronext_Main` → **New → Java Class** → Name `Order` → Finish. Apaga o que o "
+          "AnyLogic escreveu entre as chavetas da classe e cola os campos:"),
+    ("code", """
+public class Order implements java.io.Serializable {
+    public long id;                            // cresce com o tempo: serve de desempate (quem chegou primeiro)
+    public int side;                           // 1 = compra, -1 = venda
+    public double price;                       // preço-limite (€)
+    public int qty;                            // quantidade por executar
+    public double tSubmit;                     // instante de submissão
+    public double expiry;                      // se não for executada até aqui, é cancelada (desistência)
+    public com.anylogic.engine.Agent trader;   // quem enviou (null nos testes)
+}
+"""),
+    ("h1", "3. Agente Stock: o livro de ordens"),
     ("ol", [
         "Palette → Agent → arrasta **Agent** → **Single agent** → agent type `Stock`, agent name `stock` → Finish.",
         "Dentro de `Stock`, variáveis: `lastPrice`, `refPrice` e `ma` (double, Initial value `main.initialPrice`), "
         "`halted` boolean false, `volume` int 0, `lastStaticDir` int 0, `haltStart` double, `prePrice` double.",
-        "Desenha este fluxograma com a Palette **Process Modeling Library** (arrasta os blocos e liga as portas):",
+        "Stock → Properties → **Advanced Java → Additional class code**: cola as duas filas do livro e a fila de espera da reserva:",
     ]),
     ("code", """
- enter --> holdQueue --> hold --> sideSelect --(true)--> bidBook --> bidGate --> sinkNever
-                                       |                   '--(timeout)--> sinkCancelled
-                                       '----(false)------> askBook --> askGate --> sinkNever
-                                                           '--(timeout)--> sinkCancelled
- executed --> sinkExecuted            cancelEnter --> sinkCancelled
+// Compras: preço mais alto primeiro; no mesmo preço, quem chegou primeiro (id menor)
+java.util.PriorityQueue<Order> bids = new java.util.PriorityQueue<>(
+    (a, b) -> a.price != b.price ? Double.compare(b.price, a.price) : Long.compare(a.id, b.id));
+// Vendas: preço mais baixo primeiro; no mesmo preço, quem chegou primeiro
+java.util.PriorityQueue<Order> asks = new java.util.PriorityQueue<>(
+    (a, b) -> a.price != b.price ? Double.compare(a.price, b.price) : Long.compare(a.id, b.id));
+// Ordens que chegam durante uma reserva: esperam pelo leilão de reabertura
+java.util.ArrayList<Order> pending = new java.util.ArrayList<>();
 """),
-    ("table", [
-        ["Bloco", "Tipo", "Propriedades"],
-        ["enter, executed, cancelEnter", "Enter", "Agent type: `Order`"],
-        ["holdQueue", "Queue", "Agent type `Order`; **Maximum capacity** marcado"],
-        ["hold", "Hold", "Agent type `Order`; *Initially blocked* desmarcado"],
-        ["sideSelect", "SelectOutput", "Select True output: *If condition is true*; Condition `agent.side == 1`"],
-        ["bidBook", "Queue", "Maximum capacity; **Queuing: Priority-based**; Agent priority `agent.price`; **Enable exit on "
-                             "timeout**, Timeout `uniform(10, 60)` minutes; **On enter** `matchEvent.restart(0);`"],
-        ["askBook", "Queue", "Igual ao bidBook, mas Agent priority `-agent.price`"],
-        ["bidGate, askGate", "Hold", "**Initially blocked** marcado (as ordens ficam no livro até serem executadas ou canceladas)"],
-        ["sinkNever, sinkCancelled, sinkExecuted", "Sink", "—"],
-    ], [4.2, 2.4, 9.4]),
-    ("tip", "Põe **Agent type: Order** em todos os blocos, para o código poder usar `agent.price`. As filas por prioridade "
-            "põem a melhor compra (preço mais alto) e a melhor venda (preço mais baixo) à frente e, no mesmo preço, "
-            "por ordem de chegada. É exatamente o FCFS por nível de preço que está na proposta."),
     ("h2", "Funções do Stock"),
     ("p", "**order** (Just action; argumentos `trader` Agent, `side` int, `price` double, `qty` int). É esta que os investidores chamam:"),
     ("code", """
@@ -293,15 +295,18 @@ o.side = side;
 o.price = main.roundTick(price);
 o.qty = qty;
 o.tSubmit = time();
+o.expiry = time() + main.orderLife * uniform(0.3, 1.7);   // desistência (pressuposto)
 o.trader = trader;
-enter.take(o);
+if (halted) pending.add(o);            // durante a reserva fica retida até ao leilão
+else { addToBook(o); match(); }
 """),
+    ("p", "**addToBook** (Just action; argumento `o` Order): `if (o.side == 1) bids.add(o); else asks.add(o);`"),
     ("p", "**bestBid**, **bestAsk**, **mid** e **spread** (todas Returns value, double):"),
     ("code", """
 // bestBid
-return bidBook.size() > 0 ? bidBook.get(0).price : Double.NaN;
+return bids.isEmpty() ? Double.NaN : bids.peek().price;
 // bestAsk
-return askBook.size() > 0 ? askBook.get(0).price : Double.NaN;
+return asks.isEmpty() ? Double.NaN : asks.peek().price;
 // mid
 double b = bestBid(), a = bestAsk();
 if (Double.isNaN(b) || Double.isNaN(a)) return lastPrice;
@@ -311,16 +316,11 @@ return bestAsk() - bestBid();
 """),
     ("p", "**cancelAll** (Just action; argumento `a` Agent):"),
     ("code", """
-for (int i = bidBook.size() - 1; i >= 0; i--) {
-    Order o = bidBook.get(i);
-    if (o.trader == a) { bidBook.remove(o); cancelEnter.take(o); }
-}
-for (int i = askBook.size() - 1; i >= 0; i--) {
-    Order o = askBook.get(i);
-    if (o.trader == a) { askBook.remove(o); cancelEnter.take(o); }
-}
+bids.removeIf(o -> o.trader == a);
+asks.removeIf(o -> o.trader == a);
 """),
-    ("p", "**execute** (Just action; argumentos `b` Order, `a` Order, `p` double, `q` int):"),
+    ("p", "**execute** (Just action; argumentos `b` Order, `a` Order, `p` double, `q` int). `b` e `a` são sempre a "
+          "cabeça de cada fila:"),
     ("code", """
 lastPrice = p;
 volume += q;
@@ -328,34 +328,82 @@ b.qty -= q;
 a.qty -= q;
 main.onFill(b.trader, 1, q, p);
 main.onFill(a.trader, -1, q, p);
-if (b.qty == 0) { bidBook.remove(b); executed.take(b); }
-if (a.qty == 0) { askBook.remove(a); executed.take(a); }
+if (b.qty == 0) bids.poll();
+if (a.qty == 0) asks.poll();
 """),
     ("p", "**collarHit** (Returns value, boolean; argumento `p` double). Na semana 1 o corpo é só `return false;`. "
           "O código verdadeiro está na secção 5."),
     ("p", "**match** (Just action):"),
     ("code", """
-while (!halted && bidBook.size() > 0 && askBook.size() > 0) {
-    Order b = bidBook.get(0);
-    Order a = askBook.get(0);
-    if (b.price < a.price) break;                            // não há cruzamento
-    double p = (a.tSubmit < b.tSubmit) ? a.price : b.price;  // preço de quem já estava no livro
-    if (collarHit(p)) return;                                 // abre reserva; a ordem espera pelo leilão
+while (!halted && !bids.isEmpty() && !asks.isEmpty()) {
+    Order b = bids.peek();
+    Order a = asks.peek();
+    if (b.price < a.price) break;                 // não há cruzamento
+    double p = (a.id < b.id) ? a.price : b.price; // preço de quem já estava no livro
+    if (collarHit(p)) return;                      // abre reserva; a ordem espera pelo leilão
     execute(b, a, p, Math.min(a.qty, b.qty));
 }
 """),
     ("h2", "Eventos do Stock"),
     ("ul", [
         "**matchEvent**: Trigger type *Timeout*, Mode **User control**, Action `match();`",
+        "**purgeEvent** (desistências): Mode *Cyclic*, First occurrence 1, Recurrence 1, Action "
+        "`bids.removeIf(o -> o.expiry < time()); asks.removeIf(o -> o.expiry < time());`",
         "**dayEvent** (abertura de cada dia): Mode *Cyclic*, First occurrence 510, Recurrence 510, "
         "Action `refPrice = lastPrice; lastStaticDir = 0;`",
         "**maEvent** (média móvel de ~50 min para os chartists): Mode *Cyclic*, First occurrence 1, Recurrence 1, "
         "Action `ma = 0.98 * ma + 0.02 * lastPrice;`",
     ]),
-    ("tip", "Se der erro ao fazer `new Order()` com o Enter: cria no Main uma população vazia `orders` (Population of "
-            "agents, Initial number 0), troca a 1.ª linha de `order` por `Order o = main.add_orders();` e, nos três "
-            "Sink, põe em On enter `main.remove_orders(agent);`."),
-    ("h1", "4. Noise traders e gráfico (semana 1)"),
+    ("h1", "4. Testar o livro ANTES dos agentes (semana 1)"),
+    ("p", "É o que os professores pediram. Os testes metem ordens conhecidas e confirmam o resultado. Correm com "
+          "`runTests = true` e `nNoise = 0` (sem agentes a baralhar). Na consola deve aparecer só **OK**."),
+    ("p", "**check** (Just action; argumentos `name` String, `ok` boolean): "
+          "`traceln((ok ? \"OK      \" : \"FALHOU  \") + name);`"),
+    ("p", "**testBook** (Just action):"),
+    ("code", """
+bids.clear(); asks.clear(); pending.clear();
+lastPrice = 0.50; refPrice = 0.50; volume = 0;
+boolean collars = main.collarsActive;
+main.collarsActive = false;
+
+// 1. Sem cruzamento: nada é executado e o spread é a diferença
+order(null, 1, 0.50, 100);
+order(null, -1, 0.51, 100);
+check("1. sem cruzamento: volume 0", volume == 0);
+check("1. spread 0.01", Math.abs(spread() - 0.01) < 1e-9);
+
+// 2. Execução parcial ao preço de quem já estava no livro
+order(null, -1, 0.50, 40);
+check("2. executa 40 a 0.50", volume == 40 && Math.abs(lastPrice - 0.50) < 1e-9);
+check("2. sobram 60 na compra", bids.peek().qty == 60);
+
+// 3. Prioridade de tempo no mesmo preço
+order(null, 1, 0.50, 10);              // chega depois, mesmo preço
+order(null, -1, 0.50, 65);             // leva os 60 da 1.a compra e 5 da 2.a
+check("3. FCFS: volume 105", volume == 105);
+check("3. FCFS: a 2.a compra fica com 5", bids.size() == 1 && bids.peek().qty == 5);
+
+// 4. Uma compra grande varre dois níveis de venda
+order(null, -1, 0.52, 100);
+order(null, 1, 0.52, 150);             // 100 a 0.51 e 50 a 0.52
+check("4. varre níveis: volume 255", volume == 255);
+check("4. último preço 0.52", Math.abs(lastPrice - 0.52) < 1e-9);
+check("4. sobram 50 a 0.52", Math.abs(asks.peek().price - 0.52) < 1e-9 && asks.peek().qty == 50);
+
+// 5. Colar dinâmico: um negócio a -3.8% não é executado
+main.collarsActive = true;
+order(null, -1, 0.40, 100);            // cruza com a compra de 5 a 0.50: 0.50/0.52 - 1 = -3.8%
+check("5. colar: nada executado", volume == 255);
+
+// 6. Cancelamento
+cancelAll(null);
+check("6. cancelAll limpa o livro", bids.isEmpty() && asks.isEmpty());
+
+main.collarsActive = collars;
+"""),
+    ("tip", "Se um teste FALHAR, não avances para os agentes: corrige primeiro. O teste 5 só passa depois de fazeres a "
+            "secção 5 (até lá falha, e é normal). Sempre que mexeres no livro, volta a correr os testes."),
+    ("h1", "5. Noise traders e gráfico (semana 1)"),
     ("ol", [
         "Palette → Agent → **Agent** → **Population of agents** → type `NoiseTrader`, population `noiseTraders`, "
         "Initial number `nNoise`.",
@@ -370,11 +418,11 @@ main.stock.order(this, side, p, uniform_discr(100, 1000));
     ("ol", [
         "Palette **Analysis** → **Time Plot** no Main: Value `stock.lastPrice` (título Preço) e `fundamentalValue`; "
         "Time window 510.",
-        "Projects → **Simulation** → Model time: Stop **At specified time** 61200 (120 dias). **Run**.",
-        "Confirma que o preço mexe. Commit `Miguel: modelo base, o preço mexe` e **avisa o grupo**: toda a gente "
-        "começa a trabalhar a partir deste ficheiro.",
+        "Projects → **Simulation** → Model time: Stop **At specified time** 61200 (120 dias). **Run** com `runTests` false e `nNoise` 30.",
+        "Confirma que o preço mexe. Commit `Miguel: livro de ordens testado, o preço mexe` e **avisa o grupo**: toda a "
+        "gente começa a trabalhar a partir deste ficheiro.",
     ]),
-    ("h1", "5. Colares, reservas e leilão (semana 2)"),
+    ("h1", "6. Colares, reservas e leilão (semana 2)"),
     ("p", "Regras da proposta: reserva se o preço sair de ±3% do último preço (**dinâmico**) ou de ±8% do preço de "
           "referência (**estático**; abertura ou último leilão). A reserva dura 3 min, ou 10 min se o estático voltar a "
           "disparar no mesmo sentido. Depois há um leilão de reabertura."),
@@ -402,7 +450,7 @@ return true;
         ["Estado", "Entry action"],
         ["Continuous (inicial)", "`halted = false; matchEvent.restart(0);`"],
         ["ReservDynamic, ReservStatic, ReservStatic10", "`startHalt();`"],
-        ["Auction", "`hold.unblock();` (as ordens retidas entram nos livros)"],
+        ["Auction", "`for (Order o : pending) addToBook(o); pending.clear();` (as ordens retidas entram no livro)"],
     ], [6, 10]),
     ("p", "As 3 transições que saem de Continuous: Triggered by **Message**, String, *On particular message* com "
           "`\"DYNAMIC\"`, `\"STATIC\"` e `\"STATIC_REPEAT\"`. Timeouts: `main.haltShort`, `main.haltShort` e "
@@ -410,8 +458,7 @@ return true;
     ("p", "**startHalt** e **endHalt** (Just action):"),
     ("code", """
 // startHalt
-halted = true;
-hold.block();                 // ordens novas ficam na holdQueue até ao leilão
+halted = true;                // a partir daqui as ordens novas vão para 'pending'
 haltStart = time();
 prePrice = lastPrice;
 main.nHalts++;
@@ -430,27 +477,28 @@ main.broadcast("REOPEN");
 double bestP = lastPrice;
 int bestQ = 0;
 java.util.TreeSet<Double> cands = new java.util.TreeSet<>();
-for (int i = 0; i < bidBook.size(); i++) cands.add(bidBook.get(i).price);
-for (int i = 0; i < askBook.size(); i++) cands.add(askBook.get(i).price);
+for (Order o : bids) cands.add(o.price);
+for (Order o : asks) cands.add(o.price);
 for (double p : cands) {
     int dem = 0, sup = 0;
-    for (int i = 0; i < bidBook.size(); i++) if (bidBook.get(i).price >= p) dem += bidBook.get(i).qty;
-    for (int i = 0; i < askBook.size(); i++) if (askBook.get(i).price <= p) sup += askBook.get(i).qty;
+    for (Order o : bids) if (o.price >= p) dem += o.qty;
+    for (Order o : asks) if (o.price <= p) sup += o.qty;
     int q = Math.min(dem, sup);
     if (q > bestQ || (q == bestQ && q > 0 && Math.abs(p - lastPrice) < Math.abs(bestP - lastPrice))) {
         bestQ = q; bestP = p;
     }
 }
-while (bestQ > 0 && bidBook.size() > 0 && askBook.size() > 0
-       && bidBook.get(0).price >= bestP && askBook.get(0).price <= bestP) {
-    Order b = bidBook.get(0), a = askBook.get(0);
+while (bestQ > 0 && !bids.isEmpty() && !asks.isEmpty()
+       && bids.peek().price >= bestP && asks.peek().price <= bestP) {
+    Order b = bids.peek(), a = asks.peek();
     execute(b, a, bestP, Math.min(a.qty, b.qty));
 }
 refPrice = lastPrice;         // o leilão passa a ser a nova referência estática
 """),
-    ("p", "**Teste:** põe `noiseSigma = 0.01` para forçar movimentos grandes. Devem aparecer linhas na consola "
-          "(`HALT`/`REOPEN`) e o preço fica parado durante 3 min. Volta a pôr 0.002."),
-    ("h1", "6. Integração (semanas 2–3)"),
+    ("p", "**Testes:** volta a correr o `testBook` (agora o teste 5 tem de dar OK). Depois, com agentes, põe "
+          "`noiseSigma = 0.01` para forçar movimentos grandes: devem aparecer `HALT`/`REOPEN` na consola e o preço fica "
+          "parado durante 3 min. Volta a pôr 0.002."),
+    ("h1", "7. Integração (semanas 2–3)"),
     ("ol", [
         "Quando alguém avisar: Pull e abre o modelo dessa pessoa e o `model/Euronext_Main.alp` (ambos ficam no Projects).",
         "No modelo da pessoa, seleciona o tipo de agente (ex.: `Fundamentalist`) → Ctrl+C → seleciona `Euronext_Main` → Ctrl+V.",
@@ -461,25 +509,23 @@ refPrice = lastPrice;         // o leilão passa a ser a nova referência estát
         "**Instrumentação da Margarida** (semana 2): copia do Main dela os parâmetros e variáveis novos, os 2 Text "
         "File, o `logEvent` e o texto do *On startup* e do *On destroy*. Depois descomenta as linhas de `startHalt` "
         "e `endHalt`.",
-        "Build (F7) → corrige os erros que aparecerem no painel Problems → Run → Commit `Miguel: integrado X`.",
+        "Build (F7) → corrige os erros que aparecerem no painel Problems → corre o `testBook` → Run → Commit `Miguel: integrado X`.",
     ]),
-    ("h1", "7. Velocidade (semana 4)"),
+    ("h1", "8. Velocidade (semana 4)"),
     ("ul", [
-        "Nas experiências (Parameters Variation, Optimization) não há animação, por isso correm muito mais depressa.",
+        "Nas experiências (Parameters Variation) não há animação, por isso correm muito mais depressa.",
         "Se a Simulation estiver lenta: Run → no fundo da janela, **Virtual time mode** (o botão da seta dupla).",
-        "Se o livro ficar com milhares de ordens, reduz o timeout dos livros (ex.: `uniform(5, 30)`) e diz à Margarida (isto entra na calibração).",
+        "Se o livro ficar com milhares de ordens, reduz o `orderLife` e diz ao João e à "
+        "Margarida (é um pressuposto que entra na calibração).",
+        "Confirma os limites da tua licença (PLE) no site da AnyLogic: duração das corridas, número de agentes e que "
+        "experiências estão disponíveis. Se algum limite apertar, avisa a Margarida.",
     ]),
-    ("h1", "8. Fase 2: integração (semana 5)"),
+    ("h1", "9. Semanas 5–6"),
     ("ul", [
-        "A Matilde faz o agente `Broker` inteiro (fila e statecharts) e a Margarida o `LeveragedTrader`. Tu integras os dois "
-        "como na secção 6 e acrescentas as linhas deles em `onFill` e `broadcast`.",
-        "Confirma que as ordens dos alavancados passam pelo broker (`main.brokers.get(0).order(...)`) e chegam ao `stock.enter`.",
-        "Com o tempo que sobra, ajuda quem estiver atrasado. Tu conheces o motor melhor que ninguém.",
-    ]),
-    ("h1", "9. Semana 6"),
-    ("ul", [
+        "Semana 5: a Matilde faz os testes de verificação (valores extremos). Corriges o que ela encontrar.",
         "Último commit com a mensagem `VERSÃO FINAL`. A partir daí ninguém mexe no `model/`.",
-        "No relatório: Introdução e Definição do problema (partem das secções da proposta) e a descrição do livro de ordens como sistema de filas (secção 3 deste guião).",
+        "No relatório: Introdução, Definição do problema (partem da proposta) e o livro de ordens (secções 3, 4 e 6 "
+        "deste guião, incluindo a tabela dos testes).",
     ]),
 ]
 
@@ -490,13 +536,13 @@ JOAO = [
     ("h1", "Resumo das tuas semanas"),
     ("table", [
         ["Semana", "Entrega concreta"],
-        ["1 (17–24 out)", "**Dados do BCP** (Python + Claude Code): preços diários, estatísticas-alvo, arquivo intradiário. "
-                          "Perceber os statecharts e desenhar os deste guião. Quando o modelo base sair: começar o Fundamentalist."],
-        ["2 (24–31 out)", "**Fundamentalist a funcionar.** Tabela de metas (calmo, BES, COVID)."],
+        ["1 (17–24 out)", "**Dados do BCP** (Python + Claude Code) e **factos estilizados com os valores-alvo** "
+                          "(`docs/FACTOS_ESTILIZADOS.md`), antes de qualquer calibração. Desenhar os statecharts deste guião."],
+        ["2 (24–31 out)", "**Fundamentalist a funcionar.** Tabela de metas (calmo e períodos de stress)."],
         ["3 (31 out–7 nov)", "**Chartist com rede e efeito manada.** Testar o `kpis.py` com as primeiras corridas da Margarida."],
-        ["4 (7–14 nov)", "**Calibração**: `compare_model.py` + afinar os investidores com a Margarida. Validação (ESMA e BES)."],
-        ["5 (14–21 nov)", "KPIs dos cenários (`kpis.py`). Fase 2: MarketMaker em stress."],
-        ["6 (21–28 nov)", "`kpis.xlsx` final para a Matilde. Relatório: investidores, dados e resultados."],
+        ["4 (7–14 nov)", "**Calibração**: `compare_model.py` + afinar os investidores com a Margarida. Validação (ESMA)."],
+        ["5 (14–21 nov)", "KPIs dos cenários (`kpis.py`). Fechar o registo de pressupostos (`docs/PRESSUPOSTOS.md`) com os valores finais."],
+        ["6 (21–28 nov)", "`kpis.xlsx` final para a Matilde. Relatório: investidores, dados, factos estilizados, pressupostos e resultados."],
     ], [3.2, 12.8]),
     ("tip", "Tens o Claude Code: usa-o para tudo o que é Python. Abre-o na pasta do repositório e pede, por exemplo, "
             "“corre o download_daily.py e o target_stats.py e explica-me os resultados”, ou “o kpis.py deu este erro: …”. "
@@ -512,6 +558,15 @@ JOAO = [
         "Quando o Miguel publicar o modelo base: Pull → copia `model/Euronext_Main.alp` para `sandbox/joao/joao.alp` → abre esse.",
     ]),
     ("plan_b", "joao"),
+    ("h1", "1a. Semana 1: factos estilizados (antes de calibrar)"),
+    ("p", "Os professores pediram para **definir os factos estilizados antes de calibrar**. São os padrões estatísticos "
+          "que o modelo tem de reproduzir. A lista já está em `docs/FACTOS_ESTILIZADOS.md` (6 factos, cada um com a "
+          "métrica e o critério de “bate”). A tua parte é preencher a coluna **Valor BCP** com o `target_stats.py` "
+          "(secção 1b) e fazer commit **antes** de a Margarida correr a primeira calibração. Depois disso a lista não muda, "
+          "porque mudá-la a meio seria afinar a meta ao resultado."),
+    ("tip", "Os professores também avisaram: validamos estatísticas de preço e volume, mas **não dizemos que o modelo "
+            "reproduz crashes reais** (BES, março 2020). Os choques são estilizados, “inspirados em”, e servem para comparar "
+            "regras, não para recriar a história."),
     ("h1", "1b. Semana 1: dados do BCP (Python)"),
     ("ol", [
         "Instala o Python (python.org/downloads; no instalador marca **“Add python.exe to PATH”**). Depois, na pasta do "
@@ -679,7 +734,8 @@ signalNeighbours();
     ("ul", [
         "**ESMA:** a Margarida preenche a tabela da ESMA (efeitos das interrupções). No cenário 2 com colares, na folha "
         "**halts** do `kpis.xlsx`, `vol_depois` tem de ser menor que `vol_antes` e `spread_depois` maior que `spread_antes`.",
-        "**BES:** compara a queda máxima do cenário 2 sem colares com a queda real do BCP no verão de 2014 (está na tua tabela de metas).",
+        "**Choque:** a queda máxima no cenário de choque deve ser **plausível** (da mesma ordem de grandeza dos piores "
+        "dias do BCP na tabela de metas). Não é um teste de reprodução do BES: no relatório escreve “inspirado em”.",
     ]),
     ("h1", "6. KPIs dos cenários (semanas 3–6)"),
     ("p", "Sempre que a Margarida acabar um lote de corridas no AnyLogic, corres `python scripts/kpis.py`. Cria "
@@ -697,24 +753,19 @@ signalNeighbours();
         ["Curtose dos retornos", "runs/resumo: `curtose_ret_1min`"],
     ], [7.5, 8.5]),
     ("p", "Na semana 6 corres o `kpis.py` sobre as corridas finais e dás o `kpis.xlsx` à **Matilde**, que faz os gráficos."),
-    ("h1", "7. Fase 2: MarketMaker em stress (semana 5)"),
-    ("p", "O MarketMaker da Matilde cota sempre. Em stress, os criadores de mercado reais alargam o spread ou retiram-se. "
-          "Tu acrescentas isso ao agente dela (pede-lhe o modelo, ou faz na tua cópia depois de integrado). Novos estados: "
-          "**Wide** (spread × 3) e **Withdrawn** (sem cotações). Novo parâmetro `mmObligation` (boolean): se for true, o "
-          "criador é obrigado a cotar com spread máximo `mmMaxSpread` (cenário 2 da Fase 2). Troca o Timeout 1 de Quoting por um Branch:"),
-    ("code", """
- Quoting --Timeout 1--> <stress>
-     stress > 0.04 && !main.mmObligation  --> Withdrawn (entry: main.stock.cancelAll(this);)
-     stress > 0.02                        --> Wide      (entry: como quote() mas com spread * 3,
-                                                         ou main.mmMaxSpread se mmObligation)
-     default                              --> Quoting
- Withdrawn / Wide --Timeout 1--> <stress>
- onde stress = Math.abs(main.stock.lastPrice / main.stock.ma - 1)
-"""),
+    ("h1", "7. Registo de pressupostos (semanas 1–5)"),
+    ("p", "Os professores avisaram que os dados do livro de ordens e do comportamento dos investidores são escassos, e "
+          "pediram para **documentar os pressupostos**. Estão em `docs/PRESSUPOSTOS.md`: cada linha diz o que assumimos, "
+          "porquê e como o testamos. És tu que manténs este ficheiro:"),
+    ("ul", [
+        "Sempre que alguém do grupo inventar um número (ex.: `fundBand` 0.01), acrescenta-se uma linha.",
+        "Depois da calibração, atualizas a coluna **Valor** com os valores finais.",
+        "Na semana 5 marcas, para cada pressuposto, se entrou na análise de sensibilidade da Margarida.",
+    ]),
     ("h1", "8. Semana 6: relatório"),
     ("ul", [
-        "Investidores: os statecharts e as regras deste guião (fundamentalista, chartist e manada, criador de mercado em stress).",
-        "Dados: de onde vêm, o que medem e a tabela de metas.",
+        "Investidores: os statecharts e as regras deste guião (fundamentalista, chartist e manada).",
+        "Dados, factos estilizados e pressupostos: as tabelas de `docs/FACTOS_ESTILIZADOS.md` e `docs/PRESSUPOSTOS.md`.",
         "Resultados: as tabelas do resumo do `kpis.xlsx`, com médias e intervalos de confiança.",
     ]),
 ]
@@ -730,9 +781,9 @@ MARGARIDA = [
         ["2 (24–31 out)", "**Instrumentar o modelo**: parâmetros de cenário, ficheiros CSV de saída e KPIs (secção 2)."],
         ["3 (31 out–7 nov)", "Montar as experiências dos cenários e fazer as primeiras corridas (o João testa o `kpis.py` com elas)."],
         ["4 (7–14 nov)", "**Calibração** com o João: tu corres o baseline e mudas os parâmetros, ele compara com o BCP."],
-        ["5 (14–21 nov)", "Correr os cenários da Fase 1 com 30 replicações. Fase 2: **LeveragedTrader**."],
-        ["6 (21–28 nov)", "Corridas finais (grelha e otimização). Relatório: instrumentação, cenários e experiências, e "
-                          "o investidor alavancado."],
+        ["5 (14–21 nov)", "Correr os cenários com 30 replicações. **Análise de sensibilidade** aos pressupostos (secção 5)."],
+        ["6 (21–28 nov)", "Corridas finais (grelha e limiares ótimos). Relatório: instrumentação, cenários, experiências e "
+                          "análise de sensibilidade."],
     ], [3.2, 12.8]),
     ("h1", "1. Semana 1: experiências do AnyLogic e ESMA"),
     ("ol", [
@@ -796,7 +847,7 @@ pricesFile.println(label + ";" + runId + ";" + time() + ";" + p + ";"
         "`main.haltsFile`, `main.label`, `main.runId` e `main.timeHalted`.",
         "**Teste:** corre a Simulation durante uns minutos e fecha. O `output/precos.csv` deve ter linhas como "
         "`baseline_c2_h3.0;a1b2c3d4;12.0;0.5013;0.501;0.5016;84200`. Com `noiseSigma = 0.01` devem aparecer linhas no `halts.csv`.",
-        "Commit e avisa o Miguel para integrar (ele tem os passos no guião dele, secção 6).",
+        "Commit e avisa o Miguel para integrar (ele tem os passos no guião dele, secção 7).",
     ]),
     ("h1", "3. Correr o modelo e os cenários no AnyLogic (semanas 3–5)"),
     ("h2", "Onde saem os dados"),
@@ -807,8 +858,8 @@ pricesFile.println(label + ";" + runId + ";" + time() + ";" + p + ";"
     ("table", [
         ["#", "Cenário", "scenario", "shockOn", "collarSet", "nChartists", "haltShort", "Stop time"],
         ["1", "Baseline: calibração e validação", "baseline", "false", "2", "30", "3", "127500 (250 dias)"],
-        ["2", "Choque grande com e sem colares (BES)", "shock", "true", "2 e 0", "30", "3", "61200"],
-        ["3", "Choque com muitos chartists (março 2020)", "herd", "true", "2 e 0", "60", "3", "61200"],
+        ["2", "Choque grande com e sem colares (estilizado, inspirado no BES)", "shock", "true", "2 e 0", "30", "3", "61200"],
+        ["3", "Choque com muitos chartists (inspirado em março 2020)", "herd", "true", "2 e 0", "60", "3", "61200"],
         ["4", "Grelha de colares × duração", "grid", "true", "0, 1, 2, 3", "30", "3 e 10", "61200"],
     ], [0.6, 4.6, 1.6, 1.4, 1.7, 1.7, 1.6, 2.8]),
     ("p", "`collarSet`: 0 = sem colares, 1 = 2%/5%, 2 = 3%/8% (atual), 3 = 5%/10%. O choque (`shockSize` = −10%) acontece no dia 60 (`shockTime` = 30600)."),
@@ -830,6 +881,11 @@ pricesFile.println(label + ";" + runId + ";" + time() + ";" + p + ";"
           "10–60 (step 10). São 4 × 2 × 6 = 48 combinações; com 30 replicações dá 1440 corridas. Começa com 5 replicações "
           "para ver quanto tempo demora."),
     ("h2", "Otimização (os limiares que minimizam a queda)"),
+    ("tip", "Os professores avisaram para verificar os limites da versão PLE do AnyLogic. Confirma no site da AnyLogic "
+            "se a tua licença tem a experiência **Optimization** e quantas iterações permite. Se não tiver, faz o mesmo "
+            "com uma Parameters Variation: `collarSet` Fixed 4, `customDyn` Range 0.01–0.06 (step 0.01), `customStat` "
+            "Range 0.04–0.14 (step 0.02), 10 replicações. No kpis.xlsx escolhes a combinação com a menor queda máxima "
+            "entre as que têm pelo menos 90% do volume."),
     ("ol", [
         "New → Experiment → **Optimization**. Objective: **minimize** `root.maxDrawdown`.",
         "Parameters: `collarSet` Fixed 4; `customDyn` *continuous* 0.01–0.06; `customStat` *continuous* 0.04–0.15; `shockOn` true.",
@@ -842,49 +898,33 @@ pricesFile.println(label + ";" + runId + ";" + time() + ";" + p + ";"
             "`compare_model.py` no teu PC: ele instala o Python lá uma vez, ou fazem-no juntos numa chamada."),
     ("h1", "4. Calibração com o João (semana 4)"),
     ("ol", [
+        "Antes de começar, confirma que o João já fez commit de `docs/FACTOS_ESTILIZADOS.md` com os valores do BCP: "
+        "as metas ficam fixas antes da calibração.",
         "Apaga os CSV de `model/output/` e corre o cenário 1 (baseline) com 10 replicações e Stop 127500.",
         "O João compara com o BCP real (`compare_model.py`) e diz-te o que não bate.",
         "Escolhem juntos o que mudar (a tabela de afinação está no guião dele, secção 5). Tu mudas os parâmetros no "
         "AnyLogic e corres outra vez. Muda uma coisa de cada vez.",
     ]),
-    ("h1", "5. Fase 2: LeveragedTrader (semana 5)"),
-    ("p", "Investidor com dinheiro emprestado. Se o preço cai, vende por stop-loss; se a margem fica abaixo do mínimo, "
-          "recebe uma chamada de margem (margin call) e é obrigado a vender. É isto que cria as cascatas da pergunta 3. "
-          "Faz na tua cópia e avisa o Miguel para integrar."),
+    ("h1", "5. Análise de sensibilidade (semana 5)"),
+    ("p", "Os dados sobre o comportamento dos investidores são escassos, por isso muitos parâmetros são pressupostos "
+          "(estão em `docs/PRESSUPOSTOS.md`). A análise de sensibilidade mostra se as conclusões dependem deles. "
+          "A proposta prometia-a e os professores pediram para documentar os pressupostos."),
     ("ol", [
-        "Parâmetros no Main: `nLeveraged` 10, `leverage` 3, `stopLoss` 0.05, `maintenanceMargin` 0.25.",
-        "População `leveraged` (type `LeveragedTrader`, Initial number `nLeveraged`). Variáveis: `cash` 5000 (capital "
-        "próprio), `loan` 0, `position` 0, `entryPrice` 0.",
-        "Função **margin** (Returns double): `double v = position * main.stock.mid(); return v > 0 ? (v - loan) / v : 1;`",
-        "Statechart (as regras de como desenhar estão no capítulo 0; os do João são um bom exemplo):",
+        "Usa o cenário 2 com colares (`collarSet` 2, `shockOn` true) como referência.",
+        "Para **um parâmetro de cada vez**, faz uma Parameters Variation com 3 valores: o calibrado, −50% e +50% "
+        "(Freeform). Mantém os outros fixos. Usa 10 replicações e Fixed seed.",
+        "Parâmetros a testar: `herdThreshold`, `chartRate`, `trendThreshold`, `fundBand`, `noiseSigma`, `mmSpread` e "
+        "`orderLife` (tempo de vida das ordens).",
+        "O João corre o `kpis.py`. Para cada parâmetro, regista numa tabela (`data/processed/sensibilidade.xlsx`) a queda "
+        "máxima e o tempo em interrupção nos 3 valores.",
+        "A pergunta a responder no relatório: **a conclusão principal (colares com/sem) mantém-se em todos os casos?** Se sim, "
+        "o resultado é robusto; se não, diz-se em que condições muda.",
     ]),
-    ("code", """
- Normal --Rate 0.05--> Open (entry: compra alavancado) --T0--> Holding
- Holding --Rate 1--> <check> --preço < entry*(1-stopLoss)----> StopLoss   (entry: vende tudo a mid*0.995)
-                        |-----margin() < maintenanceMargin---> MarginAlert --Timeout 5--> <again>
-                        '-----default------------------------> Holding        |--margem ainda baixa--> ForcedSale
- StopLoss / ForcedSale --T0--> Normal  (ou Liquidated se cash <= 0)            '--default------------> Holding
-"""),
-    ("code", """
-// Open -> Entry action
-double p = main.stock.mid() * 1.002;
-int q = (int) (cash * main.leverage / p);
-loan = cash * (main.leverage - 1);
-entryPrice = p;
-main.brokers.get(0).order(this, 1, p, q);     // as ordens passam pelo broker da Matilde
-
-// MarginAlert -> Entry action (avisa o broker)
-send("MARGIN_CALL", main.brokers.get(0));
-
-// ForcedSale -> Entry action (vende tudo, muito abaixo do mercado)
-main.brokers.get(0).order(this, -1, main.stock.mid() * 0.98, position);
-"""),
-    ("p", "Enquanto o broker da Matilde não estiver pronto, usa `main.stock.order(...)` em vez de `main.brokers.get(0).order(...)`."),
     ("h1", "6. Semana 6"),
     ("ul", [
-        "Corridas finais: cenários com 30 replicações, a grelha e a otimização. Avisa o João para fazer o `kpis.xlsx` final.",
+        "Corridas finais: cenários com 30 replicações, a grelha e os limiares ótimos. Avisa o João para fazer o `kpis.xlsx` final.",
         "Relatório: como o modelo é instrumentado (que dados grava), os cenários e as experiências (Parameters Variation, "
-        "replicações, sementes fixas, otimização) e o investidor alavancado.",
+        "replicações, sementes fixas, otimização) e a análise de sensibilidade.",
     ]),
 ]
 
@@ -900,9 +940,9 @@ MATILDE = [
         ["2 (24–31 out)", "**NewsAgent e MarketMaker a funcionar.** Commit e avisar."],
         ["3 (31 out–7 nov)", "Ecrã inicial (sliders) e cores dos agentes por estado."],
         ["4 (7–14 nov)", "**Dashboard final.**"],
-        ["5 (14–21 nov)", "Fase 2: **Broker completo** (fila + dois statecharts)."],
+        ["5 (14–21 nov)", "**Verificação do modelo**: 10 testes de condições extremas (secção 6)."],
         ["6 (21–28 nov)", "**Gráficos finais** (a partir do kpis.xlsx do João), apresentação e a tua parte do relatório "
-                          "(interface, criador de mercado, notícias, broker)."],
+                          "(interface, criador de mercado, notícias, verificação)."],
     ], [3.2, 12.8]),
     ("h1", "1. Semana 1"),
     ("ol", [
@@ -929,7 +969,7 @@ MATILDE = [
 """),
     ("h1", "2. NewsAgent: notícias e choques (semana 2)"),
     ("p", "Gera a informação externa. Em geral está calmo e de vez em quando há pequenas notícias. No cenário de choque, "
-          "no dia 60, o valor fundamental cai (ex.: −10%, como o BES) e todos são avisados com `SHOCK`; segue-se uma fase "
+          "no dia 60, o valor fundamental cai (ex.: −10%; um choque estilizado, inspirado no BES, não uma reprodução) e todos são avisados com `SHOCK`; segue-se uma fase "
           "de dissipação com pequenas réplicas."),
     ("ol", [
         "Parâmetros no Main: `shockOn` boolean false, `shockTime` 30600, `shockSize` -0.10, `newsRate` 0.0004.",
@@ -992,7 +1032,7 @@ main.stock.order(this, -1, m * (1 + main.mmSpread / 2), main.mmQty);
         ["Elemento", "Palette", "O que pôr"],
         ["Preço", "Analysis → Time Plot", "Values `stock.lastPrice` (“Preço”) e `fundamentalValue` (“Valor fundamental”); Time window 510"],
         ["Spread", "Analysis → Time Plot", "Value `stock.spread()`"],
-        ["Livro de ordens", "Analysis → Bar Chart", "Values `stock.bidBook.size()` (“Compras”) e `stock.askBook.size()` (“Vendas”)"],
+        ["Livro de ordens", "Analysis → Bar Chart", "Values `stock.bids.size()` (“Compras”) e `stock.asks.size()` (“Vendas”)"],
         ["KPIs", "Presentation → Text", "Text dinâmico (clica no ícone = ao lado do campo): `\"Estado: \" + (stock.halted ? \"RESERVA\" : \"CONTÍNUO\")`, "
                                        "`\"Interrupções: \" + nHalts`, `String.format(\"Queda máxima: %.1f%%\", 100 * maxDrawdown)`, `\"Volume: \" + stock.volume`"],
         ["Retornos", "Analysis → Histogram Data + Histogram", "Histogram Data `retData` (40 intervalos); Histogram com Data `retData`"],
@@ -1008,63 +1048,32 @@ prevPrice = stock.lastPrice;
         "Abre o tipo `Fundamentalist` (do João) → Palette Presentation → **Oval** pequeno no centro → Fill color → "
         "dinâmico: `inState(Buying) ? green : inState(Selling) ? red : inState(Halted) ? gray : silver`",
         "Igual no `Chartist`: `inState(Panic) ? red : inState(TrendSell) ? orange : inState(TrendBuy) ? green : silver`",
-        "Durante a simulação, o livro de ordens anima-se sozinho: escolhe `stock` na barra de cima e vês as filas a encher e a esvaziar.",
+        "O livro de ordens é código Java, por isso não se anima sozinho: o gráfico de barras “Livro de ordens” é a forma de o mostrar.",
     ]),
-    ("h1", "6. Fase 2: Broker (semana 5)"),
-    ("p", "O MarketMaker em stress (Fase 2) fica com o João: ele acrescenta estados ao teu agente."),
-    ("h2", "Broker, parte 1: a fila (Process Modeling Library)"),
-    ("p", "O broker recebe as ordens dos investidores alavancados, põe-nas numa fila com capacidade limitada e envia-as "
-          "para o mercado. Se a plataforma estiver sobrecarregada, rejeita ordens. É a “fila do broker” da proposta."),
-    ("ol", [
-        "Parâmetros no Main: `brokerRate` 2 (ordens processadas por minuto, por servidor), `brokerServers` int 1, "
-        "`graceMinutes` 15.",
-        "Palette → Agent → **Agent** → **Population of agents** → type `Broker`, population `brokers`, Initial number 1. "
-        "Parâmetro do Broker: `capacity` int 50. Variáveis: `accepting` boolean true, `rejectedCount` int 0.",
-        "Dentro do Broker, desenha com a Process Modeling Library:",
-    ]),
-    ("code", """
- brokerIn --> tmStart --> accept --(true)--> brokerQueue --> processing --> tmEnd --> toMarket
-                            '--(false)--> rejected (Sink)
-"""),
+    ("h1", "6. Verificação do modelo (semana 5)"),
+    ("p", "Verificar é confirmar que o modelo faz o que dizemos que faz. A forma clássica são os **testes de condições "
+          "extremas**: muda-se um parâmetro para um valor extremo e confirma-se que o resultado é o esperado. Se não for, "
+          "há um erro e o Miguel corrige-o. Esta tabela vai diretamente para o relatório, e é o que os professores querem "
+          "ver depois de avisarem que os dados são escassos."),
     ("table", [
-        ["Bloco", "Tipo", "Propriedades (em todos: Agent type `Order`)"],
-        ["brokerIn", "Enter", "—"],
-        ["tmStart / tmEnd", "TimeMeasureStart / TimeMeasureEnd", "no tmEnd, TimeMeasureStart: `tmStart`. O KPI do tempo de espera é `tmEnd.distribution.mean()`"],
-        ["accept", "SelectOutput", "Condition `accepting && brokerQueue.size() < capacity`"],
-        ["brokerQueue", "Queue", "Maximum capacity"],
-        ["processing", "Delay", "Delay time `exponential(main.brokerRate)`; Capacity `main.brokerServers`"],
-        ["toMarket", "Exit", "On exit: `main.stock.enter.take(agent);`"],
-        ["rejected", "Sink", "On enter: `rejectedCount++;`"],
-    ], [3.0, 4.4, 8.6]),
-    ("p", "Função **order** do Broker (Just action; argumentos `trader` Agent, `side` int, `price` double, `qty` int). "
-          "É igual à do Stock, mas a ordem entra no broker:"),
-    ("code", """
-Order o = new Order();
-o.id = main.nextOrderId++;
-o.side = side;
-o.price = main.roundTick(price);
-o.qty = qty;
-o.tSubmit = time();
-o.trader = trader;
-brokerIn.take(o);
-"""),
-    ("p", "**Teste:** põe `capacity = 5` e `brokerRate = 0.2`: o `rejectedCount` deve subir e a fila deve encher na animação."),
-    ("h2", "Broker, parte 2: dois statecharts em paralelo"),
-    ("p", "No mesmo agente `Broker` põe **dois** Statechart Entry Points: `riskChart` e `platformChart`. O "
-          "`platformChart` liga e desliga a variável `accepting` que a fila usa."),
-    ("code", """
- platformChart:  Operational --Timeout 1--> <load>
-                    brokerQueue.size() > 0.95 * capacity --> Rejecting   (entry: accepting = false;)
-                    brokerQueue.size() > 0.70 * capacity --> Overloaded  (entry: accepting = true;)
-                    default                              --> Operational (entry: accepting = true;)
-                 Overloaded / Rejecting --Timeout 1--> <load>
-
- riskChart:      Normal --Message "MARGIN_CALL"--> MarginAlert --Timeout main.graceMinutes--> ForcedLiquidation
-                 ForcedLiquidation (entry: manda "LIQUIDATE" aos clientes) --Timeout 30--> Normal
-"""),
-    ("p", "`graceMinutes` é o “regras de margem apertadas vs. folgadas” da proposta (ex.: 5 vs. 60 min). O "
-          "LeveragedTrader da Margarida manda `MARGIN_CALL` ao broker quando entra em MarginAlert. Para a mensagem chegar "
-          "ao statechart certo: Broker → Properties → **On message received**: `riskChart.receiveMessage(msg);`"),
+        ["#", "Teste", "O que mudar", "Resultado esperado", "OK?"],
+        ["1", "Só ruído", "`nFundamentalists` 0, `nChartists` 0", "preço sem tendência, sem quedas grandes; quase nenhuma interrupção", ""],
+        ["2", "Sem manada", "`herdThreshold` 1000", "nenhum chartist em Panic; curtose mais baixa que no baseline", ""],
+        ["3", "Manada extrema", "`herdThreshold` 1, `nChartists` 80", "quedas grandes e muitas interrupções", ""],
+        ["4", "Sem colares", "`collarSet` 0", "`nHalts` = 0 em todas as corridas", ""],
+        ["5", "Choque nulo", "`shockOn` true, `shockSize` 0", "igual ao baseline (mesma semente)", ""],
+        ["6", "Choque positivo", "`shockSize` +0.10", "o preço sobe; as interrupções são de subida", ""],
+        ["7", "Criador de mercado gigante", "`mmQty` 1 000 000", "spread quase sempre igual a `mmSpread`", ""],
+        ["8", "Sem criador de mercado", "`mmQty` 0", "spread maior e mais variável", ""],
+        ["9", "Reserva longa", "`haltShort` 60", "cada reserva dura 60 min (vê no `halts.csv`)", ""],
+        ["10", "Conservação", "qualquer corrida", "soma das `position` de todos os agentes = soma inicial (cada ação comprada foi vendida por alguém)", ""],
+    ], [0.6, 3.0, 3.8, 6.8, 1.0]),
+    ("ol", [
+        "Para cada teste, corre a Simulation (ou uma Parameters Variation com 5 replicações) e preenche a coluna OK.",
+        "Para o teste 10, cria no Main uma função `totalPosition()` que soma `position` de todos os agentes e escreve "
+        "`traceln(totalPosition());` no início e no fim da corrida.",
+        "Guarda a tabela em `docs/VERIFICACAO.md` e avisa o Miguel de qualquer teste que falhe.",
+    ]),
     ("h1", "7. Semana 6: gráficos finais"),
     ("p", "O João dá-te o `data/processed/kpis.xlsx` final. Fazes estes gráficos, que vão para o relatório e para a apresentação:"),
     ("ul", [
@@ -1087,9 +1096,9 @@ brokerIn.take(o);
 
 PEOPLE = [
     ("Miguel", "miguel", "Motor do mercado (livro de ordens, colares, leilão) e integração", MIGUEL),
-    ("João", "joao", "Investidores (fundamentalista, tendência/manada, criador de mercado em stress) e dados/Python (BCP, calibração, KPIs)", JOAO),
-    ("Margarida", "margarida", "Experiências no AnyLogic (instrumentação, cenários, otimização), ESMA e investidor alavancado", MARGARIDA),
-    ("Matilde", "matilde", "Notícias, criador de mercado, broker, ecrã inicial, dashboard e gráficos finais", MATILDE),
+    ("João", "joao", "Investidores (fundamentalista, tendência/manada), dados/Python (BCP, calibração, KPIs), factos estilizados e pressupostos", JOAO),
+    ("Margarida", "margarida", "Experiências no AnyLogic (instrumentação, cenários, limiares ótimos, sensibilidade) e ESMA", MARGARIDA),
+    ("Matilde", "matilde", "Notícias, criador de mercado, ecrã inicial, dashboard, verificação e gráficos finais", MATILDE),
 ]
 
 
@@ -1127,7 +1136,7 @@ def build_geral():
             "**Domingo:** reunião de 30 min (todos) para confirmar os papéis e o `docs/CONTRATO.md`.",
             "**Quinta, 23 out:** modelo base do Miguel no GitHub (o preço mexe). Se atrasar, o João e a Matilde seguem o plano B do guião deles.",
             "**7 nov:** Fase 1 completa a correr.",
-            "**14 nov:** decisão. Se a Fase 1 estiver validada, avança-se para a Fase 2; se não, polir.",
+            "**14 nov:** Fase 1 calibrada e validada. A partir daqui só cenários, sensibilidade, verificação e relatório (os professores pediram para nos comprometermos só com a Fase 1).",
             "**21–28 nov:** cada um escreve a sua parte do relatório.",
             "**28 nov–2 dez:** revisão final de todos e entrega.",
         ]),

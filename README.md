@@ -8,19 +8,19 @@ Entrega final: **2 de dezembro**.
 
 | Pessoa | Papel |
 |---|---|
-| Miguel | Motor do mercado (livro de ordens, matching, interrupções) e integração |
-| João | Investidores (fundamentalista, tendência e manada) e dados/Python (BCP, calibração, KPIs) |
-| Margarida | Experiências no AnyLogic (instrumentação, cenários, otimização), ESMA e investidor alavancado |
-| Matilde | Notícias, criador de mercado, broker, interface, dashboard e gráficos finais |
+| Miguel | Livro de ordens em Java (testado primeiro), colares, leilão e integração |
+| João | Investidores (fundamentalista, tendência e manada), dados/Python (BCP, calibração, KPIs), factos estilizados e pressupostos |
+| Margarida | Experiências no AnyLogic (instrumentação, cenários, limiares ótimos, sensibilidade) e ESMA |
+| Matilde | Notícias, criador de mercado, interface, dashboard, verificação e gráficos finais |
 
-O plano completo, com as tarefas por semana, está em [docs/TAREFAS.md](docs/TAREFAS.md).
+O plano completo, com as tarefas por semana, está em [docs/TAREFAS.md](docs/TAREFAS.md). **Âmbito: só a Fase 1** (ver [docs/FEEDBACK_PROPOSTA.md](docs/FEEDBACK_PROPOSTA.md)). Antes de calibrar: [docs/FACTOS_ESTILIZADOS.md](docs/FACTOS_ESTILIZADOS.md). Tudo o que é assumido: [docs/PRESSUPOSTOS.md](docs/PRESSUPOSTOS.md).
 
 ## Estrutura
 
 ```
 model/      modelo principal Euronext_Main.alp (só o Miguel faz commit aqui)
 sandbox/    uma pasta por pessoa para modelos de teste
-docs/       CONTRATO (nomes combinados), TAREFAS e guioes/ (um PDF concreto por pessoa)
+docs/       CONTRATO, TAREFAS, FACTOS_ESTILIZADOS, PRESSUPOSTOS, FEEDBACK_PROPOSTA e guioes/ (PDF por pessoa)
 scripts/    Python para descarregar dados e calcular as estatísticas-alvo
 data/raw/        CSV descarregados
 data/processed/  estatísticas (Excel/CSV)

@@ -4,24 +4,30 @@ Este documento junta os nomes que **todos** usam no AnyLogic. Quem precisar de u
 
 Unidade de tempo: **minuto**. Um dia de negociação corresponde a **510 min** (08:00–16:30).
 
-## `Order` (tipo de agente: cada ordem é uma "entidade" que passa pelas filas)
+Âmbito: **só a Fase 1** (uma ação, livro de ordens, colares), como pediram os professores. A Fase 2 e a Fase 3 ficam como extensões opcionais e não estão no plano.
 
-| Variável | Tipo | Significado |
+## `Order` (classe Java, não é agente)
+
+Os professores avisaram que o livro de ordens vai ser sobretudo código Java. Além disso, um modelo cria milhões de ordens, e se cada uma fosse um agente era provável ultrapassar os limites da versão PLE do AnyLogic.
+
+| Campo | Tipo | Significado |
 |---|---|---|
-| `id` | `long` | identificador único |
+| `id` | `long` | identificador único; cresce com o tempo, por isso serve de desempate (quem chegou primeiro) |
 | `side` | `int` | `1` = compra, `-1` = venda |
 | `price` | `double` | preço-limite (€) |
 | `qty` | `int` | quantidade por executar |
 | `tSubmit` | `double` | instante de submissão |
-| `trader` | `Agent` | quem enviou a ordem |
+| `expiry` | `double` | instante em que é cancelada se não for executada (desistência) |
+| `trader` | `Agent` | quem enviou a ordem (`null` nos testes) |
 
 ## `Stock` (agente único no `Main`, nome `stock`)
 
-Blocos da Process Modeling Library (o livro de ordens como sistema de filas):
-`enter → holdQueue → hold → sideSelect → bidBook / askBook`, com `executed → sinkExecuted`, `cancelEnter → sinkCancelled` e a saída por timeout dos livros também para `sinkCancelled`.
+O livro de ordens é um sistema de filas em Java: `bids` e `asks` são `PriorityQueue<Order>` (prioridade por preço e, no mesmo preço, por chegada), e `pending` é a fila de espera das ordens que chegam durante uma reserva.
 
 | Nome | Tipo | Significado |
 |---|---|---|
+| `bids` / `asks` | `PriorityQueue<Order>` | os dois lados do livro |
+| `pending` | `ArrayList<Order>` | ordens retidas até ao leilão de reabertura |
 | `lastPrice` | `double` | último preço negociado |
 | `refPrice` | `double` | preço de referência estático (o do último leilão) |
 | `ma` | `double` | média móvel do preço (para os investidores de tendência) |
@@ -35,6 +41,8 @@ Funções que **os outros chamam**:
 - `main.stock.cancelAll(Agent a)`: cancela todas as ordens de um agente;
 - `main.stock.mid()`, `bestBid()`, `bestAsk()`, `spread()`.
 
+Funções internas: `addToBook`, `match`, `execute`, `collarHit`, `runAuction`, `startHalt`, `endHalt` e os testes `testBook` e `check`.
+
 ## Populações no `Main`
 
 | Nome | Tipo de agente | Quantidade | Responsável |
@@ -44,8 +52,6 @@ Funções que **os outros chamam**:
 | `noiseTraders` | `NoiseTrader` | `nNoise` | Miguel (1.ª versão) e depois João |
 | `marketMaker` | `MarketMaker` | 1 | Matilde |
 | `news` | `NewsAgent` | 1 | Matilde |
-| `leveraged` | `LeveragedTrader` (Fase 2) | `nLeveraged` | Margarida |
-| `brokers` | `Broker` (Fase 2) | 1 | Matilde (fila e statecharts) |
 
 Todos os investidores têm as variáveis `double cash` e `int position` e um statechart chamado `statechart`.
 
@@ -69,8 +75,10 @@ Todos os investidores têm as variáveis `double cash` e `int position` e um sta
 | `nNoise` | int | 30 | calibrar |
 | `initialPrice` | double | 0.50 | aproximadamente o BCP (€) |
 | `tickSize` | double | 0.0001 | |
+| `orderLife` | double | 35 | minutos de vida média de uma ordem não executada |
+| `runTests` | boolean | false | `true` corre o `stock.testBook()` no arranque (com `nNoise = 0`) |
 | `collarSet` | int | 2 | 0 = sem colares, 1 = 2%/5%, 2 = 3%/8% (atual), 3 = 5%/10%, 4 = personalizado |
-| `customDyn` / `customStat` | double | 0.03 / 0.08 | usados quando `collarSet = 4` (otimização) |
+| `customDyn` / `customStat` | double | 0.03 / 0.08 | usados quando `collarSet = 4` (limiares ótimos) |
 | `haltShort` / `haltLong` | double | 3 / 10 | minutos |
 | `shockOn` | boolean | false | |
 | `shockTime` | double | 30600 | dia 60 |
