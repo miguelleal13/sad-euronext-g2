@@ -12,7 +12,16 @@ Coisas do modelo que ficaram "provisórias" e que tenho de mudar mais tarde. Ris
 - [ ] Copiar do Main dela: os parâmetros `collarSet`, `customDyn`, `customStat` e `scenario`, as variáveis `label`, `runId`, `peakPrice`, `maxDrawdown`, `nHalts` e `timeHalted`, os 2 Text File (`pricesFile`, `haltsFile`) e o `logEvent`.
 - [ ] **On startup** do Main: juntar o código dela (o `switch (collarSet)` e o `label`) ao meu `if (runTests) stock.testBook();`.
 - [ ] **On destroy** do Main: `pricesFile.close(); haltsFile.close();`
-- [ ] Em `startHalt` / `endHalt`: tirar as `//` das linhas com `main.nHalts`, `main.haltsFile`, `main.label`, `main.runId` e `main.timeHalted`.
+- [ ] **`startHalt`** (Stock): por agora tem só 4 linhas. Acrescentar antes do `main.broadcast("HALT");`:
+  ```java
+  main.nHalts++;
+  ```
+- [ ] **`endHalt`** (Stock): por agora tem só o `broadcast`. Acrescentar antes do `main.broadcast("REOPEN");`:
+  ```java
+  main.haltsFile.println(main.label + ";" + main.runId + ";" + haltStart + ";" + time() + ";"
+                         + prePrice + ";" + lastPrice);
+  main.timeHalted += time() - haltStart;
+  ```
 
 ## Sempre que entrar um agente novo (semanas 2–3)
 Tirar as `//` da linha desse agente em:
