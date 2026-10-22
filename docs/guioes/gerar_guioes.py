@@ -122,7 +122,7 @@ traceln(time() + " ordem " + (side == 1 ? "COMPRA " : "VENDA ") + qty + " @ " + 
 // cancelAll (Just action; a Agent)
 // vazio
 """),
-        ("p", "Event `walk` no Stock falso (Rate 1): `lastPrice *= 1 + normal(0.002, 0); ma = 0.98 * ma + 0.02 * lastPrice;`"),
+        ("p", "Event `walk` no Stock falso (Rate 1): `lastPrice *= 1 + normal(0.002, 0); ma = ma + (lastPrice - ma) / 50;`"),
     ]
 
 
@@ -229,7 +229,7 @@ MIGUEL = [
         "AnyLogic: **File → New → Model**. Model name `Euronext_Main`; Location: a pasta `model/` do repositório; "
         "**Model time units: minutes**.",
         "No `Main` cria os **parâmetros** (Palette → Agent → Parameter): `nNoise` int 30, `initialPrice` 0.5, "
-        "`tickSize` 0.0001, `haltShort` 3, `haltLong` 10, `noiseRate` 1, `noiseSigma` 0.002, `orderLife` 35 (minutos de vida média de uma ordem), `runTests` boolean false.",
+        "`tickSize` 0.0001, `haltShort` 3, `haltLong` 10, `noiseRate` 1, `noiseSigma` 0.002, `orderLife` 35 (minutos de vida média de uma ordem), `maWindow` 50 (memória da média móvel, em minutos), `runTests` boolean false.",
         "E as **variáveis** (Palette → Agent → Variable): `fundamentalValue` double (Initial value `initialPrice`), "
         "`nextOrderId` long 0, `dynamicThreshold` double 0.03, `staticThreshold` double 0.08, `collarsActive` boolean true.",
         "O resto do Main (cenários, ficheiros de saída e KPIs: `collarSet`, `label`, `runId`, `logEvent`…) é feito "
@@ -352,7 +352,7 @@ while (!halted && !bids.isEmpty() && !asks.isEmpty()) {
         "**dayEvent** (abertura de cada dia): Mode *Cyclic*, First occurrence 510, Recurrence 510, "
         "Action `refPrice = lastPrice; lastStaticDir = 0;`",
         "**maEvent** (média móvel de ~50 min para os chartists): Mode *Cyclic*, First occurrence 1, Recurrence 1, "
-        "Action `ma = 0.98 * ma + 0.02 * lastPrice;`",
+        "Action `ma = ma + (lastPrice - ma) / main.maWindow;`",
     ]),
     ("h1", "4. Testar o livro ANTES dos agentes (semana 1)"),
     ("p", "É o que os professores pediram. Os testes metem ordens conhecidas e confirmam o resultado. Correm com "
@@ -914,7 +914,7 @@ pricesFile.println(label + ";" + runId + ";" + time() + ";" + p + ";"
         "Para **um parâmetro de cada vez**, faz uma Parameters Variation com 3 valores: o calibrado, −50% e +50% "
         "(Freeform). Mantém os outros fixos. Usa 10 replicações e Fixed seed.",
         "Parâmetros a testar: `herdThreshold`, `chartRate`, `trendThreshold`, `fundBand`, `noiseSigma`, `mmSpread` e "
-        "`orderLife` (tempo de vida das ordens).",
+        "`orderLife` (tempo de vida das ordens) e `maWindow` (memória da média móvel dos chartists).",
         "O João corre o `kpis.py`. Para cada parâmetro, regista numa tabela (`data/processed/sensibilidade.xlsx`) a queda "
         "máxima e o tempo em interrupção nos 3 valores.",
         "A pergunta a responder no relatório: **a conclusão principal (colares com/sem) mantém-se em todos os casos?** Se sim, "

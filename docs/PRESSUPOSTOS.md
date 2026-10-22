@@ -19,7 +19,7 @@ Os dados públicos sobre o livro de ordens e o comportamento dos investidores na
 | 9 | Banda e ritmo do fundamentalista (`fundBand`, `fundRate`) | 0.01 / 0.2 | Literatura | C, S |
 | 10 | Erro de avaliação de cada fundamentalista (`bias`) | Normal(0, 2%) | Heterogeneidade de opiniões | — |
 | 11 | Ritmo e limiar de tendência do chartist (`chartRate`, `trendThreshold`) | 0.2 / 0.005 | Literatura | C, S |
-| 12 | Média móvel usada pelos chartists | ~50 min | Simplificação | — |
+| 12 | Memória da média móvel usada pelos chartists (`maWindow`) | 50 min | Horizonte intradiário intermédio: curto demais reage a ruído; longo demais não vê uma queda a meio da sessão | C, S |
 | 13 | Rede de contactos dos chartists | small world, 6 vizinhos | Como no Market Model das aulas | — |
 | 14 | Limiar de manada (`herdThreshold`) e duração do pânico (`panicDuration`) | 2 / 10 min | Não observável | C, S |
 | 15 | Ruído: ritmo e dispersão de preços (`noiseRate`, `noiseSigma`) | 1 / 0.2% | Dá volume e liquidez de base | C, S |

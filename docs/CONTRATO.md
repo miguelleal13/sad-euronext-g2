@@ -76,6 +76,7 @@ Todos os investidores têm as variáveis `double cash` e `int position` e um sta
 | `initialPrice` | double | 0.50 | aproximadamente o BCP (€) |
 | `tickSize` | double | 0.0001 | |
 | `orderLife` | double | 35 | minutos de vida média de uma ordem não executada |
+| `maWindow` | double | 50 | memória da média móvel `stock.ma` (minutos); `ma += (lastPrice - ma) / maWindow` |
 | `runTests` | boolean | false | `true` corre o `stock.testBook()` no arranque (com `nNoise = 0`) |
 | `collarSet` | int | 2 | 0 = sem colares, 1 = 2%/5%, 2 = 3%/8% (atual), 3 = 5%/10%, 4 = personalizado |
 | `customDyn` / `customStat` | double | 0.03 / 0.08 | usados quando `collarSet = 4` (limiares ótimos) |
