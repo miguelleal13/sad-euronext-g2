@@ -1,6 +1,6 @@
 """KPIs dos cenários (proposta: volatilidade, liquidez e recuperação).
 
-Lê model/output/precos.csv e model/output/halts.csv e escreve data/processed/kpis.xlsx com 3 folhas:
+Lê model/Euronext_Main/output/precos.csv e halts.csv e escreve data/processed/kpis.xlsx com 3 folhas:
   halts  - uma linha por interrupção: volatilidade e spread 2/5/10 min antes e depois, gap do leilão
   runs   - uma linha por corrida: queda máxima, volume, tempo em interrupção, recuperação de metade da queda
   resumo - média e intervalo de confiança de 95% por cenário (label)
@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT_DIR = ROOT / "model" / "output"
+OUT_DIR = ROOT / "model" / "Euronext_Main" / "output"
 PRICES = OUT_DIR / "precos.csv"
 HALTS = OUT_DIR / "halts.csv"
 RESULT = ROOT / "data" / "processed" / "kpis.xlsx"

@@ -18,7 +18,7 @@ O plano completo, com as tarefas por semana, está em [docs/TAREFAS.md](docs/TAR
 ## Estrutura
 
 ```
-model/      modelo principal Euronext_Main.alp (só o Miguel faz commit aqui)
+model/      modelo principal Euronext_Main/Euronext_Main.alp (só o Miguel faz commit aqui)
 sandbox/    uma pasta por pessoa para modelos de teste
 docs/       CONTRATO, TAREFAS, FACTOS_ESTILIZADOS, PRESSUPOSTOS, FEEDBACK_PROPOSTA e guioes/ (PDF por pessoa)
 scripts/    Python para descarregar dados e calcular as estatísticas-alvo

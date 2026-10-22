@@ -149,9 +149,9 @@ def common(pasta):
         ]),
         ("h2", "Onde trabalhas"),
         ("ul", [
-            "`model/Euronext_Main.alp` é o modelo principal e **só o Miguel o edita**.",
+            "`model/Euronext_Main/Euronext_Main.alp` é o modelo principal e **só o Miguel o edita**.",
             f"Tu trabalhas em `sandbox/{pasta}/`. Depois do Miguel publicar o modelo base, copia "
-            f"`model/Euronext_Main.alp` para a tua pasta com outro nome (ex.: `sandbox/{pasta}/{pasta}.alp`) e "
+            f"`model/Euronext_Main/Euronext_Main.alp` para a tua pasta com outro nome (ex.: `sandbox/{pasta}/{pasta}.alp`) e "
             "abre esse. Na tua cópia podes mexer em tudo, incluindo no Main.",
             "Quando a tua peça funcionar: commit + push e avisa no grupo. O Miguel abre os dois modelos no AnyLogic e, "
             "no painel **Projects**, copia o teu agente (Ctrl+C) e cola-o no modelo principal (Ctrl+V). Isto só "
@@ -500,7 +500,7 @@ refPrice = lastPrice;         // o leilão passa a ser a nova referência estát
           "parado durante 3 min. Volta a pôr 0.002."),
     ("h1", "7. Integração (semanas 2–3)"),
     ("ol", [
-        "Quando alguém avisar: Pull e abre o modelo dessa pessoa e o `model/Euronext_Main.alp` (ambos ficam no Projects).",
+        "Quando alguém avisar: Pull e abre o modelo dessa pessoa e o `model/Euronext_Main/Euronext_Main.alp` (ambos ficam no Projects).",
         "No modelo da pessoa, seleciona o tipo de agente (ex.: `Fundamentalist`) → Ctrl+C → seleciona `Euronext_Main` → Ctrl+V.",
         "Arrasta o tipo, do Projects para o canvas do Main, para criar a população. Usa o nome do CONTRATO "
         "(ex.: `fundamentalists`) e em Initial number o parâmetro (`nFundamentalists`).",
@@ -555,7 +555,7 @@ JOAO = [
         "Lê o capítulo 0 deste guião.",
         "Desenha em papel os statecharts do Fundamentalist e do Chartist (secções 2 e 4) e vê se percebes cada seta. "
         "As dúvidas vão para `sandbox/joao/duvidas.md`. Não precisas de escrever mais nenhum documento: as regras estão aqui.",
-        "Quando o Miguel publicar o modelo base: Pull → copia `model/Euronext_Main.alp` para `sandbox/joao/joao.alp` → abre esse.",
+        "Quando o Miguel publicar o modelo base: Pull → copia `model/Euronext_Main/Euronext_Main.alp` para `sandbox/joao/joao.alp` → abre esse.",
     ]),
     ("plan_b", "joao"),
     ("h1", "1a. Semana 1: factos estilizados (antes de calibrar)"),
@@ -714,7 +714,7 @@ signalNeighbours();
           "`herdThreshold = 1` devem dar quedas fortes; com `collarSet = 2` essas quedas devem abrir reservas. Commit e avisa."),
     ("h1", "5. Calibração com a Margarida (semana 4)"),
     ("ol", [
-        "A Margarida corre o cenário baseline no AnyLogic (10 replicações). Os resultados ficam em `model/output/precos.csv`.",
+        "A Margarida corre o cenário baseline no AnyLogic (10 replicações). Os resultados ficam em `model/Euronext_Main/output/precos.csv`.",
         "Tu corres `python scripts/compare_model.py baseline`. O script mostra o BCP real vs. o modelo e se cada "
         "estatística **bate** (a menos de 25%). No modelo, um dia tem 510 minutos e o último preço de cada bloco conta como fecho.",
         "Se não bater, escolhem juntos o que mudar (tabela abaixo), ela corre outra vez e tu comparas outra vez. Muda uma "
@@ -810,7 +810,7 @@ MARGARIDA = [
           "no Main da tua cópia (`sandbox/margarida/margarida.alp`, copiada do modelo base do Miguel) e, no fim, o "
           "Miguel copia para o modelo principal. Também te serve de treino de AnyLogic para as experiências."),
     ("ol", [
-        "Cria a pasta `sandbox/margarida/output/`. Quando o Miguel integrar, a pasta passa a ser `model/output/`.",
+        "Cria a pasta `sandbox/margarida/output/`. Quando o Miguel integrar, a pasta passa a ser `model/Euronext_Main/output/`.",
         "No Main, **parâmetros** (Palette → Agent → Parameter): `collarSet` int 2, `customDyn` 0.03, `customStat` 0.08, "
         "`scenario` String \"baseline\".",
         "**Variáveis**: `label` String, `runId` String com Initial value "
@@ -851,7 +851,7 @@ pricesFile.println(label + ";" + runId + ";" + time() + ";" + p + ";"
     ]),
     ("h1", "3. Correr o modelo e os cenários no AnyLogic (semanas 3–5)"),
     ("h2", "Onde saem os dados"),
-    ("p", "Cada corrida acrescenta linhas a `model/output/precos.csv` (um preço por minuto) e `model/output/halts.csv` "
+    ("p", "Cada corrida acrescenta linhas a `model/Euronext_Main/output/precos.csv` (um preço por minuto) e `model/Euronext_Main/output/halts.csv` "
           "(uma linha por interrupção). **Antes de cada lote de corridas apaga estes dois ficheiros**, para não misturar "
           "com corridas antigas. Cada linha tem um `label` (cenário mais parâmetros) e um `run` (a corrida)."),
     ("h2", "Cenários da Fase 1 (da proposta)"),
@@ -873,7 +873,7 @@ pricesFile.println(label + ";" + runId + ";" + time() + ";" + p + ";"
         "com a mesma sorte, como promete a proposta.",
         "**Model time**: Stop at specified time = 61200.",
         "Em **Advanced**, desmarca **Allow parallel evaluations** (duas corridas a escrever ao mesmo tempo no mesmo CSV estragam o ficheiro).",
-        "Run (não há animação, espera que acabe). Os CSV de `model/output/` não vão para o GitHub, porque são grandes. "
+        "Run (não há animação, espera que acabe). Os CSV de `model/Euronext_Main/output/` não vão para o GitHub, porque são grandes. "
         "Avisa o João, que corre o `kpis.py` e faz o `kpis.xlsx` (vê a dica abaixo).",
     ]),
     ("h2", "Grelha (cenário 4 e pergunta 1 da proposta)"),
@@ -900,7 +900,7 @@ pricesFile.println(label + ";" + runId + ";" + time() + ";" + p + ";"
     ("ol", [
         "Antes de começar, confirma que o João já fez commit de `docs/FACTOS_ESTILIZADOS.md` com os valores do BCP: "
         "as metas ficam fixas antes da calibração.",
-        "Apaga os CSV de `model/output/` e corre o cenário 1 (baseline) com 10 replicações e Stop 127500.",
+        "Apaga os CSV de `model/Euronext_Main/output/` e corre o cenário 1 (baseline) com 10 replicações e Stop 127500.",
         "O João compara com o BCP real (`compare_model.py`) e diz-te o que não bate.",
         "Escolhem juntos o que mudar (a tabela de afinação está no guião dele, secção 5). Tu mudas os parâmetros no "
         "AnyLogic e corres outra vez. Muda uma coisa de cada vez.",
@@ -950,7 +950,7 @@ MATILDE = [
         "“Radio buttons”. Em cada página, faz o exemplo num modelo de teste qualquer.",
         "Em papel: ecrã inicial e dashboard (esboço abaixo; podes melhorar).",
         "Lê o capítulo 0 e desenha em papel os statecharts do NewsAgent e do MarketMaker (secções 2 e 3).",
-        "Quando o Miguel publicar o modelo base: Pull → copia `model/Euronext_Main.alp` para `sandbox/matilde/matilde.alp` → abre esse.",
+        "Quando o Miguel publicar o modelo base: Pull → copia `model/Euronext_Main/Euronext_Main.alp` para `sandbox/matilde/matilde.alp` → abre esse.",
     ]),
     ("plan_b", "matilde"),
     ("code", """

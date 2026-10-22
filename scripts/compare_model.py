@@ -13,7 +13,7 @@ import pandas as pd
 from target_stats import compute, stats_from_returns
 
 ROOT = Path(__file__).resolve().parent.parent
-PRICES = ROOT / "model" / "output" / "precos.csv"
+PRICES = ROOT / "model" / "Euronext_Main" / "output" / "precos.csv"
 OUT_DIR = ROOT / "data" / "processed"
 DAY = 510          # minutos por dia de negociação no modelo
 

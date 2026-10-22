@@ -110,7 +110,7 @@ Todos os investidores têm as variáveis `double cash` e `int position` e um sta
 | `onFill(Agent t, int side, int q, double p)` | função | atualiza o `cash` e a `position` de quem negociou |
 | `roundTick(double p)` | função | arredonda ao tick |
 
-## Ficheiros de saída (`model/output/`, lidos pelos scripts do João)
+## Ficheiros de saída (`model/Euronext_Main/output/`, lidos pelos scripts do João)
 
 | Ficheiro | Colunas (separadas por `;`) |
 |---|---|

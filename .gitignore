@@ -23,4 +23,5 @@ Thumbs.db
 desktop.ini
 
 # Saídas das corridas do AnyLogic (grandes; os resultados finais vão para data/processed)
-model/output/
+model/*/output/
+sandbox/**/output/
