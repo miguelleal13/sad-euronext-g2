@@ -3,10 +3,10 @@
 Coisas do modelo que ficaram "provisórias" e que tenho de mudar mais tarde. Risco quando fizer.
 
 ## Semana 2: colares, reservas e leilão
-- [ ] **`collarHit`** (Stock): trocar `return false;` pelo código dos colares (guião, secção 6).
-- [ ] **Statechart do Stock**: Continuous → ReservDynamic / ReservStatic / ReservStatic10 → Auction → Continuous (guião, secção 6).
-- [ ] Funções **`startHalt`**, **`endHalt`** e **`runAuction`** no Stock (guião, secção 6).
-- [ ] Correr os testes (`runTests = true`, `nNoise = 0`): o **teste 5** tem de passar a **OK**.
+- [x] **`collarHit`** (Stock): trocar `return false;` pelo código dos colares (guião, secção 6).
+- [x] **Statechart do Stock**: Continuous → ReservDynamic / ReservStatic / ReservStatic10 → Auction → Continuous (guião, secção 6).
+- [x] Funções **`startHalt`**, **`endHalt`** e **`runAuction`** no Stock (guião, secção 6).
+- [x] Correr os testes (`runTests = true`, `nNoise = 0`): o **teste 5** tem de passar a **OK**.
 
 ## Quando a Margarida entregar a instrumentação (semana 2)
 - [ ] Copiar do Main dela: os parâmetros `collarSet`, `customDyn`, `customStat` e `scenario`, as variáveis `label`, `runId`, `peakPrice`, `maxDrawdown`, `nHalts` e `timeHalted`, os 2 Text File (`pricesFile`, `haltsFile`) e o `logEvent`.
