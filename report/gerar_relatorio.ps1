@@ -40,7 +40,7 @@ try {
         $lvl.NumberStyle = 0
         $lvl.NumberPosition = 0
         $lvl.TextPosition = 0
-        $lvl.TrailingCharacter = 2   # space
+        $lvl.TrailingCharacter = 1   # space
         $lvl.ResetOnHigher = $i - 1
         $lvl.LinkedStyle = $doc.Styles.Item($ids[$i - 1]).NameLocal
     }
@@ -62,6 +62,58 @@ try {
         $sel.Range.ListFormat.RemoveNumbers()
         $sel.TypeParagraph()
     }
+
+    # --- helpers used by the section texts (conteudo_*.ps1) ---
+    foreach ($lbl in 'Figure', 'Table') { try { $word.CaptionLabels.Add($lbl) | Out-Null } catch {} }
+    function Body([string]$text) {
+        $sel.Style = $doc.Styles.Item($sNormal).NameLocal
+        $sel.ParagraphFormat.Alignment = 3      # justified
+        $sel.TypeText($text)
+        $sel.TypeParagraph()
+    }
+    function Caption([string]$label, [string]$text) {
+        $sel.Style = $doc.Styles.Item(-35).NameLocal   # Caption
+        $sel.ParagraphFormat.Alignment = 1
+        $sel.TypeText("$label ")
+        $doc.Fields.Add($sel.Range, -1, "SEQ $label \* ARABIC", $false) | Out-Null
+        $sel.EndKey(6) | Out-Null
+        $sel.TypeText(" - $text")
+        $sel.TypeParagraph()
+        $sel.Style = $doc.Styles.Item($sNormal).NameLocal
+    }
+    function Tbl([string]$caption, [string[]]$headers, [object[]]$rows, [double[]]$widthsCm) {
+        Caption 'Table' $caption
+        $nr = $rows.Count + 1; $nc = $headers.Count
+        $t = $doc.Tables.Add($sel.Range, $nr, $nc)
+        $t.Borders.Enable = 1
+        $t.Range.Font.Size = 9.5
+        $t.Range.ParagraphFormat.Alignment = 0
+        $t.Range.ParagraphFormat.SpaceAfter = 0
+        for ($c = 1; $c -le $nc; $c++) {
+            $t.Columns.Item($c).Width = $widthsCm[$c - 1] * 28.35
+            $t.Cell(1, $c).Range.Text = $headers[$c - 1]
+        }
+        $t.Rows.Item(1).Range.Font.Bold = 1
+        $t.Rows.Item(1).Shading.BackgroundPatternColor = 15132390   # light grey
+        $t.Rows.Item(1).HeadingFormat = -1
+        for ($r = 0; $r -lt $rows.Count; $r++) {
+            for ($c = 1; $c -le $nc; $c++) { $t.Cell($r + 2, $c).Range.Text = [string]$rows[$r][$c - 1] }
+        }
+        $sel.EndKey(6) | Out-Null
+        $sel.TypeParagraph()
+    }
+    function Fig([string]$path, [string]$caption, [double]$widthCm) {
+        $sel.Style = $doc.Styles.Item($sNormal).NameLocal
+        $sel.ParagraphFormat.Alignment = 1
+        $sel.ParagraphFormat.KeepWithNext = -1
+        $shape = $sel.InlineShapes.AddPicture($path)
+        $ratio = $shape.Height / $shape.Width
+        $shape.Width = $widthCm * 28.35
+        $shape.Height = $shape.Width * $ratio
+        $sel.TypeParagraph()
+        Caption 'Figure' $caption
+    }
+    . (Join-Path $PSScriptRoot 'conteudo_miguel.ps1')
 
     # ---------------- Cover ----------------
     1..5 | ForEach-Object { Para '' }
@@ -95,8 +147,14 @@ try {
     $sel.TypeParagraph()
     $sel.InsertBreak(7)
     Para 'List of Figures' $sNormal 0 16 $true
+    $doc.TablesOfFigures.Add($sel.Range, 'Figure', $true) | Out-Null
+    $sel.EndKey(6) | Out-Null
+    $sel.TypeParagraph()
     $sel.InsertBreak(7)
     Para 'List of Tables' $sNormal 0 16 $true
+    $doc.TablesOfFigures.Add($sel.Range, 'Table', $true) | Out-Null
+    $sel.EndKey(6) | Out-Null
+    $sel.TypeParagraph()
 
     # ---------------- Chapters ----------------
     $outline = @(
@@ -159,6 +217,7 @@ try {
         $sel.Style = $doc.Styles.Item($styleOf[$h[0]]).NameLocal
         $sel.TypeText($h[1])
         $sel.TypeParagraph()
+        if ($content.ContainsKey($h[1])) { & $content[$h[1]] }
     }
 
     Unnumbered 'References'
@@ -175,7 +234,9 @@ try {
     $footer.PageNumbers.Add(1, $true) | Out-Null   # centre
     $doc.Sections.Item(1).PageSetup.DifferentFirstPageHeaderFooter = $true
 
+    $doc.Fields.Update() | Out-Null
     $doc.TablesOfContents.Item(1).Update()
+    foreach ($tof in $doc.TablesOfFigures) { $tof.Update() }
     $doc.SaveAs2($OutPath, 16)                       # .docx
     $pdf = [System.IO.Path]::ChangeExtension($OutPath, '.pdf')
     $doc.SaveAs2($pdf, 17)                           # PDF copy for checking
