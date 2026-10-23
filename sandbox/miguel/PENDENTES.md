@@ -40,6 +40,8 @@ Tirar as `//` da linha desse agente em:
 ## Configuração
 - [ ] `runTests`: tem de ficar **false** no modelo do GitHub (só passa a true quando corro os testes).
 - [ ] Simulation: Stop time **61200** (120 dias). A Margarida usa 127500 (250 dias) no baseline, nas experiências dela.
+- [x] Tempo de uma corrida de 120 dias (só 30 noise traders, sem log): **< 5 s** em virtual time (23/10).
+- [ ] **Voltar a cronometrar depois da integração** (semana 3): com ~100 agentes e o log da Margarida a cada minuto vai ser mais lento. Passar o tempo à Margarida para ela planear as replicações.
 - [ ] Semana 4: confirmar no site da AnyLogic os **limites da PLE** (duração das corridas, número de agentes, experiências disponíveis) e avisar a Margarida.
 
 ## Para outros confirmarem (não é código meu)
