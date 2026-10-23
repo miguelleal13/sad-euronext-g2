@@ -25,3 +25,7 @@ desktop.ini
 # Saídas das corridas do AnyLogic (grandes; os resultados finais vão para data/processed)
 model/*/output/
 sandbox/**/output/
+
+# Cópias automáticas do AnyLogic
+*.autosave
+*.alp.bak
