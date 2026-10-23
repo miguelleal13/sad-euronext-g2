@@ -881,11 +881,12 @@ pricesFile.println(label + ";" + runId + ";" + time() + ";" + p + ";"
           "10–60 (step 10). São 4 × 2 × 6 = 48 combinações; com 30 replicações dá 1440 corridas. Começa com 5 replicações "
           "para ver quanto tempo demora."),
     ("h2", "Otimização (os limiares que minimizam a queda)"),
-    ("tip", "Os professores avisaram para verificar os limites da versão PLE do AnyLogic. Confirma no site da AnyLogic "
-            "se a tua licença tem a experiência **Optimization** e quantas iterações permite. Se não tiver, faz o mesmo "
-            "com uma Parameters Variation: `collarSet` Fixed 4, `customDyn` Range 0.01–0.06 (step 0.01), `customStat` "
-            "Range 0.04–0.14 (step 0.02), 10 replicações. No kpis.xlsx escolhes a combinação com a menor queda máxima "
-            "entre as que têm pelo menos 90% do volume."),
+    ("tip", "Limites da PLE já confirmados (`docs/LIMITES_PLE.md`): a experiência **Optimization** existe na PLE "
+            "(motor genético completo; OptQuest até 500 iterações e 7 parâmetros), por isso estes passos funcionam. A "
+            "PLE também tem uma experiência **Sensitivity Analysis** pronta, útil na secção 5. Alternativa à otimização: "
+            "uma Parameters Variation com `collarSet` Fixed 4, `customDyn` Range 0.01–0.06 (step 0.01) e `customStat` Range "
+            "0.04–0.14 (step 0.02), escolhendo no kpis.xlsx a combinação com a menor queda máxima entre as que têm pelo "
+            "menos 90% do volume."),
     ("ol", [
         "New → Experiment → **Optimization**. Objective: **minimize** `root.maxDrawdown`.",
         "Parameters: `collarSet` Fixed 4; `customDyn` *continuous* 0.01–0.06; `customStat` *continuous* 0.04–0.15; `shockOn` true.",

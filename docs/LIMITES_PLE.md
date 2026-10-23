@@ -7,7 +7,7 @@ Os professores pediram para verificar os limites da versão PLE. Fonte: a ajuda 
 | Limite da PLE | O nosso modelo | Problema? |
 |---|---|---|
 | Máximo **10 tipos de agente** num modelo | Main, Stock, NoiseTrader, Fundamentalist, Chartist, MarketMaker, NewsAgent = **7** (`Order` é uma classe Java, não conta) | ✅ Não, mas sobram só 3: não criar tipos de agente desnecessários |
-| **Tempo de modelação limitado a 5 horas** em todas as bibliotecas exceto a Process Modeling Library | Não usamos as bibliotecas limitadas (Material Handling, Pedestrian, Rail, Road Traffic, Fluid). Uma corrida de 120 dias (61 200 min) já correu inteira | ✅ Não |
+| **Tempo de modelação limitado a 5 horas** em todas as bibliotecas exceto a Process Modeling Library | Não usamos as bibliotecas limitadas (Material Handling, Pedestrian, Rail, Road Traffic, Fluid). **Testado:** uma corrida de 120 dias (61 200 min ≈ 1020 h de tempo de modelo) correu até ao fim, a 23/10. Alguns resumos na internet dizem que *todas* as corridas da PLE param às 5 h; o teste mostra que no nosso modelo isso não acontece | ✅ Não |
 | Máximo **50 000 agentes criados dinamicamente** | Criamos milhões de **ordens**, mas são objetos Java e não agentes. Os ~100 investidores são criados no arranque | ✅ Não. Foi por isto que o livro de ordens passou para Java |
 | Máximo **200 populações e blocos de fluxograma** por tipo de agente | Poucas populações e nenhum bloco | ✅ Não |
 | Máximo 200 variáveis de System Dynamics por tipo de agente | Não usamos System Dynamics | ✅ Não |
