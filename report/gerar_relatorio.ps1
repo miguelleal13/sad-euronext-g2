@@ -140,6 +140,7 @@ try {
         @(2, 'Collar Thresholds and Reservation Duration'),
         @(2, 'Optimal Thresholds'),
         @(2, 'Sensitivity Analysis'),
+        @(2, 'Monte Carlo Replications'),
         @(1, 'Results'),
         @(2, 'Baseline Scenario'),
         @(2, 'Large Shock with and without Collars'),
@@ -147,6 +148,7 @@ try {
         @(2, 'Collar Thresholds and Reservation Duration'),
         @(2, 'Optimal Thresholds'),
         @(2, 'Sensitivity Analysis'),
+        @(2, 'Monte Carlo Replications'),
         @(1, 'Discussion and Interpretation of Results'),
         @(1, 'Conclusions'),
         @(2, 'Final Considerations'),
@@ -165,7 +167,8 @@ try {
                    'APPENDIX C: Order Book Test Output',
                    'APPENDIX D: Calibration Log',
                    'APPENDIX E: Assumptions Register',
-                   'APPENDIX F: Results Excel File') { Unnumbered $a }
+                   'APPENDIX F: Results Excel File',
+                   'APPENDIX G: Experiment Interfaces (Parameter Variation and Monte Carlo)') { Unnumbered $a }
 
     # ---------------- Page numbers in the footer ----------------
     $footer = $doc.Sections.Item(1).Footers.Item(1)
