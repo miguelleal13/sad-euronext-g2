@@ -42,7 +42,7 @@ Tirar as `//` da linha desse agente em:
 - [ ] Simulation: Stop time **61200** (120 dias). A Margarida usa 127500 (250 dias) no baseline, nas experiências dela.
 - [x] Tempo de uma corrida de 120 dias (só 30 noise traders, sem log): **< 5 s** em virtual time (23/10).
 - [ ] **Voltar a cronometrar depois da integração** (semana 3): com ~100 agentes e o log da Margarida a cada minuto vai ser mais lento. Passar o tempo à Margarida para ela planear as replicações.
-- [ ] Semana 4: confirmar no site da AnyLogic os **limites da PLE** (duração das corridas, número de agentes, experiências disponíveis) e avisar a Margarida.
+- [x] Limites da PLE confirmados (23/10): ver `docs/LIMITES_PLE.md`. Nenhum limite nos afeta; regra: máximo 10 tipos de agente (vamos em 7) e não criar agentes durante a simulação.
 
 ## Para outros confirmarem (não é código meu)
 - [ ] João: confirmar no documento *Trading safeguards* da Euronext os valores dos colares para o BCP (±3% / ±8%, 3 / 10 min) e citar com data.

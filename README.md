@@ -13,7 +13,7 @@ Entrega final: **2 de dezembro**.
 | Margarida | Experiências no AnyLogic (instrumentação, cenários, limiares ótimos, sensibilidade) e ESMA |
 | Matilde | Notícias, criador de mercado, interface, dashboard, verificação e gráficos finais |
 
-O plano completo, com as tarefas por semana, está em [docs/TAREFAS.md](docs/TAREFAS.md). **Âmbito: só a Fase 1** (ver [docs/FEEDBACK_PROPOSTA.md](docs/FEEDBACK_PROPOSTA.md)). Antes de calibrar: [docs/FACTOS_ESTILIZADOS.md](docs/FACTOS_ESTILIZADOS.md). Tudo o que é assumido: [docs/PRESSUPOSTOS.md](docs/PRESSUPOSTOS.md).
+O plano completo, com as tarefas por semana, está em [docs/TAREFAS.md](docs/TAREFAS.md). **Âmbito: só a Fase 1** (ver [docs/FEEDBACK_PROPOSTA.md](docs/FEEDBACK_PROPOSTA.md)). Antes de calibrar: [docs/FACTOS_ESTILIZADOS.md](docs/FACTOS_ESTILIZADOS.md). Tudo o que é assumido: [docs/PRESSUPOSTOS.md](docs/PRESSUPOSTOS.md). Limites da versão PLE: [docs/LIMITES_PLE.md](docs/LIMITES_PLE.md).
 
 ## Estrutura
 
