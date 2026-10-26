@@ -23,6 +23,13 @@ Coisas do modelo que ficaram "provisórias" e que tenho de mudar mais tarde. Ris
   main.timeHalted += time() - haltStart;
   ```
 
+## Experiências da Margarida (quando entrar a Matilde)
+- [ ] Copiar do modelo `sandbox/margarida/margarida.alp` as experiências **Cenario1, Cenario2 e Cenario4** (Projects → Ctrl+C → Ctrl+V no `Euronext_Main`). Só depois de existirem os parâmetros da Matilde (`shockOn`, `shockTime`, `shockSize`…), senão não compilam.
+
+## Relatório
+- [ ] Juntar ao relatório principal as secções que o João escreveu em `report/Joao_sections_DSS_report.docx`.
+- [ ] Escrever: 1 Introduction, 2 Problem Description, 4.1 Modelling Approach.
+
 ## Sempre que entrar um agente novo (semanas 2–3)
 Tirar as `//` da linha desse agente em:
 - [ ] **`onFill`** (Main): Fundamentalist · Chartist · MarketMaker
