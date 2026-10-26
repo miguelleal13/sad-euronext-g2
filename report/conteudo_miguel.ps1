@@ -7,7 +7,7 @@ $content = @{}
 
 $content['Main agent'] = {
     Body 'The Main agent is the top-level agent of the model. It holds every agent population and the global parameters, so that scenarios can be changed without modifying the model logic, together with three utility functions shared by all agents. The model time unit is the minute, and one trading day corresponds to 510 minutes, the length of the continuous trading session of Euronext Lisbon (08:00-16:30).'
-    Body 'Table 1 lists the parameters and variables of the market core. The parameters that define the scenarios and the output files are presented in Chapter 7.'
+    Body '{T:mainParams} lists the parameters and variables of the market core. The parameters that define the scenarios and the output files are presented in Chapter 7.'
     Tbl 'Key parameters and variables present in the Main agent' @('Name', 'Type', 'Value', 'Description') @(
         @('nNoise', 'Parameter (int)', '30', 'Number of noise traders'),
         @('initialPrice', 'Parameter', '0.50', 'Initial price and fundamental value of the stock (EUR), of the order of magnitude of BCP'),
@@ -23,7 +23,7 @@ $content['Main agent'] = {
         @('dynamicThreshold', 'Variable', '0.03', 'Dynamic collar, relative to the last traded price'),
         @('staticThreshold', 'Variable', '0.08', 'Static collar, relative to the reference price'),
         @('collarsActive', 'Variable (boolean)', 'true', 'Switches the volatility interruptions on or off')
-    ) @(3.2, 3.2, 2.3, 7.3)
+    ) @(3.2, 3.2, 2.3, 7.3) 'mainParams'
     Tbl 'Key functions present in the Main agent' @('Function', 'Description') @(
         @('roundTick(p)', 'Rounds a price to the tick size'),
         @('onFill(t, side, q, p)', 'Updates the cash and the position of a trader after one of its orders is executed'),
@@ -65,18 +65,18 @@ $content['Order Book (Stock agent type)'] = {
 
 $content['Volatility Interruptions and Reopening Auction'] = {
     Body 'The volatility interruptions follow the Euronext trading safeguards for the constituents of its main indices, including the PSI. A reservation period starts when a trade would occur more than 3% away from the last traded price (dynamic collar) or more than 8% away from the reference price, which is the opening price or the price of the last auction (static collar). The reservation lasts 3 minutes and is extended to 10 minutes when the static collar is triggered again in the same direction on the same day. Trading then resumes through a reopening auction.'
-    Body 'This mechanism is implemented with a statechart in the Stock agent type, shown in Figure 1 and described in Table 6. When a reservation starts, every agent receives a HALT message and new orders are kept in the pending queue; at the end of the auction, a REOPEN message is sent and continuous trading resumes.'
-    Fig (Join-Path $figDir 'stock_statechart.png') 'Statechart defining the trading phases of the Stock agent type' 9.5
+    Body 'This mechanism is implemented with a statechart in the Stock agent type, shown in {F:stockChart} and described in {T:stockStates}. When a reservation starts, every agent receives a HALT message and new orders are kept in the pending queue; at the end of the auction, a REOPEN message is sent and continuous trading resumes.'
+    Fig (Join-Path $figDir 'stock_statechart.png') 'Statechart defining the trading phases of the Stock agent type' 9.5 'stockChart'
     Tbl 'States and transitions of the Stock agent type statechart' @('State', 'Meaning', 'Transitions') @(
         @('Continuous', 'Continuous trading (initial state)', 'To ReservDynamic on message DYNAMIC; to ReservStatic on STATIC; to ReservStatic10 on STATIC_REPEAT'),
         @('ReservDynamic', 'Reservation after a breach of the dynamic collar', 'To Auction after haltShort (3 min)'),
         @('ReservStatic', 'Reservation after a breach of the static collar', 'To Auction after haltShort (3 min)'),
         @('ReservStatic10', 'Static collar breached again in the same direction', 'To Auction after haltLong (10 min)'),
         @('Auction', 'Reopening auction: the pending orders enter the book', 'To Continuous after 0.01 min, executing runAuction() and endHalt()')
-    ) @(3.2, 5.5, 7.3)
+    ) @(3.2, 5.5, 7.3) 'stockStates'
     Body 'The reopening auction sets a single uncrossing price. For every candidate price p (the limit prices present in the book), the demand is the quantity of bids with a price greater than or equal to p and the supply is the quantity of asks with a price lower than or equal to p; the executable volume is the minimum of the two. The auction selects the price with the largest executable volume and, in case of a tie, the one closest to the last traded price. All crossing orders are executed at that single price, which becomes the new reference price of the static collar.'
-    Body 'Figure 2 shows the mechanism at work in a deliberately volatile market (noise traders with a price dispersion of 5%): every HALT is followed by a REOPEN 3.01 minutes later, that is, the 3-minute reservation plus the auction.'
-    Fig (Join-Path $figDir 'reservations_demo.png') 'Reservation periods in a volatile market: every HALT is followed by a REOPEN 3.01 minutes later' 6.0
+    Body '{F:halts} shows the mechanism at work in a deliberately volatile market (noise traders with a price dispersion of 5%): every HALT is followed by a REOPEN 3.01 minutes later, that is, the 3-minute reservation plus the auction.'
+    Fig (Join-Path $figDir 'reservations_demo.png') 'Reservation periods in a volatile market: every HALT is followed by a REOPEN 3.01 minutes later' 6.0 'halts'
 }
 
 $content['Noise Trader agent type'] = {
@@ -89,7 +89,7 @@ $content['Noise Trader agent type'] = {
 }
 
 $content['Order Book Tests'] = {
-    Body 'Before any trading agent was added, the order book was verified with six scripted tests (function testBook), run with no agents in the model. Each test submits known orders and checks that the resulting state of the book is the expected one. The tests are run again after every change to the Stock agent type. Table 8 describes them and Figure 3 shows the output of the last run, in which all checks passed.'
+    Body 'Before any trading agent was added, the order book was verified with six scripted tests (function testBook), run with no agents in the model. Each test submits known orders and checks that the resulting state of the book is the expected one. The tests are run again after every change to the Stock agent type. {T:tests} describes them and {F:tests} shows the output of the last run, in which all checks passed.'
     Tbl 'Order book tests' @('#', 'Situation', 'Expected behaviour', 'Result') @(
         @('1', 'Buy 100 at 0.50 and sell 100 at 0.51', 'No trade, since the prices do not cross; spread of 0.01', 'Pass'),
         @('2', 'Sell 40 at 0.50', '40 shares traded at 0.50, the price of the resting bid; 60 shares remain on the bid', 'Pass'),
@@ -97,6 +97,6 @@ $content['Order Book Tests'] = {
         @('4', 'Sell 100 at 0.52, then buy 150 at 0.52', 'The buy order sweeps two levels: 100 at 0.51 and 50 at 0.52; last price of 0.52', 'Pass'),
         @('5', 'Sell at 0.40 against the bid at 0.50, with collars active', 'The trade (-3.8% from the last price) is blocked and a reservation starts: HALT at t = 0 and REOPEN at t = 3.01 min', 'Pass'),
         @('6', 'Cancel all orders', 'The order book is empty', 'Pass')
-    ) @(0.8, 4.7, 8.8, 1.7)
-    Fig (Join-Path $figDir 'order_book_tests.png') 'Output of the order book tests' 9.0
+    ) @(0.8, 4.7, 8.8, 1.7) 'tests'
+    Fig (Join-Path $figDir 'order_book_tests.png') 'Output of the order book tests' 9.0 'tests'
 }

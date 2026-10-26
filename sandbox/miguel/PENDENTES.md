@@ -27,8 +27,8 @@ Coisas do modelo que ficaram "provisórias" e que tenho de mudar mais tarde. Ris
 - [ ] Copiar do modelo `sandbox/margarida/margarida.alp` as experiências **Cenario1, Cenario2 e Cenario4** (Projects → Ctrl+C → Ctrl+V no `Euronext_Main`). Só depois de existirem os parâmetros da Matilde (`shockOn`, `shockTime`, `shockSize`…), senão não compilam.
 
 ## Relatório
-- [ ] Juntar ao relatório principal as secções que o João escreveu em `report/Joao_sections_DSS_report.docx`.
-- [ ] Escrever: 1 Introduction, 2 Problem Description, 4.1 Modelling Approach.
+- [x] Secções do João juntas ao relatório principal (26/10).
+- [x] Escritas: 1 Introduction, 2 Problem Description, 4.1 Modelling Approach (26/10).
 
 ## Sempre que entrar um agente novo (semanas 2–3)
 Tirar as `//` da linha desse agente em:

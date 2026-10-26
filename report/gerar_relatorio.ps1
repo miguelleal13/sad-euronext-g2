@@ -61,28 +61,43 @@ try {
         $sel.TypeText($text)
         $sel.Range.ListFormat.RemoveNumbers()
         $sel.TypeParagraph()
+        if ($content.ContainsKey($text)) { & $content[$text] }
     }
 
     # --- helpers used by the section texts (conteudo_*.ps1) ---
+    # In the texts, {T:key} and {F:key} become cross-references ("Table 3", "Figure 2") to the
+    # table / figure created with that key, so the numbers stay right when sections move.
     foreach ($lbl in 'Figure', 'Table') { try { $word.CaptionLabels.Add($lbl) | Out-Null } catch {} }
     function Body([string]$text) {
         $sel.Style = $doc.Styles.Item($sNormal).NameLocal
         $sel.ParagraphFormat.Alignment = 3      # justified
-        $sel.TypeText($text)
+        foreach ($part in [regex]::Split($text, '(\{[TF]:[A-Za-z0-9_]+\})')) {
+            if ($part -match '^\{([TF]):([A-Za-z0-9_]+)\}$') {
+                $doc.Fields.Add($sel.Range, -1, "REF ref_$($Matches[1])_$($Matches[2]) \h", $false) | Out-Null
+                $sel.EndKey(6) | Out-Null
+            } elseif ($part) { $sel.TypeText($part) }
+        }
         $sel.TypeParagraph()
     }
-    function Caption([string]$label, [string]$text) {
+    function Bullets([string[]]$items) {
+        $start = $sel.Start
+        foreach ($it in $items) { Body $it }
+        $doc.Range($start, $sel.Start - 1).ListFormat.ApplyBulletDefault()
+    }
+    function Caption([string]$label, [string]$text, [string]$key = '') {
         $sel.Style = $doc.Styles.Item(-35).NameLocal   # Caption
         $sel.ParagraphFormat.Alignment = 1
+        $start = $sel.Start
         $sel.TypeText("$label ")
         $doc.Fields.Add($sel.Range, -1, "SEQ $label \* ARABIC", $false) | Out-Null
         $sel.EndKey(6) | Out-Null
+        if ($key) { $doc.Bookmarks.Add("ref_$($label.Substring(0,1))_$key", $doc.Range($start, $sel.Start)) | Out-Null }
         $sel.TypeText(" - $text")
         $sel.TypeParagraph()
         $sel.Style = $doc.Styles.Item($sNormal).NameLocal
     }
-    function Tbl([string]$caption, [string[]]$headers, [object[]]$rows, [double[]]$widthsCm) {
-        Caption 'Table' $caption
+    function Tbl([string]$caption, [string[]]$headers, [object[]]$rows, [double[]]$widthsCm, [string]$key = '') {
+        Caption 'Table' $caption $key
         $nr = $rows.Count + 1; $nc = $headers.Count
         $t = $doc.Tables.Add($sel.Range, $nr, $nc)
         $t.Borders.Enable = 1
@@ -102,7 +117,7 @@ try {
         $sel.EndKey(6) | Out-Null
         $sel.TypeParagraph()
     }
-    function Fig([string]$path, [string]$caption, [double]$widthCm) {
+    function Fig([string]$path, [string]$caption, [double]$widthCm, [string]$key = '') {
         $sel.Style = $doc.Styles.Item($sNormal).NameLocal
         $sel.ParagraphFormat.Alignment = 1
         $sel.ParagraphFormat.KeepWithNext = -1
@@ -111,9 +126,11 @@ try {
         $shape.Width = $widthCm * 28.35
         $shape.Height = $shape.Width * $ratio
         $sel.TypeParagraph()
-        Caption 'Figure' $caption
+        Caption 'Figure' $caption $key
     }
     . (Join-Path $PSScriptRoot 'conteudo_miguel.ps1')
+    . (Join-Path $PSScriptRoot 'conteudo_miguel_intro.ps1')
+    . (Join-Path $PSScriptRoot 'conteudo_joao.ps1')
 
     # ---------------- Cover ----------------
     1..5 | ForEach-Object { Para '' }
@@ -234,6 +251,7 @@ try {
     $footer.PageNumbers.Add(1, $true) | Out-Null   # centre
     $doc.Sections.Item(1).PageSetup.DifferentFirstPageHeaderFooter = $true
 
+    $doc.Fields.Update() | Out-Null
     $doc.Fields.Update() | Out-Null
     $doc.TablesOfContents.Item(1).Update()
     foreach ($tof in $doc.TablesOfFigures) { $tof.Update() }
