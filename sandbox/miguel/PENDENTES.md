@@ -24,14 +24,14 @@ Coisas do modelo que ficaram "provisórias" e que tenho de mudar mais tarde. Ris
   ```
 
 ## Experiências da Margarida (quando entrar a Matilde)
-- [ ] Copiar do modelo `sandbox/margarida/margarida.alp` as experiências **Cenario1, Cenario2 e Cenario4** (Projects → Ctrl+C → Ctrl+V no `Euronext_Main`). Só depois de existirem os parâmetros da Matilde (`shockOn`, `shockTime`, `shockSize`…), senão não compilam.
+- [x] (27/10) Copiar do modelo `sandbox/margarida/margarida.alp` as experiências **Cenario1, Cenario2 e Cenario4** (Projects → Ctrl+C → Ctrl+V no `Euronext_Main`). Só depois de existirem os parâmetros da Matilde (`shockOn`, `shockTime`, `shockSize`…), senão não compilam.
 
 ## Relatório
 - [x] Secções do João juntas ao relatório principal (26/10).
 - [x] Escritas: 1 Introduction, 2 Problem Description, 4.1 Modelling Approach (26/10).
 
 ## Sempre que entrar um agente novo (semanas 2–3)
-Integrados a 27/10: Fundamentalist e Chartist (João), com a rede dos chartists no On startup. Falta: NewsAgent e MarketMaker (Matilde) e as experiências da Margarida.
+Integrados a 27/10: Fundamentalist e Chartist (João), com a rede dos chartists no On startup. NewsAgent e MarketMaker (Matilde) e experiências Cenario1/2/4 (Margarida) também integrados a 27/10. Falta: dashboard e ecrã inicial (Matilde) e Cenario3 (Margarida).
 
 Tirar as `//` da linha desse agente em:
 - [ ] **`onFill`** (Main): Fundamentalist · Chartist · MarketMaker
