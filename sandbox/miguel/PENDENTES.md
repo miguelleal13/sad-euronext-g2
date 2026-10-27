@@ -8,15 +8,15 @@ Coisas do modelo que ficaram "provisórias" e que tenho de mudar mais tarde. Ris
 - [x] Funções **`startHalt`**, **`endHalt`** e **`runAuction`** no Stock (guião, secção 6).
 - [x] Correr os testes (`runTests = true`, `nNoise = 0`): o **teste 5** tem de passar a **OK**.
 
-## Quando a Margarida entregar a instrumentação (semana 2)
-- [ ] Copiar do Main dela: os parâmetros `collarSet`, `customDyn`, `customStat` e `scenario`, as variáveis `label`, `runId`, `peakPrice`, `maxDrawdown`, `nHalts` e `timeHalted`, os 2 Text File (`pricesFile`, `haltsFile`) e o `logEvent`.
-- [ ] **On startup** do Main: juntar o código dela (o `switch (collarSet)` e o `label`) ao meu `if (runTests) stock.testBook();`.
-- [ ] **On destroy** do Main: `pricesFile.close(); haltsFile.close();`
-- [ ] **`startHalt`** (Stock): por agora tem só 4 linhas. Acrescentar antes do `main.broadcast("HALT");`:
+## Quando a Margarida entregar a instrumentação (semana 2) ✅ feito a 27/10
+- [x] Copiar do Main dela: os parâmetros `collarSet`, `customDyn`, `customStat` e `scenario`, as variáveis `label`, `runId`, `peakPrice`, `maxDrawdown`, `nHalts` e `timeHalted`, os 2 Text File (`pricesFile`, `haltsFile`) e o `logEvent`.
+- [x] **On startup** do Main: juntar o código dela (o `switch (collarSet)` e o `label`) ao meu `if (runTests) stock.testBook();`.
+- [x] **On destroy** do Main: `pricesFile.close(); haltsFile.close();`
+- [x] **`startHalt`** (Stock): por agora tem só 4 linhas. Acrescentar antes do `main.broadcast("HALT");`:
   ```java
   main.nHalts++;
   ```
-- [ ] **`endHalt`** (Stock): por agora tem só o `broadcast`. Acrescentar antes do `main.broadcast("REOPEN");`:
+- [x] **`endHalt`** (Stock): por agora tem só o `broadcast`. Acrescentar antes do `main.broadcast("REOPEN");`:
   ```java
   main.haltsFile.println(main.label + ";" + main.runId + ";" + haltStart + ";" + time() + ";"
                          + prePrice + ";" + lastPrice);
@@ -31,6 +31,8 @@ Coisas do modelo que ficaram "provisórias" e que tenho de mudar mais tarde. Ris
 - [x] Escritas: 1 Introduction, 2 Problem Description, 4.1 Modelling Approach (26/10).
 
 ## Sempre que entrar um agente novo (semanas 2–3)
+Integrados a 27/10: Fundamentalist e Chartist (João), com a rede dos chartists no On startup. Falta: NewsAgent e MarketMaker (Matilde) e as experiências da Margarida.
+
 Tirar as `//` da linha desse agente em:
 - [ ] **`onFill`** (Main): Fundamentalist · Chartist · MarketMaker
 - [ ] **`broadcast`** (Main): fundamentalists · chartists · marketMaker · news
