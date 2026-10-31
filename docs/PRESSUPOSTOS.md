@@ -9,7 +9,7 @@ Os dados públicos sobre o livro de ordens e o comportamento dos investidores na
 | # | Pressuposto | Valor | Porquê / fonte | Teste |
 |---|---|---|---|---|
 | 1 | Uma só ação (BCP), sem contágio a outras | — | Âmbito da Fase 1, como os professores pediram | — |
-| 2 | Regras dos colares: ±3% dinâmico, ±8% estático, reserva de 3 min (10 min se o estático se repetir), leilão de reabertura | regras reais | Euronext Trading Safeguards | — |
+| 2 | Regras dos colares para o PSI: ±3% dinâmico (face ao último preço), ±8% estático (face ao preço de abertura ou à referência do dia anterior), reserva de 3 min, 10 min se houver uma reserva estática consecutiva no mesmo sentido, leilão de reabertura | regras reais | Euronext, *Trading safeguards* (consultado a 31/10/2026) | — |
 | 3 | O dia de negociação tem 510 min seguidos; não há noite nem leilões de abertura e fecho | 510 | Simplificação; o preço de referência estático muda a cada 510 min | — |
 | 4 | Preço inicial e valor fundamental inicial | 0.50 € | Ordem de grandeza do BCP | — |
 | 5 | Tick | 0.0001 € | Simplificação (a Euronext usa uma tabela de ticks) | — |
@@ -35,8 +35,10 @@ Os dados públicos sobre o livro de ordens e o comportamento dos investidores na
 | 25 | Noise traders sem restrições de dinheiro nem de ações (podem vender a descoberto) | cash 1e9, position 0 | Fonte de liquidez de base | — |
 | 26 | Quantidade das ordens dos noise traders | Uniforme(100, 1000) | Simplificação | — |
 | 27 | Vida de cada ordem: `orderLife` × Uniforme(0.3; 1.7) | 10–60 min | Heterogeneidade nos cancelamentos | C, S |
-| 28 | Colar dinâmico medido contra o último preço negociado | `lastPrice` | Simplificação do preço de referência dinâmico da Euronext | V |
+| 28 | Colar dinâmico medido contra o último preço negociado | `lastPrice` | Regra da Euronext: o preço de referência dinâmico é o último preço negociado | V |
 | 29 | Leilão de reabertura instantâneo: preço que maximiza o volume; em empate, o mais perto do último preço | — | Regra de leilão simplificada | V |
 | 30 | Durante a reserva, fundamentalistas e chartists param; os noise traders continuam e as ordens ficam para o leilão | — | Como na realidade, as ordens acumulam-se para o leilão | — |
 | 31 | Período de stress BES começa a 15/07/2014 (e não a 01/06) | 15/07–30/09/2014 | Os preços ajustados do Yahoo mostram subidas falsas (+12% e +24%) no fim de junho e início de julho, por causa do aumento de capital do BCP | — |
 | 32 | Dados reais: preços diários ajustados do Yahoo Finance (BCP.LS) | 2010–2026 | Única fonte gratuita com histórico longo | — |
+| 33 | As reservas duram exatamente o mínimo da Euronext; na realidade podem ser prolongadas | 3 / 10 min | Simplificação | S |
+| 34 | O preço de referência estático é o último preço do dia anterior e passa a ser o preço do leilão de reabertura depois de cada reserva; a Euronext define-o como o preço de abertura do dia ou a referência do dia anterior | — | Simplificação (o modelo não tem leilão de abertura) | V |

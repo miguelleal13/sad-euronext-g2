@@ -62,7 +62,7 @@ $content['APPENDIX E: Assumptions Register'] = {
     Body 'Test: C = calibrated against the stylised facts; S = sensitivity analysis; V = extreme condition tests; — = fixed rule or simplification. The Value column is updated with the calibrated values at the end of the project.'
     Tbl 'Assumptions register' @('#', 'Assumption', 'Value', 'Justification / source', 'Test') @(
         @('1', 'A single stock (BCP), without contagion', '—', 'Phase 1 scope, as recommended', '—'),
-        @('2', 'Collar rules: ±3% dynamic, ±8% static, 3-min reservation (10 min if the static collar repeats), reopening auction', 'real rules', 'Euronext Trading Safeguards', '—'),
+        @('2', 'Collar rules for PSI constituents: ±3% dynamic (last traded price), ±8% static (opening or previous reference price), 3-min reservation, 10 min for a consecutive static reservation in the same direction, reopening auction', 'real rules', 'Euronext Trading safeguards (consulted on 31/10/2026)', '—'),
         @('3', 'Continuous 510-min trading day; no overnight, opening or closing auctions', '510 min', 'Simplification; the static reference changes every 510 min', '—'),
         @('4', 'Initial price and initial fundamental value', '0.50 €', 'Order of magnitude of BCP', '—'),
         @('5', 'Tick size', '0.0001 €', 'Simplification (Euronext uses a tick size table)', '—'),
@@ -87,11 +87,13 @@ $content['APPENDIX E: Assumptions Register'] = {
         @('24', 'Trend followers forget sell signals', '30 min', 'Not observable', '—'),
         @('25', 'Noise traders have no cash or short-selling constraints', '—', 'Source of baseline liquidity', '—'),
         @('26', 'Noise trader order quantity', 'U(100, 1000)', 'Simplification', '—'),
-        @('27', 'Dynamic collar measured against the last traded price', 'lastPrice', 'Simplification of the Euronext dynamic reference', 'V'),
+        @('27', 'Dynamic collar measured against the last traded price', 'lastPrice', 'Euronext rule: the dynamic reference price is the last traded price', 'V'),
         @('28', 'Instantaneous reopening auction: maximum volume, ties broken by proximity to the last price', '—', 'Simplified auction rule', 'V'),
         @('29', 'During a reservation, fundamentalists and trend followers stop; noise trader orders wait for the auction', '—', 'Orders accumulate for the auction, as in the real market', '—'),
         @('30', 'BES stress period starts on 15 July 2014', '15/07–30/09/2014', 'Excludes the price jumps caused by the BCP capital increase', '—'),
-        @('31', 'Source of real data: Yahoo Finance adjusted daily prices (BCP.LS)', '2010–2026', 'Free source with a long history', '—')
+        @('31', 'Source of real data: Yahoo Finance adjusted daily prices (BCP.LS)', '2010–2026', 'Free source with a long history', '—'),
+        @('32', 'Reservations last exactly the Euronext minimum; in the real market they can be extended', '3 / 10 min', 'Simplification', 'S'),
+        @('33', 'The static reference price is the last price of the previous day and is reset to the reopening auction price after each reservation; Euronext defines it as the opening price of the day or the previous reference price', '-', 'Simplification (no opening auction in the model)', 'V')
     ) @(0.8, 6.0, 2.6, 5.2, 1.4) 'assumptions'
 }
 
