@@ -25,3 +25,15 @@ Os passos concretos de cada pessoa, com o código para colar, estão nos PDFs em
 | 6 (21–28 nov) | Congelar o modelo; introdução, problema e livro de ordens | `kpis.xlsx` final; relatório: investidores, dados, factos, pressupostos e resultados | Corridas finais (grelha, limiares ótimos); relatório: experiências e sensibilidade | **Gráficos finais** e apresentação |
 
 **Marcos:** domingo (reunião de 30 min) · 23 out (livro testado + preço a mexer) · 24 out (factos estilizados fixados) · 7 nov (Fase 1 a correr) · 14 nov (Fase 1 calibrada e validada) · 28 nov–2 dez (revisão e entrega).
+
+## Para chegar ao 18–19 (comparação com o relatório do Grupo 21, que teve 18/20)
+
+O Grupo 21 (logística da Super Bock) teve 18 com dados reais de empresa, decisões práticas (tirar um empilhador, payback) e animação 2D/3D com vídeo, mas sem verificação, calibração, intervalos de confiança nem sensibilidade. Nós temos o rigor; falta garantir o lado prático e visual.
+
+| # | Tarefa | Quem | Quando |
+|---|---|---|---|
+| 1 | **Recomendação clara no fim dos resultados**: uma tabela final do tipo "colares 3%/8% reduzem a queda máxima em X% com Y% menos volume; 2%/5% reduzem Z% mas custam W% de liquidez; sem colares…", e uma frase de recomendação para a Euronext/CMVM. Vai para o fim do capítulo 8 e para as conclusões | João (números do `kpis.xlsx`) + Margarida | semana 6 |
+| 2 | **Análise multicritério** (estabilidade vs. liquidez), prometida na proposta: normalizar a queda máxima, o tempo em interrupção, o volume e o spread por cenário, pesos (ex.: 50/50) e ranking dos colares; mostrar como muda o ranking com outros pesos | Margarida | semana 5–6 |
+| 3 | **Dashboard bonito + vídeo curto (1–2 min)** do choque a acontecer: a queda, os HALT/REOPEN, o livro a esvaziar e os agentes a mudar de cor. Gravar o ecrã (Win+G) e pôr o link num apêndice, como o Grupo 21 fez | Matilde | semana 4–6 |
+| 4 | **Calibração que bata com o BCP**, com a tabela "BCP real vs. modelo" no relatório. É a nossa resposta a não termos dados de uma empresa | João + Margarida | semana 4 |
+| 5 | **Email aos professores** a confirmar que o livro de ordens em Java (sem blocos da Process Modeling Library) está bem | Miguel | já |
