@@ -5,15 +5,18 @@ Lê model/Euronext_Main/output/precos.csv e halts.csv e escreve data/processed/k
   runs   - uma linha por corrida: queda máxima, volume, tempo em interrupção, recuperação de metade da queda
   resumo - média e intervalo de confiança de 95% por cenário (label)
 
-Uso: python scripts/kpis.py
+Uso: python scripts/kpis.py                 (lê model/Euronext_Main/output)
+     python scripts/kpis.py C:/pasta/output  (lê outra pasta, ex.: a da Margarida)
 """
+import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT_DIR = ROOT / "model" / "Euronext_Main" / "output"
+OUT_DIR = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "model" / "Euronext_Main" / "output"
 PRICES = OUT_DIR / "precos.csv"
 HALTS = OUT_DIR / "halts.csv"
 RESULT = ROOT / "data" / "processed" / "kpis.xlsx"
@@ -21,18 +24,23 @@ WINDOWS = [2, 5, 10]
 
 
 def load():
-    p = pd.read_csv(PRICES, sep=";", names=["label", "run", "time", "price", "bid", "ask", "volume"])
+    p = pd.read_csv(PRICES, sep=";", names=["label", "run", "time", "price", "bid", "ask", "volume"],
+                    dtype={"label": str, "run": str})
     p["ret"] = p.groupby("run")["price"].transform(lambda s: np.log(s).diff())
     p["rel_spread"] = (p["ask"] - p["bid"]) / ((p["ask"] + p["bid"]) / 2)
-    h = (pd.read_csv(HALTS, sep=";", names=["label", "run", "start", "end", "prePrice", "auctionPrice"])
+    h = (pd.read_csv(HALTS, sep=";", names=["label", "run", "start", "end", "prePrice", "auctionPrice"],
+                     dtype={"label": str, "run": str})
          if HALTS.exists() and HALTS.stat().st_size > 0 else pd.DataFrame())
     return p, h
 
 
 def halt_kpis(p, h):
+    by_run = dict(tuple(p.groupby("run")))      # separa as corridas uma vez só (o ficheiro tem milhões de linhas)
     rows = []
     for _, x in h.iterrows():
-        g = p[p["run"] == x["run"]]
+        g = by_run.get(x["run"])
+        if g is None:
+            continue
         row = {"label": x["label"], "run": x["run"], "start": x["start"], "dur": x["end"] - x["start"],
                "gap_leilao": x["auctionPrice"] / x["prePrice"] - 1}
         for w in WINDOWS:
@@ -73,7 +81,8 @@ def run_kpis(p, h):
 def summary(runs):
     num = runs.drop(columns=["run"]).groupby("label")
     mean, std, n = num.mean(), num.std(), num.count()
-    ci = 1.96 * std / np.sqrt(n)
+    t = n.apply(lambda c: stats.t.ppf(0.975, c - 1))   # t de Student (com 10 corridas dá ~2.26 em vez de 1.96)
+    ci = t * std / np.sqrt(n)
     return mean.add_suffix("_media").join(ci.add_suffix("_ic95")).join(n.iloc[:, :1].rename(columns=lambda _: "n_corridas"))
 
 

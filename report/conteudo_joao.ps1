@@ -1,4 +1,4 @@
-﻿# Generated from report/Joao_sections_DSS_report.docx (João). Do not edit by hand: edit João's file and convert again.
+﻿# João's sections. Edited directly since 31/10 (the old Joao_sections_DSS_report.docx and converter_joao.py are no longer used).
 $figDirJ = Join-Path $PSScriptRoot 'figures'
 
 $content['Data Sources'] = {
@@ -96,3 +96,35 @@ $content['APPENDIX E: Assumptions Register'] = {
 }
 
 $referencesJoao = @('Chiarella, C., & Iori, G. (2002). A simulation analysis of the microstructure of double auction markets. Quantitative Finance, 2(5), 346–353.', 'Lux, T., & Marchesi, M. (1999). Scaling and criticality in a stochastic multi-agent model of a financial market. Nature, 397, 498–500.')
+
+$content['Trend Follower agent type and Herding'] = {
+    Body 'Trend followers (chartists) ignore the value of the share and trade on the recent direction of the price. They buy when the price is above its moving average and sell when it is below. When they sell, they warn their neighbours in a social network, and an agent that receives enough warnings panics and sells a large quantity below the market. Trend following and herding amplify price movements, which is what drives the price towards the collars.'
+    Body 'Each trend follower starts with 5000 € in cash and 10 000 shares and compares the last traded price with the moving average ma of the Stock agent, which is updated every minute with a memory of maWindow minutes. {T:chartParams} lists the parameters, variables, functions and events of this agent type.'
+    Tbl 'Key parameters, variables, functions and events of the Trend Follower agent type' @('Name', 'Type', 'Value', 'Description') @(
+        @('nChartists', 'Parameter (Main, int)', '30', 'Number of trend followers'),
+        @('chartRate', 'Parameter (Main)', '0.2', 'Decisions per minute of each trend follower (one every 5 min on average)'),
+        @('trendThreshold', 'Parameter (Main)', '0.005', 'Minimum gap between the last price and the moving average that triggers a trade'),
+        @('herdThreshold', 'Parameter (Main, int)', '2', 'Number of sell signals from neighbours that triggers panic'),
+        @('panicDuration', 'Parameter (Main)', '10', 'Duration of a panic episode (min)'),
+        @('shockPanicProb', 'Parameter (Main)', '0.3', 'Probability of panic when a negative news shock arrives'),
+        @('cash', 'Variable (double)', '5000', 'Available cash (EUR)'),
+        @('position', 'Variable (int)', '10 000', 'Number of shares held'),
+        @('sellSignals', 'Variable (int)', '0', 'Sell signals received from neighbours since the last reset'),
+        @('signalNeighbours()', 'Function', '-', 'Delivers a SELL_SIGNAL message to the statechart of every trend follower neighbour'),
+        @('forget', 'Event (every 30 min)', '-', 'Resets sellSignals, so that only recent warnings count')
+    ) @(3.4, 3.6, 1.6, 7.4) 'chartParams'
+    Body 'The trend followers are connected by a small-world network built in the start-up code of the Main agent, as in the Market Model used in class. The agents are placed on a ring and each one is linked to the next three, which gives about six neighbours per agent; with probability 5% a link goes to a random trend follower instead, creating shortcuts across the ring. The network only connects trend followers, so that the warnings are not lost on agents that do not react to them.'
+    Body 'The behaviour is defined by the statechart in {F:chartChart} and {T:chartStates}. At random instants, with rate chartRate per minute, the agent leaves Neutral and compares the last price with the moving average. It buys up to 500 shares at 0.3% above the mid price if the price is more than trendThreshold above the average, and sells up to 500 shares at 0.3% below the mid price, warning its neighbours, if the price is more than trendThreshold below the average.'
+    Fig (Join-Path $figDirJ 'chartist_statechart.png') 'Statechart of the Trend Follower agent type' 12.0 'chartChart'
+    Tbl 'States and transitions of the Trend Follower agent type statechart' @('State', 'Meaning', 'Transitions') @(
+        @('Neutral', 'Waiting for the next decision (initial state of Active)', 'To the branch decide at rate chartRate; to the branch herd on message SELL_SIGNAL (sellSignals + 1); to Panic on message SHOCK with probability shockPanicProb'),
+        @('decide (branch)', 'Compares the last price with the moving average', 'To TrendBuy if the price is above the average and cash allows; to TrendSell if it is below and shares allow; otherwise (default) back to Neutral'),
+        @('TrendBuy', 'Submits a buy order', 'Back to Neutral immediately (timeout 0)'),
+        @('TrendSell', 'Submits a sell order and warns the neighbours', 'Back to Neutral immediately (timeout 0)'),
+        @('herd (branch)', 'Counts the warnings received', 'To Panic if sellSignals reaches herdThreshold and the agent holds shares; otherwise (default) back to Neutral'),
+        @('Panic', 'Sells up to 2000 shares at 1% below the mid price and warns the neighbours', 'Back to Neutral after panicDuration minutes, resetting sellSignals'),
+        @('Halted', 'Trading suspended during a reservation', 'From Active on message HALT; back to Active (Neutral) on message REOPEN')
+    ) @(3.0, 5.0, 8.0) 'chartStates'
+    Body 'Herding spreads as a cascade: an agent in panic warns its neighbours, those that reach the threshold panic in turn and warn theirs, and the selling pressure grows faster than the fundamentalists can absorb it. The warnings are forgotten every 30 minutes, so panic only spreads when several neighbours sell at about the same time. Like the fundamentalists, trend followers stop trading during a reservation period, because the HALT and REOPEN messages are delivered to their statecharts.'
+    Body 'Three tests confirmed this behaviour. Every trend follower had six neighbours in the network. With the default parameters, the collars were triggered in a normal market, which did not happen with fundamentalists and noise traders only. With 60 trend followers and a herding threshold of 1, the price rose by about 20% in two hours, triggering a 3-minute and a 10-minute reservation (the static collar breached twice in the same direction), and then stayed flat because the agents had run out of cash or shares; this limitation of the initial endowments is addressed in the calibration (Section 6.3).'
+}
