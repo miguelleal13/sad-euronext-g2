@@ -4,6 +4,8 @@ Lê model/Euronext_Main/output/precos.csv e halts.csv e escreve data/processed/k
   halts  - uma linha por interrupção: volatilidade e spread 2/5/10 min antes e depois, gap do leilão
   runs   - uma linha por corrida: queda máxima, volume, tempo em interrupção, recuperação de metade da queda
   resumo - média e intervalo de confiança de 95% por cenário (label)
+  esma   - validação (ESMA, 2020): em cada cenário, % de interrupções em que a volatilidade desce
+           e o spread alarga depois da reserva (janelas de 2, 5 e 10 min)
 
 Uso: python scripts/kpis.py                 (lê model/Euronext_Main/output)
      python scripts/kpis.py C:/pasta/output  (lê outra pasta, ex.: a da Margarida)
@@ -86,18 +88,41 @@ def summary(runs):
     return mean.add_suffix("_media").join(ci.add_suffix("_ic95")).join(n.iloc[:, :1].rename(columns=lambda _: "n_corridas"))
 
 
+def esma(halts):
+    """Validação ESMA: depois de uma interrupção a volatilidade deve descer e o spread alargar."""
+    rows = []
+    for label, g in halts.groupby("label"):
+        row = {"label": label, "n_interrupcoes": len(g)}
+        for w in WINDOWS:
+            v = g.dropna(subset=[f"vol_antes_{w}", f"vol_depois_{w}"])
+            s = g.dropna(subset=[f"spread_antes_{w}", f"spread_depois_{w}"])
+            row[f"pct_vol_desce_{w}"] = (v[f"vol_depois_{w}"] < v[f"vol_antes_{w}"]).mean() if len(v) else np.nan
+            row[f"pct_spread_alarga_{w}"] = (s[f"spread_depois_{w}"] > s[f"spread_antes_{w}"]).mean() if len(s) else np.nan
+            row[f"vol_antes_{w}_media"] = v[f"vol_antes_{w}"].mean()
+            row[f"vol_depois_{w}_media"] = v[f"vol_depois_{w}"].mean()
+            row[f"spread_antes_{w}_media"] = s[f"spread_antes_{w}"].mean()
+            row[f"spread_depois_{w}_media"] = s[f"spread_depois_{w}"].mean()
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
 def main():
     p, h = load()
     halts = halt_kpis(p, h) if not h.empty else pd.DataFrame()
     runs = run_kpis(p, h)
     res = summary(runs)
+    val = esma(halts) if not halts.empty else pd.DataFrame()
     RESULT.parent.mkdir(parents=True, exist_ok=True)
     with pd.ExcelWriter(RESULT) as xw:
         halts.to_excel(xw, sheet_name="halts", index=False)
         runs.to_excel(xw, sheet_name="runs", index=False)
         res.to_excel(xw, sheet_name="resumo")
+        val.to_excel(xw, sheet_name="esma", index=False)
     cols = [c for c in res.columns if c.startswith(("queda_maxima", "volume_total", "tempo_em", "n_corridas"))]
     print(res[cols].to_string(float_format=lambda x: f"{x:.4f}"))
+    if not val.empty:
+        print("\nValidação ESMA (janela de 5 min): % de interrupções em que a volatilidade desce / o spread alarga")
+        print(val[["label", "n_interrupcoes", "pct_vol_desce_5", "pct_spread_alarga_5"]].to_string(index=False, float_format=lambda x: f"{x:.2f}"))
     print(f"\nGuardado em {RESULT}")
 
 
