@@ -28,6 +28,7 @@ FACTS = [
     ("autocorr_retornos_lag1", lambda r, m: -0.1 <= m <= 0.1),
     ("pct_dias_var_maior_3pct", lambda r, m: abs(m - r) <= 0.5 * abs(r)),
     ("corr_volume_absret", lambda r, m: m > 0),
+    ("autocorr_volume_lag1", lambda r, m: m > 0),
 ]
 
 

@@ -4,6 +4,7 @@ Os professores pediram para **definir os factos estilizados antes de calibrar**.
 
 - **Responsável:** João. Preenche a coluna *Valor BCP* com `python scripts/target_stats.py` (período calmo 2023–2024) e faz commit antes de a Margarida correr a calibração.
 - **Como se mede no modelo:** `python scripts/compare_model.py baseline`, com 10 corridas do cenário baseline de 250 dias. O fecho de cada dia é o último preço de cada bloco de 510 minutos.
+- **Facto 7** acrescentado a 31/10/2026, antes de qualquer afinação do modelo (a ronda 0 da calibração foi o modelo original), porque os professores pediram para validar preço **e volume** e o FEEDBACK_PROPOSTA já referia esta métrica.
 - **Dados:** valores calculados a 25/10/2026 com os preços diários do Yahoo Finance (BCP.LS, 2023-01-01 a 2024-12-31, 510 dias).
 
 | # | Facto estilizado | Métrica (`target_stats` / `compare_model`) | Valor BCP 2023-24 | Critério para “bate” |
@@ -14,6 +15,7 @@ Os professores pediram para **definir os factos estilizados antes de calibrar**.
 | 4 | Ausência de autocorrelação nos retornos (o preço não é previsível) | `autocorr_retornos_lag1` | 0.004 | modelo entre −0.1 e 0.1 |
 | 5 | Frequência de movimentos fortes (o que dispara os colares) | `pct_dias_var_maior_3pct` | 0.129 (12.9%) | modelo a ±50% |
 | 6 | Volume e volatilidade andam juntos | `corr_volume_absret` | 0.636 | modelo > 0 |
+| 7 | Persistência do volume: dias de muito volume vêm seguidos | `autocorr_volume_lag1` | 0.470 | modelo > 0 |
 
 ## Validação (separada da calibração)
 

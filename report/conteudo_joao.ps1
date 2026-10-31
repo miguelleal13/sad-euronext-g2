@@ -7,16 +7,17 @@ $content['Data Sources'] = {
     Body 'The BES period starts on 15 July because the adjusted prices show artificial jumps of +12% and +24% at the end of June and the beginning of July 2014, caused by the BCP capital increase. All returns are logarithmic.'
 }
 $content['Stylised Facts of the BCP Stock'] = {
-    Body 'Following the feedback on the project proposal, the stylised facts and their acceptance criteria were fixed before the calibration of the model, so that the targets could not be adjusted to the results. {T:facts} lists the six facts, the value measured for BCP and the criterion used to decide whether the model reproduces each one. The same statistics are computed for the model by the script compare_model.py, using the last price of each 510-minute block as the daily close.'
+    Body 'Following the feedback on the project proposal, the stylised facts and their acceptance criteria were fixed before the calibration of the model, so that the targets could not be adjusted to the results. {T:facts} lists the seven facts, the value measured for BCP and the criterion used to decide whether the model reproduces each one. The same statistics are computed for the model by the script compare_model.py, using the last price of each 510-minute block as the daily close.'
     Tbl 'Stylised facts of the BCP stock (2023–2024) and calibration criteria' @('#', 'Stylised fact', 'Metric', 'BCP', 'Model matches if') @(
         @('1', 'Daily volatility', 'Standard deviation of daily returns', '0.0207', 'within ±25%'),
         @('2', 'Heavy tails', 'Excess kurtosis', '2.41', '> 1 and within ±50%'),
         @('3', 'Volatility clustering', 'Lag-1 autocorrelation of absolute returns', '0.080', '> 0.05'),
         @('4', 'Absence of return autocorrelation', 'Lag-1 autocorrelation of returns', '0.004', 'between −0.1 and 0.1'),
         @('5', 'Frequency of large moves', 'Share of days with |r| > 3%', '12.9%', 'within ±50%'),
-        @('6', 'Volume–volatility relation', 'Correlation between volume and |r|', '0.636', '> 0')
+        @('6', 'Volume–volatility relation', 'Correlation between volume and |r|', '0.636', '> 0'),
+        @('7', 'Volume persistence', 'Lag-1 autocorrelation of daily volume', '0.470', '> 0')
     ) @(0.8, 3.6, 5.2, 1.8, 4.6) 'facts'
-    Body 'The BCP share shows the typical behaviour of financial returns: returns are not autocorrelated, the distribution has heavy tails, large moves tend to be followed by large moves, and trading volume is higher on volatile days. Volatility clustering is weak (0.080) and close to the acceptance threshold, so it is expected to be the hardest fact to reproduce.'
+    Body 'The BCP share shows the typical behaviour of financial returns: returns are not autocorrelated, the distribution has heavy tails, large moves tend to be followed by large moves, and trading volume is higher on volatile days and persistent from one day to the next. The last fact was added on 31 October 2026, before any tuning of the model, so that the calibration covers both price and volume, as recommended in the feedback on the proposal. Volatility clustering is weak (0.080) and close to the acceptance threshold, so it is expected to be the hardest fact to reproduce.'
     Body '{T:stress} compares the calm period with the two stress periods. During a crisis the daily volatility roughly doubles and the share of days with moves above 3%, the range in which the collars act, roughly triples. The worst days reach −16%, so the stylised shock of the scenarios (−10%, Chapter 7) is of a plausible order of magnitude.'
     Tbl 'BCP statistics in the calm period and in two stress periods' @('Statistic', 'Calm 2023–24', 'BES 2014', 'COVID-19 2020') @(
         @('Trading days', '510', '55', '51'),
@@ -135,13 +136,13 @@ $content['Trend Follower agent type and Herding'] = {
 $content['Calibration'] = {
     Body 'The behavioural parameters of the agents are not observable, so they were calibrated against the stylised facts of the BCP stock fixed in Section 3.2 ({T:facts}). The calibration followed an iterative protocol. In each round the baseline scenario (no news shock, collars as in the real market) was run with 10 replications of 250 trading days, the statistics of {T:facts} were computed by the script compare_model.py for every replication, and the mean over the replications was compared with the BCP values using the acceptance criteria of the table. The median over the replications was also reported, to detect means driven by one or two extreme replications.'
     Body 'Only one mechanism was changed per round, chosen from the diagnosis of the previous round, so that the effect of each change could be identified. Every round is recorded in the calibration log (Appendix D) with the parameter values, the resulting statistics and the decision taken.'
-    Body 'The first run of the complete model (round 0, with the parameter values of Appendix E) reproduced only the volume-volatility relation. The market was about five times calmer than BCP (daily volatility of 0.42% against 2.07%), almost no day moved by more than 3%, and daily returns were negatively autocorrelated (-0.14). The diagnosis was that the price was anchored by the fundamentalists to a fundamental value that hardly moved: with one news item every five trading days and a standard deviation of 1% per item, news alone generate a daily volatility of about 0.44%, which matches the model. The mean excess kurtosis of 9.6 came from three replications with reservation periods, while the median was only 0.2.'
+    Body 'The first run of the complete model (round 0, with the parameter values of Appendix E) reproduced only the two volume facts (relation with volatility and persistence, the latter only weakly at 0.04). The market was about five times calmer than BCP (daily volatility of 0.42% against 2.07%), almost no day moved by more than 3%, and daily returns were negatively autocorrelated (-0.14). The diagnosis was that the price was anchored by the fundamentalists to a fundamental value that hardly moved: with one news item every five trading days and a standard deviation of 1% per item, news alone generate a daily volatility of about 0.44%, which matches the model. The mean excess kurtosis of 9.6 came from three replications with reservation periods, while the median was only 0.2.'
 }
 
 $content['APPENDIX D: Calibration Log'] = {
     Body 'Each round used 10 replications of 250 trading days of the baseline scenario. Statistics are means over the replications (median kurtosis in brackets); the targets are those of {T:facts}.'
-    Tbl 'Calibration log' @('Round', 'Change', 'Daily vol.', 'Kurtosis', 'Autocorr. |r|', 'Autocorr. r', 'Days > 3%', 'Corr. vol.-|r|', 'Facts met') @(
-        @('Target', '-', '0.0155-0.0259', '1.21-3.62', '> 0.05', '-0.1 to 0.1', '6.5%-19.4%', '> 0', '6 / 6'),
-        @('0', 'Initial values (Appendix E)', '0.0042', '9.58 (0.20)', '0.040', '-0.139', '0.2%', '0.204', '1 / 6')
-    ) @(1.3, 3.6, 1.6, 1.7, 1.6, 1.6, 1.5, 1.6, 1.5) 'calibLog'
+    Tbl 'Calibration log' @('Round', 'Change', 'Daily vol.', 'Kurtosis', 'Autocorr. |r|', 'Autocorr. r', 'Days > 3%', 'Corr. vol.-|r|', 'Autocorr. vol.', 'Facts met') @(
+        @('Target', '-', '0.0155-0.0259', '1.21-3.62', '> 0.05', '-0.1 to 0.1', '6.5%-19.4%', '> 0', '> 0', '7 / 7'),
+        @('0', 'Initial values (Appendix E)', '0.0042', '9.58 (0.20)', '0.040', '-0.139', '0.2%', '0.204', '0.040', '2 / 7')
+    ) @(1.2, 3.0, 1.6, 1.7, 1.4, 1.4, 1.4, 1.4, 1.4, 1.5) 'calibLog'
 }
