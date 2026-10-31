@@ -9,8 +9,8 @@ Os dados públicos sobre o livro de ordens e o comportamento dos investidores na
 | # | Pressuposto | Valor | Porquê / fonte | Teste |
 |---|---|---|---|---|
 | 1 | Uma só ação (BCP), sem contágio a outras | — | Âmbito da Fase 1, como os professores pediram | — |
-| 2 | Regras dos colares para o PSI: ±3% dinâmico (face ao último preço), ±8% estático (face ao preço de abertura ou à referência do dia anterior), reserva de 3 min, 10 min se houver uma reserva estática consecutiva no mesmo sentido, leilão de reabertura | regras reais | Euronext, *Trading safeguards* (consultado a 31/10/2026) | — |
-| 3 | O dia de negociação tem 510 min seguidos; não há noite nem leilões de abertura e fecho | 510 | Simplificação; o preço de referência estático muda a cada 510 min | — |
+| 2 | Regras dos colares para o PSI: ±3% dinâmico (face ao último preço), ±8% estático (face ao preço de abertura ou à referência do dia anterior), reserva de 3 min, 10 min se houver uma reserva estática consecutiva no mesmo sentido, leilão de reabertura | regras reais | Euronext, *Trading safeguards* (consultado a 31/10/2026) e anexo aos Trading Manuals 4-01 (2025), grupo P0 Equities PSI | — |
+| 3 | O dia de negociação tem 510 min seguidos (negociação contínua das 08:00 às 16:30 em Lisboa = 09:00–17:30 CET); não há noite, pré-abertura, leilão de abertura nem leilão de fecho (na realidade há pré-abertura desde as 06:30 e leilão de fecho às 16:35, hora de Lisboa) | 510 | Horário confirmado no anexo aos Trading Manuals da Euronext (2025); o preço de referência estático muda a cada 510 min | — |
 | 4 | Preço inicial e valor fundamental inicial | 0.50 € | Ordem de grandeza do BCP | — |
 | 5 | Tick | 0.0001 € | Simplificação (a Euronext usa uma tabela de ticks) | — |
 | 6 | As ordens são todas limitadas; uma ordem agressiva faz de ordem ao mercado | — | Simplificação do livro | — |
@@ -42,3 +42,4 @@ Os dados públicos sobre o livro de ordens e o comportamento dos investidores na
 | 32 | Dados reais: preços diários ajustados do Yahoo Finance (BCP.LS) | 2010–2026 | Única fonte gratuita com histórico longo | — |
 | 33 | As reservas duram exatamente o mínimo da Euronext; na realidade podem ser prolongadas | 3 / 10 min | Simplificação | S |
 | 34 | O preço de referência estático é o último preço do dia anterior e passa a ser o preço do leilão de reabertura depois de cada reserva; a Euronext define-o como o preço de abertura do dia ou a referência do dia anterior | — | Simplificação (o modelo não tem leilão de abertura) | V |
+| 35 | O leilão de reabertura não tem limite de preço; na Euronext o leilão dos títulos do PSI tem um colar de ±6% | — | Simplificação | V |
