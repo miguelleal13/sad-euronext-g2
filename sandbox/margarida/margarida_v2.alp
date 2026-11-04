@@ -939,7 +939,7 @@ traceln("nHalts=" + nHalts + "  timeHalted=" + timeHalted + "  maxDrawdown=" + m
 						<UnitType><![CDATA[NONE]]></UnitType>
 						<SdArray>false</SdArray>
 						<DefaultValue Class="CodeValue">
-							<Code><![CDATA[0.0004]]></Code>
+							<Code><![CDATA[0.002]]></Code>
 						</DefaultValue>
 						<ParameterEditor>
 							<Id>1793123605139</Id>
@@ -2990,7 +2990,7 @@ main.stock.order(this, side, p, uniform_discr(100, 1000));]]></Action>
 					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
 						<Type><![CDATA[double]]></Type>        
 						<InitialValue Class="CodeValue">
-							<Code><![CDATA[5000]]></Code>
+							<Code><![CDATA[50000]]></Code>
 						</InitialValue>
 					</Properties>
 				</Variable>
@@ -3020,7 +3020,7 @@ main.stock.order(this, side, p, uniform_discr(100, 1000));]]></Action>
 					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
 						<Type><![CDATA[int]]></Type>        
 						<InitialValue Class="CodeValue">
-							<Code><![CDATA[10000]]></Code>
+							<Code><![CDATA[100000]]></Code>
 						</InitialValue>
 					</Properties>
 				</Variable>
@@ -3700,7 +3700,7 @@ if (q >= 100) main.stock.order(this, -1, p, q);]]></EntryAction>
 					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
 						<Type><![CDATA[double]]></Type>        
 						<InitialValue Class="CodeValue">
-							<Code><![CDATA[5000]]></Code>
+							<Code><![CDATA[50000]]></Code>
 						</InitialValue>
 					</Properties>
 				</Variable>
@@ -3715,7 +3715,7 @@ if (q >= 100) main.stock.order(this, -1, p, q);]]></EntryAction>
 					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
 						<Type><![CDATA[int]]></Type>        
 						<InitialValue Class="CodeValue">
-							<Code><![CDATA[10000]]></Code>
+							<Code><![CDATA[100000]]></Code>
 						</InitialValue>
 					</Properties>
 				</Variable>
@@ -4923,7 +4923,7 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 					</Points>
 					<IconOffset>20.0</IconOffset>
 					<Properties Source="1793123412595" Target="1793123412595" Trigger="rate">
-						<Action><![CDATA[main.fundamentalValue *= (1 + normal(0.01, 0));]]></Action>
+						<Action><![CDATA[main.fundamentalValue *= (1 + normal(0.02, 0));]]></Action>
 						<Timeout Class="CodeUnitValue">
 							<Code><![CDATA[1]]></Code>
 							<Unit Class="TimeUnits"><![CDATA[MINUTE]]></Unit>
