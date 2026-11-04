@@ -18,6 +18,7 @@ $content['Main agent'] = {
         @('noiseSigma', 'Parameter', '0.002', 'Dispersion of the noise traders limit prices around the mid price'),
         @('orderLife', 'Parameter', '35', 'Mean lifetime of an order that is not executed (min)'),
         @('maWindow', 'Parameter', '50', 'Memory of the moving average used by trend followers (min)'),
+        @('auctionCollar', 'Parameter', '0.06', 'Auction collar: the reopening auction price is limited to this distance from the last price before the reservation'),
         @('runTests', 'Parameter (boolean)', 'false', 'Runs the order book tests at start-up'),
         @('fundamentalValue', 'Variable', 'initialPrice', 'Fundamental value of the stock, changed by news'),
         @('dynamicThreshold', 'Variable', '0.03', 'Dynamic collar, relative to the last traded price'),
@@ -74,7 +75,7 @@ $content['Volatility Interruptions and Reopening Auction'] = {
         @('ReservStatic10', 'Static collar breached again in the same direction', 'To Auction after haltLong (10 min)'),
         @('Auction', 'Reopening auction: the pending orders enter the book', 'To Continuous after 0.01 min, executing runAuction() and endHalt()')
     ) @(3.2, 5.5, 7.3) 'stockStates'
-    Body 'The reopening auction sets a single uncrossing price. For every candidate price p (the limit prices present in the book), the demand is the quantity of bids with a price greater than or equal to p and the supply is the quantity of asks with a price lower than or equal to p; the executable volume is the minimum of the two. The auction selects the price with the largest executable volume and, in case of a tie, the one closest to the last traded price. All crossing orders are executed at that single price, which becomes the new reference price of the static collar.'
+    Body 'The reopening auction sets a single uncrossing price. For every candidate price p (the limit prices present in the book), the demand is the quantity of bids with a price greater than or equal to p and the supply is the quantity of asks with a price lower than or equal to p; the executable volume is the minimum of the two. The auction selects the price with the largest executable volume and, in case of a tie, the one closest to the last traded price. Following the Euronext rules for PSI constituents, the auction price is limited to ±6% (parameter auctionCollar) of the last price before the reservation: if the best price lies outside this range, it is set to the closest limit and only the orders that cross at that price are executed. All crossing orders are executed at that single price, which becomes the new reference price of the static collar.'
     Body '{F:halts} shows the mechanism at work in a deliberately volatile market (noise traders with a price dispersion of 5%): every HALT is followed by a REOPEN 3.01 minutes later, that is, the 3-minute reservation plus the auction.'
     Fig (Join-Path $figDir 'reservations_demo.png') 'Reservation periods in a volatile market: every HALT is followed by a REOPEN 3.01 minutes later' 6.0 'halts'
 }

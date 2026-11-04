@@ -42,4 +42,4 @@ Os dados públicos sobre o livro de ordens e o comportamento dos investidores na
 | 32 | Dados reais: preços diários ajustados do Yahoo Finance (BCP.LS) | 2010–2026 | Única fonte gratuita com histórico longo | — |
 | 33 | As reservas duram exatamente o mínimo da Euronext; na realidade podem ser prolongadas | 3 / 10 min | Simplificação | S |
 | 34 | O preço de referência estático é o último preço do dia anterior e passa a ser o preço do leilão de reabertura depois de cada reserva; a Euronext define-o como o preço de abertura do dia ou a referência do dia anterior | — | Simplificação (o modelo não tem leilão de abertura) | V |
-| 35 | O leilão de reabertura não tem limite de preço; na Euronext o leilão dos títulos do PSI tem um colar de ±6% | — | Simplificação | V |
+| 35 | Colar do leilão de reabertura (`auctionCollar`): o preço do leilão fica a ±6% do último preço antes da reserva | ±6% | Regra da Euronext para os títulos do PSI (anexo aos Trading Manuals, coluna Col U). Introduzido a 04/11: sem ele, leilões sucessivos levavam o preço de 0,84 € a 0,02 € | V |
