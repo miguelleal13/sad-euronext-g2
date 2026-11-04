@@ -2990,7 +2990,7 @@ main.stock.order(this, side, p, uniform_discr(100, 1000));]]></Action>
 					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
 						<Type><![CDATA[double]]></Type>        
 						<InitialValue Class="CodeValue">
-							<Code><![CDATA[50000]]></Code>
+							<Code><![CDATA[1e9]]></Code>
 						</InitialValue>
 					</Properties>
 				</Variable>
@@ -3020,7 +3020,7 @@ main.stock.order(this, side, p, uniform_discr(100, 1000));]]></Action>
 					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
 						<Type><![CDATA[int]]></Type>        
 						<InitialValue Class="CodeValue">
-							<Code><![CDATA[100000]]></Code>
+							<Code><![CDATA[1000000000]]></Code>
 						</InitialValue>
 					</Properties>
 				</Variable>
@@ -3700,7 +3700,7 @@ if (q >= 100) main.stock.order(this, -1, p, q);]]></EntryAction>
 					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
 						<Type><![CDATA[double]]></Type>        
 						<InitialValue Class="CodeValue">
-							<Code><![CDATA[50000]]></Code>
+							<Code><![CDATA[1e9]]></Code>
 						</InitialValue>
 					</Properties>
 				</Variable>
@@ -3715,7 +3715,7 @@ if (q >= 100) main.stock.order(this, -1, p, q);]]></EntryAction>
 					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
 						<Type><![CDATA[int]]></Type>        
 						<InitialValue Class="CodeValue">
-							<Code><![CDATA[100000]]></Code>
+							<Code><![CDATA[1000000000]]></Code>
 						</InitialValue>
 					</Properties>
 				</Variable>
