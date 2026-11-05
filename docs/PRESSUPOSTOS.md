@@ -15,7 +15,7 @@ Os dados públicos sobre o livro de ordens e o comportamento dos investidores na
 | 5 | Tick | 0.0001 € | Simplificação (a Euronext usa uma tabela de ticks) | — |
 | 6 | As ordens são todas limitadas; uma ordem agressiva faz de ordem ao mercado | — | Simplificação do livro | — |
 | 7 | Tempo de vida das ordens (`orderLife`) | 35 min | Não há dados de Lisboa sobre cancelamentos | C, S |
-| 8 | Número de cada tipo de investidor (`nFundamentalists`, `nChartists`, `nNoise`) | 40 / 30 / 30 | Literatura de mercados baseados em agentes (ex.: Lux & Marchesi, 1999) | C |
+| 8 | Número de cada tipo de investidor (`nFundamentalists`, `nChartists`, `nNoise`) | 40 / **13** / 30 | Literatura de mercados baseados em agentes (ex.: Lux & Marchesi, 1999); chartists reduzidos de 30 para 13 na calibração (rondas 4 e 5) | C |
 | 9 | Banda e ritmo do fundamentalista (`fundBand`, `fundRate`) | 0.01 / 0.2 | Literatura (ex.: Chiarella & Iori, 2002) | C, S |
 | 10 | Erro de avaliação de cada fundamentalista (`bias`) | Normal(0, 2%) | Heterogeneidade de opiniões | — |
 | 11 | Ritmo e limiar de tendência do chartist (`chartRate`, `trendThreshold`) | 0.2 / 0.005 | Literatura (ex.: Lux & Marchesi, 1999) | C, S |
@@ -26,10 +26,10 @@ Os dados públicos sobre o livro de ordens e o comportamento dos investidores na
 | 16 | Criador de mercado: spread e quantidade (`mmSpread`, `mmQty`) | 0.4% / 2000 | Não há dados; testado em valores extremos | S, V |
 | 17 | Choque de notícia estilizado (`shockSize`, `shockTime`) | −10%, dia 60 | Inspirado no BES; **não** é uma reprodução do crash | S |
 | 18 | Probabilidade de pânico de um chartist com o choque (`shockPanicProb`) | 0.3 | Não observável | S |
-| 19 | Pequenas notícias (`newsRate`) | ~1 a cada 5 dias | Simplificação | — |
-| 20 | Dotação inicial de fundamentalistas e chartists (`cash`, `position`) | 5000 € / 10 000 ações | Simplificação: todos iguais, metade em dinheiro e metade em ações (a 0.50 €) | S |
+| 19 | Notícias (`newsRate`) e o seu tamanho | **~1 por dia (0.002/min), ±2%** | Calibrado na ronda 1 (era ~1 a cada 5 dias, ±1%) | C |
+| 20 | Fundamentalistas e chartists sem restrição de orçamento (`cash`, `position`) | **1e9 € / 1 000 000 000 ações** | Calibrado nas rondas 2 e 3: com 5000 € / 10 000 ações (e mesmo 10×) os agentes esgotavam-se e o mercado "morria" a meio do ano | C |
 | 21 | Ordens do fundamentalista: quantidade 100 + 20 000 × desvio ao valor; preço até ±0.2% do mid | — | Quanto mais longe do valor, maior a ordem | C |
-| 22 | Fundamentalista sem dinheiro nem ações espera antes de voltar a tentar | 60 min | Simplificação | — |
+| 22 | Fundamentalista sem dinheiro nem ações espera antes de voltar a tentar | 60 min | Simplificação; deixou de acontecer no modelo calibrado | — |
 | 23 | Ordens do chartist: tendência até 500 ações a ±0.3% do mid; pânico até 2000 ações a −1% do mid | — | O pânico vende muito e abaixo do mercado | C |
 | 24 | Os chartists esquecem os sinais de venda (`forget`) | 30 min | Não observável | — |
 | 25 | Noise traders sem restrições de dinheiro nem de ações (podem vender a descoberto) | cash 1e9, position 0 | Fonte de liquidez de base | — |
