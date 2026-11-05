@@ -998,6 +998,30 @@ traceln("nHalts=" + nHalts + "  timeHalted=" + timeHalted + "  maxDrawdown=" + m
 						</ParameterEditor>
 					</Properties>                 
 				</Variable>
+				<Variable Class="Parameter">
+					<Id>1793872657201</Id>
+					<Name><![CDATA[auctionCollar]]></Name>
+					<X>-470</X><Y>440</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" ModificatorType="STATIC">
+						<Type><![CDATA[double]]></Type>
+						<UnitType><![CDATA[NONE]]></UnitType>
+						<SdArray>false</SdArray>
+						<DefaultValue Class="CodeValue">
+							<Code><![CDATA[0.06]]></Code>
+						</DefaultValue>
+						<ParameterEditor>
+							<Id>1793872657199</Id>
+							<EditorContolType>TEXT_BOX</EditorContolType>
+							<MinSliderValue><![CDATA[0]]></MinSliderValue>
+							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
+							<DelimeterType>NO_DELIMETER</DelimeterType>
+						</ParameterEditor>
+					</Properties>                 
+				</Variable>
 			</Variables>
 			<Events>
 				<Event>
@@ -2552,6 +2576,9 @@ for (double p : cands) {
         bestP = p;
     }
 }
+double lo = main.roundTick(lastPrice * (1 - main.auctionCollar));
+double hi = main.roundTick(lastPrice * (1 + main.auctionCollar));
+bestP = Math.max(lo, Math.min(hi, bestP));
 while (bestQ > 0 && !bids.isEmpty() && !asks.isEmpty()
        && bids.peek().price >= bestP && asks.peek().price <= bestP) {
     Order b = bids.peek();
@@ -5308,6 +5335,9 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 				<Parameter>
 					<ParameterName><![CDATA[shockTime]]></ParameterName>
 				</Parameter>
+				<Parameter>
+					<ParameterName><![CDATA[auctionCollar]]></ParameterName>
+				</Parameter>
 			</Parameters>
 			<PresentationProperties>
 				<EnableZoomAndPanning>true</EnableZoomAndPanning>
@@ -5430,6 +5460,9 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 			<FreeformParamValue>	
 				<Id>1793123605149</Id>
 			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793872657201</Id>
+			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
 				<Type>FIXED</Type>
@@ -5509,6 +5542,9 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 			<RangeVariationParamValue>	
 				<Id>1793112481116</Id>
 				<Type>FIXED</Type>
+				<Expression Class="CodeValue">
+					<Code><![CDATA[15]]></Code>
+				</Expression>
 			</RangeVariationParamValue>
 			<RangeVariationParamValue>	
 				<Id>1793112481120</Id>
@@ -5544,6 +5580,10 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 			</RangeVariationParamValue>
 			<RangeVariationParamValue>	
 				<Id>1793123605149</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793872657201</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
 			<ModelTimeProperties>
@@ -5673,6 +5713,9 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 			</FreeformParamValue>
 			<FreeformParamValue>	
 				<Id>1793123605149</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793872657201</Id>
 			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
@@ -5805,6 +5848,10 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 				<Id>1793123605149</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793872657201</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Stop at specified time]]></StopOption>
 				<InitialDate><![CDATA[1792627200000]]></InitialDate>	
@@ -5932,6 +5979,9 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 			</FreeformParamValue>
 			<FreeformParamValue>	
 				<Id>1793123605149</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793872657201</Id>
 			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
@@ -6082,6 +6132,10 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 				<Id>1793123605149</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793872657201</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Stop at specified time]]></StopOption>
 				<InitialDate><![CDATA[1792627200000]]></InitialDate>	
@@ -6209,6 +6263,9 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 			</FreeformParamValue>
 			<FreeformParamValue>	
 				<Id>1793123605149</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793872657201</Id>
 			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
@@ -6342,6 +6399,10 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 			</RangeVariationParamValue>
 			<RangeVariationParamValue>	
 				<Id>1793123605149</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793872657201</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
 			<ModelTimeProperties>
