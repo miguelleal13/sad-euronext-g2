@@ -5543,7 +5543,7 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 				<Id>1793112481116</Id>
 				<Type>FIXED</Type>
 				<Expression Class="CodeValue">
-					<Code><![CDATA[15]]></Code>
+					<Code><![CDATA[13]]></Code>
 				</Expression>
 			</RangeVariationParamValue>
 			<RangeVariationParamValue>	
