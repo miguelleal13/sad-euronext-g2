@@ -302,6 +302,21 @@ traceln("nHalts=" + nHalts + "  timeHalted=" + timeHalted + "  maxDrawdown=" + m
 						</InitialValue>
 					</Properties>
 				</Variable>
+				<Variable Class="PlainVariable">
+					<Id>1794077560197</Id>
+					<Name><![CDATA[activity]]></Name>
+					<X>-520</X><Y>940</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
+						<Type><![CDATA[double]]></Type>        
+						<InitialValue Class="CodeValue">
+							<Code><![CDATA[1]]></Code>
+						</InitialValue>
+					</Properties>
+				</Variable>
 				<Variable Class="Parameter">
 					<Id>1792673720434</Id>
 					<Name><![CDATA[nNoise]]></Name>
@@ -771,7 +786,7 @@ traceln("nHalts=" + nHalts + "  timeHalted=" + timeHalted + "  maxDrawdown=" + m
 						<UnitType><![CDATA[NONE]]></UnitType>
 						<SdArray>false</SdArray>
 						<DefaultValue Class="CodeValue">
-							<Code><![CDATA[30]]></Code>
+							<Code><![CDATA[13]]></Code>
 						</DefaultValue>
 						<ParameterEditor>
 							<Id>1793112481114</Id>
@@ -1022,6 +1037,54 @@ traceln("nHalts=" + nHalts + "  timeHalted=" + timeHalted + "  maxDrawdown=" + m
 						</ParameterEditor>
 					</Properties>                 
 				</Variable>
+				<Variable Class="Parameter">
+					<Id>1794077505721</Id>
+					<Name><![CDATA[activityPersist]]></Name>
+					<X>-550</X><Y>860</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" ModificatorType="STATIC">
+						<Type><![CDATA[double]]></Type>
+						<UnitType><![CDATA[NONE]]></UnitType>
+						<SdArray>false</SdArray>
+						<DefaultValue Class="CodeValue">
+							<Code><![CDATA[0.7]]></Code>
+						</DefaultValue>
+						<ParameterEditor>
+							<Id>1794077505719</Id>
+							<EditorContolType>TEXT_BOX</EditorContolType>
+							<MinSliderValue><![CDATA[0]]></MinSliderValue>
+							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
+							<DelimeterType>NO_DELIMETER</DelimeterType>
+						</ParameterEditor>
+					</Properties>                 
+				</Variable>
+				<Variable Class="Parameter">
+					<Id>1794077531229</Id>
+					<Name><![CDATA[activitySigma]]></Name>
+					<X>-540</X><Y>890</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" ModificatorType="STATIC">
+						<Type><![CDATA[double]]></Type>
+						<UnitType><![CDATA[NONE]]></UnitType>
+						<SdArray>false</SdArray>
+						<DefaultValue Class="CodeValue">
+							<Code><![CDATA[0.3]]></Code>
+						</DefaultValue>
+						<ParameterEditor>
+							<Id>1794077531227</Id>
+							<EditorContolType>TEXT_BOX</EditorContolType>
+							<MinSliderValue><![CDATA[0]]></MinSliderValue>
+							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
+							<DelimeterType>NO_DELIMETER</DelimeterType>
+						</ParameterEditor>
+					</Properties>                 
+				</Variable>
 			</Variables>
 			<Events>
 				<Event>
@@ -1059,6 +1122,38 @@ peakPrice = Math.max(peakPrice, p);
 maxDrawdown = Math.max(maxDrawdown, 1 - p / peakPrice);
 pricesFile.println(label + ";" + runId + ";" + time() + ";" + p + ";"
     + stock.bestBid() + ";" + stock.bestAsk() + ";" + stock.volume);]]></Action>
+				</Event>
+				<Event>
+					<Id>1794077587803</Id>
+					<Name><![CDATA[activityEvent]]></Name>
+					<X>-510</X><Y>980</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties TriggerType="timeout" Mode="cyclic">
+						<Timeout Class="CodeUnitValue">
+							<Code><![CDATA[1]]></Code>
+							<Unit Class="TimeUnits"><![CDATA[MINUTE]]></Unit>
+						</Timeout>
+						<Rate Class="CodeUnitValue">
+							<Code><![CDATA[1]]></Code>
+							<Unit Class="RateUnits"><![CDATA[PER_MINUTE]]></Unit>
+						</Rate>
+						<Id>1794077587801</Id>
+						<OccurrenceAtTime>true</OccurrenceAtTime>
+						<OccurrenceDate>1794124800000</OccurrenceDate>
+						<OccurrenceTime Class="CodeUnitValue">
+							<Code><![CDATA[510]]></Code>
+							<Unit Class="TimeUnits"><![CDATA[MINUTE]]></Unit>
+						</OccurrenceTime>
+						<RecurrenceCode Class="CodeUnitValue">
+							<Code><![CDATA[510]]></Code>
+							<Unit Class="TimeUnits"><![CDATA[MINUTE]]></Unit>
+						</RecurrenceCode>
+						<Condition><![CDATA[false]]></Condition>
+					</Properties>
+					<Action><![CDATA[activity = Math.exp(activityPersist * Math.log(activity) + normal(activitySigma, 0) - activitySigma * activitySigma / 2);]]></Action>
 				</Event>
 			</Events>
 			<Functions>
@@ -2793,7 +2888,7 @@ refPrice = lastPrice;]]></Body>
 					</Properties>
 					<Action><![CDATA[int side = randomTrue(0.5) ? 1 : -1;
 double p = main.stock.mid() * (1 + normal(main.noiseSigma, 0));
-main.stock.order(this, side, p, uniform_discr(100, 1000));]]></Action>
+main.stock.order(this, side, p, Math.max(1, (int) Math.round(uniform_discr(100, 1000) * main.activity)));]]></Action>
 				</Event>
 			</Events>
 
@@ -5338,6 +5433,12 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 				<Parameter>
 					<ParameterName><![CDATA[auctionCollar]]></ParameterName>
 				</Parameter>
+				<Parameter>
+					<ParameterName><![CDATA[activityPersist]]></ParameterName>
+				</Parameter>
+				<Parameter>
+					<ParameterName><![CDATA[activitySigma]]></ParameterName>
+				</Parameter>
 			</Parameters>
 			<PresentationProperties>
 				<EnableZoomAndPanning>true</EnableZoomAndPanning>
@@ -5463,6 +5564,12 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 			<FreeformParamValue>	
 				<Id>1793872657201</Id>
 			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794077505721</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794077531229</Id>
+			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
 				<Type>FIXED</Type>
@@ -5584,6 +5691,14 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 			</RangeVariationParamValue>
 			<RangeVariationParamValue>	
 				<Id>1793872657201</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794077505721</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794077531229</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
 			<ModelTimeProperties>
@@ -5716,6 +5831,12 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 			</FreeformParamValue>
 			<FreeformParamValue>	
 				<Id>1793872657201</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794077505721</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794077531229</Id>
 			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
@@ -5852,6 +5973,14 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 				<Id>1793872657201</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794077505721</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794077531229</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Stop at specified time]]></StopOption>
 				<InitialDate><![CDATA[1792627200000]]></InitialDate>	
@@ -5982,6 +6111,12 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 			</FreeformParamValue>
 			<FreeformParamValue>	
 				<Id>1793872657201</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794077505721</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794077531229</Id>
 			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
@@ -6136,6 +6271,14 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 				<Id>1793872657201</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794077505721</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794077531229</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Stop at specified time]]></StopOption>
 				<InitialDate><![CDATA[1792627200000]]></InitialDate>	
@@ -6266,6 +6409,12 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 			</FreeformParamValue>
 			<FreeformParamValue>	
 				<Id>1793872657201</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794077505721</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794077531229</Id>
 			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
@@ -6403,6 +6552,14 @@ traceln(String.format("t = %.2f min  BIG SHOCK", time()));]]></EntryAction>
 			</RangeVariationParamValue>
 			<RangeVariationParamValue>	
 				<Id>1793872657201</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794077505721</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794077531229</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
 			<ModelTimeProperties>
