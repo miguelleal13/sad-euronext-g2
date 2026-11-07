@@ -35,13 +35,13 @@ $content['Key Assumptions'] = {
 }
 $content['Fundamentalist agent type'] = {
     Body 'Fundamentalists represent informed investors who trade on the gap between the market price and their own estimate of the value of the share. They buy when the share is cheap and sell when it is expensive, which pulls the price back towards its fundamental value and stabilises the market.'
-    Body 'Each fundamentalist has its own estimate of the value, value() = fundamentalValue × (1 + bias), where bias is drawn once per agent from a normal distribution with mean 0 and standard deviation 2%. This heterogeneity of beliefs avoids all fundamentalists trading at the same time and in the same direction. Each agent starts with 5000 € in cash and 10 000 shares.'
+    Body 'Each fundamentalist has its own estimate of the value, value() = fundamentalValue × (1 + bias), where bias is drawn once per agent from a normal distribution with mean 0 and standard deviation 2%. This heterogeneity of beliefs avoids all fundamentalists trading at the same time and in the same direction. In the calibrated model the fundamentalists have no budget constraint (10^9 € in cash and 10^9 shares, as the noise traders), because limited endowments made the market fade during the year (Section 6.3).'
     Tbl 'Key parameters, variables and functions of the Fundamentalist agent type' @('Name', 'Type', 'Value', 'Description') @(
         @('nFundamentalists', 'Parameter (Main, int)', '40', 'Number of fundamentalists'),
         @('fundRate', 'Parameter (Main)', '0.2', 'Decisions per minute of each fundamentalist (one every 5 min on average)'),
         @('fundBand', 'Parameter (Main)', '0.01', 'Minimum gap between price and value that triggers a trade'),
-        @('cash', 'Variable (double)', '5000', 'Available cash (EUR)'),
-        @('position', 'Variable (int)', '10 000', 'Number of shares held'),
+        @('cash', 'Variable (double)', '10^9', 'Available cash (EUR); 5000 before calibration'),
+        @('position', 'Variable (int)', '10^9', 'Number of shares held; 10 000 before calibration'),
         @('bias', 'Variable (double)', 'Normal(0, 2%)', 'Individual valuation error'),
         @('value()', 'Function (double)', '—', 'Value of the share estimated by the agent')
     ) @(3.2, 3.6, 2.6, 6.6) 'fundParams'
@@ -52,7 +52,7 @@ $content['Fundamentalist agent type'] = {
         @('decide (branch)', 'Compares the mid price with value()', 'To Buying if cheap and cash allows; to Selling if expensive and shares allow; to OutOfCash if no cash and no shares; otherwise (default) back to Watching'),
         @('Buying', 'Submits a buy order', 'Back to Watching immediately (timeout 0)'),
         @('Selling', 'Submits a sell order', 'Back to Watching immediately (timeout 0)'),
-        @('OutOfCash', 'No cash and fewer than 100 shares', 'Back to Watching after 60 min'),
+        @('OutOfCash', 'No cash and fewer than 100 shares (never reached in the calibrated model)', 'Back to Watching after 60 min'),
         @('Halted', 'Trading suspended during a reservation', 'From Active on message HALT; back to Active (Watching) on message REOPEN')
     ) @(3.0, 5.2, 7.8) 'fundStates'
     Body 'The size of each order grows with the mispricing: a buy order has 100 + 20 000 × (value/mid − 1) shares, limited by the available cash, and a sell order has 100 + 20 000 × (mid/value − 1) shares, limited by the shares held. The limit price never exceeds the agent''s own estimate and stays within 0.2% of the mid price, so fundamentalists rarely move the price by themselves. The cash and the position are updated by the function onFill of the Main agent every time one of their orders is executed.'
@@ -69,7 +69,7 @@ $content['APPENDIX E: Assumptions Register'] = {
         @('5', 'Tick size', '0.0001 €', 'Simplification (Euronext uses a tick size table)', '—'),
         @('6', 'All orders are limit orders; an aggressive order acts as a market order', '—', 'Order book simplification', '—'),
         @('7', 'Mean order lifetime (orderLife), drawn as orderLife × U(0.3, 1.7)', '35 min', 'No data on cancellations in Lisbon', 'C, S'),
-        @('8', 'Number of agents (nFundamentalists, nChartists, nNoise)', '40 / 30 / 30', 'Agent-based market literature (e.g. Lux & Marchesi, 1999)', 'C'),
+        @('8', 'Number of agents (nFundamentalists, nChartists, nNoise)', '40 / 13 / 30', 'Agent-based market literature (e.g. Lux & Marchesi, 1999); trend followers reduced from 30 to 13 in the calibration', 'C'),
         @('9', 'Fundamentalist band and decision rate (fundBand, fundRate)', '0.01 / 0.2 per min', 'Literature (e.g. Chiarella & Iori, 2002)', 'C, S'),
         @('10', 'Valuation error of each fundamentalist (bias)', 'Normal(0, 2%)', 'Heterogeneous beliefs', '—'),
         @('11', 'Trend follower decision rate and threshold (chartRate, trendThreshold)', '0.2 per min / 0.005', 'Literature (e.g. Lux & Marchesi, 1999)', 'C, S'),
@@ -80,10 +80,10 @@ $content['APPENDIX E: Assumptions Register'] = {
         @('16', 'Market maker spread and quantity (mmSpread, mmQty)', '0.4% / 2000', 'No data; tested at extreme values', 'S, V'),
         @('17', 'Stylised news shock (shockSize, shockTime)', '−10%, day 60', 'Inspired by BES; not a reproduction', 'S'),
         @('18', 'Probability of panic of a trend follower after the shock (shockPanicProb)', '0.3', 'Not observable', 'S'),
-        @('19', 'Small news events (newsRate)', '~1 every 5 days', 'Simplification', '—'),
-        @('20', 'Initial endowment of fundamentalists and trend followers (cash, position)', '5000 € / 10 000 shares', 'All equal; half in cash, half in shares', 'S'),
+        @('19', 'News events (newsRate) and their size', '~1 per day (0.002 per min), ±2%', 'Calibrated (was ~1 every 5 days, ±1%)', 'C'),
+        @('20', 'No budget constraint for fundamentalists and trend followers (cash, position)', '10^9 € / 10^9 shares', 'Calibrated: limited endowments (5000 € / 10 000 shares) made the market fade during the year', 'C'),
         @('21', 'Fundamentalist orders: 100 + 20 000 × deviation from value; limit up to ±0.2% of the mid', '—', 'Larger orders for larger mispricing', 'C'),
-        @('22', 'Fundamentalist without cash or shares waits before trying again', '60 min', 'Simplification', '—'),
+        @('22', 'Fundamentalist without cash or shares waits before trying again', '60 min', 'Simplification; not reached in the calibrated model', '—'),
         @('23', 'Trend follower orders: up to 500 shares at ±0.3% of the mid; panic up to 2000 shares at −1%', '—', 'Panic sells large quantities below the market', 'C'),
         @('24', 'Trend followers forget sell signals', '30 min', 'Not observable', '—'),
         @('25', 'Noise traders have no cash or short-selling constraints', '—', 'Source of baseline liquidity', '—'),
@@ -103,16 +103,16 @@ $referencesJoao = @('Chiarella, C., & Iori, G. (2002). A simulation analysis of 
 
 $content['Trend Follower agent type and Herding'] = {
     Body 'Trend followers (chartists) ignore the value of the share and trade on the recent direction of the price. They buy when the price is above its moving average and sell when it is below. When they sell, they warn their neighbours in a social network, and an agent that receives enough warnings panics and sells a large quantity below the market. Trend following and herding amplify price movements, which is what drives the price towards the collars.'
-    Body 'Each trend follower starts with 5000 € in cash and 10 000 shares and compares the last traded price with the moving average ma of the Stock agent, which is updated every minute with a memory of maWindow minutes. {T:chartParams} lists the parameters, variables, functions and events of this agent type.'
+    Body 'Like the fundamentalists, trend followers have no budget constraint in the calibrated model (Section 6.3). Each trend follower compares the last traded price with the moving average ma of the Stock agent, which is updated every minute with a memory of maWindow minutes. {T:chartParams} lists the parameters, variables, functions and events of this agent type.'
     Tbl 'Key parameters, variables, functions and events of the Trend Follower agent type' @('Name', 'Type', 'Value', 'Description') @(
-        @('nChartists', 'Parameter (Main, int)', '30', 'Number of trend followers'),
+        @('nChartists', 'Parameter (Main, int)', '13', 'Number of trend followers (30 before calibration)'),
         @('chartRate', 'Parameter (Main)', '0.2', 'Decisions per minute of each trend follower (one every 5 min on average)'),
         @('trendThreshold', 'Parameter (Main)', '0.005', 'Minimum gap between the last price and the moving average that triggers a trade'),
         @('herdThreshold', 'Parameter (Main, int)', '2', 'Number of sell signals from neighbours that triggers panic'),
         @('panicDuration', 'Parameter (Main)', '10', 'Duration of a panic episode (min)'),
         @('shockPanicProb', 'Parameter (Main)', '0.3', 'Probability of panic when a negative news shock arrives'),
-        @('cash', 'Variable (double)', '5000', 'Available cash (EUR)'),
-        @('position', 'Variable (int)', '10 000', 'Number of shares held'),
+        @('cash', 'Variable (double)', '10^9', 'Available cash (EUR); 5000 before calibration'),
+        @('position', 'Variable (int)', '10^9', 'Number of shares held; 10 000 before calibration'),
         @('sellSignals', 'Variable (int)', '0', 'Sell signals received from neighbours since the last reset'),
         @('signalNeighbours()', 'Function', '-', 'Delivers a SELL_SIGNAL message to the statechart of every trend follower neighbour'),
         @('forget', 'Event (every 30 min)', '-', 'Resets sellSignals, so that only recent warnings count')
@@ -140,6 +140,8 @@ $content['Calibration'] = {
     Body 'Round 1 therefore increased the frequency of news from one every five days to about one per day and their size from 1% to 2%, values that, for news alone, give a daily volatility of 2.0%, an excess kurtosis of 2.9 and 13.7% of days with moves above 3%. The model reached four of the seven facts, but the daily volatility rose only to 0.87% and the kurtosis to 75. The reason was that the market faded during the year: the daily volatility fell from 1.22% in the first 50 days to 0.38% after day 150, and 26 of the 35 reservation periods happened in the first 50 days. The fundamentalists and trend followers ran out of cash or shares, so the price stopped following the fundamental value and only caught up in a few large jumps. Round 2 increased their initial endowments tenfold.'
     Body 'In round 2 the mean daily volatility jumped to 3.41%, but this value was driven by a single replication: without it the mean was 2.01%, close to the 2.07% of BCP. In that replication the price fell from 0.84 € to 0.02 € in two days through a sequence of reopening auctions, because the auction of the model had no price limit and each auction price became the new static reference. Euronext limits the reopening auction of PSI constituents to ±6% (assumption 35), so this rule had to be added to the model. The market still faded after about 100 days in most replications, only later than before, and the turbulent first months produced too much volatility clustering (0.45) and negatively autocorrelated returns (-0.16). Round 3 therefore removed the budget constraints of fundamentalists and trend followers, as for the noise traders.'
     Body 'Without budget constraints the market no longer faded: the daily volatility stayed between 3.3% and 3.7% in every 50-day period and the reservation periods were spread over the whole year, and the excess kurtosis (2.39) matched BCP. The market was now too volatile, however (3.60% per day, 30% of days with moves above 3% and about two reservations per day), and daily returns were negatively autocorrelated (-0.34): the price overshot on one day and was corrected on the next. Since news alone generate about 2% of daily volatility, the excess came from the trend followers, so round 4 halved their number from 30 to 15. Round 4 also included the ±6% collar of the reopening auction, which would have capped only 2 of the 5074 auctions of round 3.'
+    Body 'Round 4 reproduced six of the seven facts: daily volatility of 2.37%, excess kurtosis of 2.59, volatility clustering of 0.10 and 17% of days with moves above 3%, with about 38 reservation periods per replication spread over the whole year and no auction reaching the ±6% limit. Only the autocorrelation of returns missed its range, by a small margin (-0.105 against a lower bound of -0.1; five of the ten replications were already inside). Since halving the number of trend followers had moved it from -0.34 to -0.105, round 5 reduced their number from 15 to 13.'
+    Body 'Round 5 met all seven criteria: daily volatility of 2.24% (BCP: 2.07%), excess kurtosis of 2.22 (2.41), 16.6% of days with moves above 3% (12.9%), a volume-volatility correlation of 0.58 (0.64) and return autocorrelation of -0.07, with about 17 reservation periods per replication spread over the whole year. These values define the calibrated model used in Chapter 7 (Appendix E). Three facts are met only narrowly: volatility clustering (0.053 against a threshold of 0.05) and return autocorrelation hold for the mean but only for five of the ten replications each, and volume persistence (0.001) satisfies the criterion of a positive value but is far from the 0.47 of BCP. The model therefore does not reproduce the persistence of trading volume, because most of the daily volume comes from noise traders and the market maker, who trade at a constant rate; this is discussed as a limitation in Chapter 10.'
 }
 
 $content['APPENDIX D: Calibration Log'] = {
@@ -149,6 +151,8 @@ $content['APPENDIX D: Calibration Log'] = {
         @('0', 'Initial values (Appendix E)', '0.0042', '9.58 (0.20)', '0.040', '-0.139', '0.2%', '0.204', '0.040', '2 / 7'),
         @('1', 'News: rate 0.0004 to 0.002 per min, size 1% to 2%', '0.0087', '75.5 (66.4)', '0.058', '0.008', '0.9%', '0.620', '0.171', '4 / 7'),
         @('2', 'Endowments x10 (cash 50 000, 100 000 shares)', '0.0341', '23.9 (18.8)', '0.448', '-0.159', '7.8%', '0.640', '0.567', '4 / 7'),
-        @('3', 'No budget constraints for fundamentalists and trend followers', '0.0360', '2.39 (2.29)', '0.259', '-0.344', '29.8%', '0.314', '0.348', '4 / 7')
+        @('3', 'No budget constraints for fundamentalists and trend followers', '0.0360', '2.39 (2.29)', '0.259', '-0.344', '29.8%', '0.314', '0.348', '4 / 7'),
+        @('4', 'Trend followers 30 to 15; ±6% auction collar', '0.0237', '2.59 (2.28)', '0.100', '-0.105', '17.1%', '0.549', '0.031', '6 / 7'),
+        @('5', 'Trend followers 15 to 13 (final)', '0.0224', '2.22 (1.92)', '0.053', '-0.069', '16.6%', '0.583', '0.001', '7 / 7')
     ) @(1.2, 3.0, 1.6, 1.7, 1.4, 1.4, 1.4, 1.4, 1.4, 1.5) 'calibLog'
 }
