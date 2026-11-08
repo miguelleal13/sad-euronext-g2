@@ -60,5 +60,6 @@ Corrida: nNoise 30, nFundamentalists 40, nChartists 30, choque de −10% ao minu
 - [ ] O preço estabiliza em ~0.43, abaixo do novo valor fundamental (~0.44–0.45).
 
 ## Para outros confirmarem (não é código meu)
+- [ ] João: confirmar no manual da Euronext o que acontece quando o leilão de reabertura não consegue fixar preço dentro do colar de ±6% (pressuposto 36: no modelo, o último preço passa para o limite do colar e segue-se nova reserva).
 - [ ] João: confirmar no documento *Trading safeguards* da Euronext os valores dos colares para o BCP (±3% / ±8%, 3 / 10 min) e citar com data.
 - [ ] João: pressuposto nº 3 (só negociação contínua 08:00–16:30; sem pré-abertura nem leilões de abertura e fecho).

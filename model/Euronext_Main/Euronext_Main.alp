@@ -315,7 +315,7 @@ traceln("nHalts=" + nHalts + "  timeHalted=" + timeHalted + "  maxDrawdown=" + m
 						<UnitType><![CDATA[NONE]]></UnitType>
 						<SdArray>false</SdArray>
 						<DefaultValue Class="CodeValue">
-							<Code><![CDATA[30]]></Code>
+							<Code><![CDATA[0]]></Code>
 						</DefaultValue>
 						<ParameterEditor>
 							<Id>1792673720432</Id>
@@ -507,7 +507,7 @@ traceln("nHalts=" + nHalts + "  timeHalted=" + timeHalted + "  maxDrawdown=" + m
 						<UnitType><![CDATA[NONE]]></UnitType>
 						<SdArray>false</SdArray>
 						<DefaultValue Class="CodeValue">
-							<Code><![CDATA[false]]></Code>
+							<Code><![CDATA[true]]></Code>
 						</DefaultValue>
 						<ParameterEditor>
 							<Id>1792674219560</Id>
@@ -699,7 +699,7 @@ traceln("nHalts=" + nHalts + "  timeHalted=" + timeHalted + "  maxDrawdown=" + m
 						<UnitType><![CDATA[NONE]]></UnitType>
 						<SdArray>false</SdArray>
 						<DefaultValue Class="CodeValue">
-							<Code><![CDATA[40]]></Code>
+							<Code><![CDATA[0]]></Code>
 						</DefaultValue>
 						<ParameterEditor>
 							<Id>1793111762823</Id>
@@ -771,7 +771,7 @@ traceln("nHalts=" + nHalts + "  timeHalted=" + timeHalted + "  maxDrawdown=" + m
 						<UnitType><![CDATA[NONE]]></UnitType>
 						<SdArray>false</SdArray>
 						<DefaultValue Class="CodeValue">
-							<Code><![CDATA[30]]></Code>
+							<Code><![CDATA[0]]></Code>
 						</DefaultValue>
 						<ParameterEditor>
 							<Id>1793112481114</Id>
@@ -2585,6 +2585,7 @@ while (bestQ > 0 && !bids.isEmpty() && !asks.isEmpty()
     Order a = asks.peek();
     execute(b, a, bestP, Math.min(a.qty, b.qty));
 }
+if (!bids.isEmpty() && !asks.isEmpty() && bids.peek().price >= asks.peek().price) lastPrice = bestP;
 refPrice = lastPrice;]]></Body>
 				</Function>
 			</Functions>
