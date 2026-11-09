@@ -32,7 +32,7 @@ O livro de ordens é um sistema de filas em Java: `bids` e `asks` são `Priority
 | `refPrice` | `double` | preço de referência estático (o do último leilão) |
 | `ma` | `double` | média móvel do preço (para os investidores de tendência) |
 | `halted` | `boolean` | `true` durante uma reserva (interrupção) |
-| `volume` | `int` | volume acumulado |
+| `volume` | `long` | volume acumulado (long: passa de 2 147 milhões em 250 dias) |
 | `lastStaticDir` | `int` | sentido do último colar estático do dia (+1/−1) |
 | `statechart` | Statechart | Continuous, ReservDynamic, ReservStatic, ReservStatic10, Auction |
 
