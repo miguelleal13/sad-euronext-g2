@@ -95,7 +95,8 @@ $content['APPENDIX E: Assumptions Register'] = {
         @('31', 'Source of real data: Yahoo Finance adjusted daily prices (BCP.LS)', '2010–2026', 'Free source with a long history', '—'),
         @('32', 'Reservations last exactly the Euronext minimum; in the real market they can be extended', '3 / 10 min', 'Simplification', 'S'),
         @('33', 'The static reference price is the last price of the previous day and is reset to the reopening auction price after each reservation; Euronext defines it as the opening price of the day or the previous reference price', '-', 'Simplification (no opening auction in the model)', 'V'),
-        @('34', 'The reopening auction has no price limit; on Euronext the auction of PSI constituents has a ±6% collar', '-', 'Simplification', 'V')
+        @('34', 'Reopening auction collar (auctionCollar): the auction price stays within ±6% of the last price before the reservation', '±6%', 'Euronext rule for PSI constituents (appendix to Trading Manuals 4-01, column Col U); added on 04/11 after a replication fell from 0.84 € to 0.02 € through successive auctions', 'V'),
+        @('35', 'If the reopening auction cannot trade within the ±6% collar, the last price moves to the collar limit and a new reservation follows', 'collar limit', 'Euronext Trading Manual (5 July 2021), section 4.2.4: the upper or lower threshold becomes the new reference price; added on 08/11 after a replication was stuck in 1485 reservations', 'V')
     ) @(0.8, 6.0, 2.6, 5.2, 1.4) 'assumptions'
 }
 
