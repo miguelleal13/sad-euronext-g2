@@ -2704,6 +2704,7 @@ while (bestQ > 0 && !bids.isEmpty() && !asks.isEmpty()
     Order a = asks.peek();
     execute(b, a, bestP, Math.min(a.qty, b.qty));
 }
+if (!bids.isEmpty() && !asks.isEmpty() && bids.peek().price >= asks.peek().price) lastPrice = bestP;
 refPrice = lastPrice;]]></Body>
 				</Function>
 			</Functions>
