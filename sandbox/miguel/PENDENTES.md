@@ -60,6 +60,15 @@ Corrida: nNoise 30, nFundamentalists 40, nChartists 30, choque de −10% ao minu
 - [ ] O preço estabiliza em ~0.43, abaixo do novo valor fundamental (~0.44–0.45).
 
 ## Para outros confirmarem (não é código meu)
-- [ ] João: confirmar no manual da Euronext o que acontece quando o leilão de reabertura não consegue fixar preço dentro do colar de ±6% (pressuposto 36: no modelo, o último preço passa para o limite do colar e segue-se nova reserva).
+- [x] (09/11) João: confirmar no manual da Euronext o que acontece quando o leilão de reabertura não consegue fixar preço dentro do colar de ±6% (pressuposto 36). Confirmado no Trading Manual (05/07/2021), secção 4.2.4: a regra do modelo é igual à da Euronext.
 - [ ] João: confirmar no documento *Trading safeguards* da Euronext os valores dos colares para o BCP (±3% / ±8%, 3 / 10 min) e citar com data.
 - [ ] João: pressuposto nº 3 (só negociação contínua 08:00–16:30; sem pré-abertura nem leilões de abertura e fecho).
+
+## Defaults calibrados no Main (depois da ronda 8; o João manda a lista final)
+Lista provisória do João (09/11); mudar tudo de uma vez, de preferência copiando as peças do `margarida_v2.alp`:
+- [ ] `nChartists` = 13
+- [ ] `newsRate` = 0.0026 (ou 0.002, conforme a ronda 8)
+- [ ] NewsAgent, transição das notícias: Action `normal(0.02, 0)` + `main.activity *= Math.exp(main.activityNewsJump);`; Rate `main.newsRate * Math.min(main.activity, 3)` (se a ronda 8 o mantiver)
+- [ ] Fundamentalist e Chartist: `cash` = 1e9 e `position` = 1000000000
+- [ ] Atividade dos noise traders: parâmetros `activityPersist`, `activitySigma`, `activityNewsJump`, variável `activity`, evento `activityEvent` e quantidade das ordens × `activity`
+- [ ] Depois: testes do livro → repor parâmetros normais → atualizar CONTRATO e a tabela de parâmetros do relatório → commit

@@ -81,6 +81,7 @@ $content['References'] = {
     $refs = @(
         'Chiarella, C., & Iori, G. (2002). A simulation analysis of the microstructure of double auction markets. Quantitative Finance, 2(5), 346-353.',
         'ESMA (2020). Market impacts of circuit breakers: Evidence from EU trading venues. ESMA Economic Report.',
+        'Euronext (2021). Trading Manual for the Euronext cash markets, version of 5 July 2021.',
         'Euronext. Trading safeguards. Euronext Rule Book and trading procedures.',
         'Lux, T., & Marchesi, M. (1999). Scaling and criticality in a stochastic multi-agent model of a financial market. Nature, 397, 498-500.'
     )
