@@ -4,6 +4,7 @@ $figDirJ = Join-Path $PSScriptRoot 'figures'
 $content['Data Sources'] = {
     Body 'The empirical reference for the model is the share of Banco Comercial Português (BCP), one of the most traded constituents of the PSI index. Daily adjusted closing prices and daily volumes (ticker BCP.LS) were downloaded from Yahoo Finance for January 2010 to October 2026 (4304 trading days), using the Python script download_daily.py. One-minute prices are also collected twice a week (archive_intraday.py), since Yahoo Finance only keeps the most recent days of intraday data.'
     Body 'The calibration targets were computed for 2023–2024 (510 trading days), a recent period without bank-specific crises. Two stress periods were used only as a reference for the plausibility of the shock scenarios: the resolution of Banco Espírito Santo (15 July to 30 September 2014) and the start of the COVID-19 pandemic (15 February to 30 April 2020).'
+    Body 'The calibration period 2023–2024 was fixed in the project plan before any model run and was not changed afterwards, so that the targets could not be adjusted to the results. The year 2025 was not part of it; it also contains a market-wide sell-off in April 2025, when the BCP share fell 9.9% on 4 April and its daily volatility reached 3.7% in that month, against 1.1% to 2.7% in the other months of the year. A robustness check with 2025 and with each year separately is reported in Section 3.2.'
     Body 'The BES period starts on 15 July because the adjusted prices show artificial jumps of +12% and +24% at the end of June and the beginning of July 2014, caused by the BCP capital increase. All returns are logarithmic.'
 }
 $content['Stylised Facts of the BCP Stock'] = {
@@ -18,6 +19,16 @@ $content['Stylised Facts of the BCP Stock'] = {
         @('7', 'Volume persistence', 'Lag-1 autocorrelation of daily volume', '0.470', '> 0')
     ) @(0.8, 3.6, 5.2, 1.8, 4.6) 'facts'
     Body 'The BCP share shows the typical behaviour of financial returns: returns are not autocorrelated, the distribution has heavy tails, large moves tend to be followed by large moves, and trading volume is higher on volatile days and persistent from one day to the next. The last fact was added on 31 October 2026, before any tuning of the model, so that the calibration covers both price and volume, as recommended in the feedback on the proposal. Volatility clustering is weak (0.080) and close to the acceptance threshold, so it is expected to be the hardest fact to reproduce.'
+    Body 'As a robustness check, {T:robust} computes the same statistics for each year separately and for 2025. Most values are of the same order of magnitude as the targets: daily volatility between 1.9% and 2.2%, excess kurtosis between 2.0 and 3.0, 11% to 15% of days with moves above 3% and a volume-volatility correlation between 0.57 and 0.70. The facts that vary most from year to year are volatility clustering (0.06 to 0.18), the autocorrelation of returns (-0.09 to 0.07) and volume persistence (0.16 to 0.49), which are also the facts that were hardest to reproduce in the calibration (Section 6.3). The targets were not changed after this check.'
+    Tbl 'Stylised facts of the BCP stock in other periods (robustness check)' @('Statistic', '2023-24 (target)', '2023', '2024', '2025') @(
+        @('Daily volatility', '0.0207', '0.0217', '0.0197', '0.0193'),
+        @('Excess kurtosis', '2.41', '2.01', '2.96', '2.94'),
+        @('Autocorrelation of |r|', '0.080', '0.063', '0.096', '0.177'),
+        @('Autocorrelation of r', '0.004', '0.072', '-0.078', '-0.086'),
+        @('Days with |r| > 3%', '12.9%', '14.6%', '11.0%', '12.6%'),
+        @('Correlation volume-|r|', '0.636', '0.609', '0.701', '0.569'),
+        @('Autocorrelation of volume', '0.470', '0.495', '0.333', '0.164')
+    ) @(5.2, 2.7, 2.7, 2.7, 2.7) 'robust'
     Body '{T:stress} compares the calm period with the two stress periods. During a crisis the daily volatility roughly doubles and the share of days with moves above 3%, the range in which the collars act, roughly triples. The worst days reach −16%, so the stylised shock of the scenarios (−10%, Chapter 7) is of a plausible order of magnitude.'
     Tbl 'BCP statistics in the calm period and in two stress periods' @('Statistic', 'Calm 2023–24', 'BES 2014', 'COVID-19 2020') @(
         @('Trading days', '510', '55', '51'),

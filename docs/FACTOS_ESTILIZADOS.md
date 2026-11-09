@@ -4,6 +4,8 @@ Os professores pediram para **definir os factos estilizados antes de calibrar**.
 
 - **Responsável:** João. Preenche a coluna *Valor BCP* com `python scripts/target_stats.py` (período calmo 2023–2024) e faz commit antes de a Margarida correr a calibração.
 - **Como se mede no modelo:** `python scripts/compare_model.py baseline`, com 10 corridas do cenário baseline de 250 dias. O fecho de cada dia é o último preço de cada bloco de 510 minutos.
+- **Porquê 2023–2024 e não 2025:** o período veio do plano do projeto (guião e `target_stats.py`), fixado antes de qualquer corrida do modelo, e não se mudou depois para não afinar as metas aos resultados. 2025 tem a queda de abril (−9.9% a 4/4/2025; volatilidade de 3.7%/dia em abril, contra 1.1%–2.7% nos outros meses).
+- **Teste de robustez (09/11):** os mesmos factos em 2023, 2024 e 2025 dão valores da mesma ordem (volatilidade 1.9%–2.2%, curtose 2.0–3.0, 11%–15% de dias >3%, correlação volume–|r| 0.57–0.70). Variam mais o clustering (0.06–0.18), a autocorrelação (−0.09 a 0.07) e a persistência do volume (0.16–0.49). Tabela no relatório (secção 3.2). As metas não mudaram.
 - **Facto 7** acrescentado a 31/10/2026, antes de qualquer afinação do modelo (a ronda 0 da calibração foi o modelo original), porque os professores pediram para validar preço **e volume** e o FEEDBACK_PROPOSTA já referia esta métrica.
 - **Dados:** valores calculados a 25/10/2026 com os preços diários do Yahoo Finance (BCP.LS, 2023-01-01 a 2024-12-31, 510 dias).
 
