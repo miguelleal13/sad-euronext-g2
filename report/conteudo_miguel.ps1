@@ -19,11 +19,15 @@ $content['Main agent'] = {
         @('orderLife', 'Parameter', '35', 'Mean lifetime of an order that is not executed (min)'),
         @('maWindow', 'Parameter', '50', 'Memory of the moving average used by trend followers (min)'),
         @('auctionCollar', 'Parameter', '0.06', 'Auction collar: the reopening auction price is limited to this distance from the last price before the reservation'),
+        @('activityPersist', 'Parameter', '0.6', 'Persistence of the daily activity level of the noise traders'),
+        @('activitySigma', 'Parameter', '0.05', 'Standard deviation of the daily change in the activity level'),
+        @('activityNewsJump', 'Parameter', '0.4', 'Increase in the logarithm of the activity level with each news event'),
         @('runTests', 'Parameter (boolean)', 'false', 'Runs the order book tests at start-up'),
         @('fundamentalValue', 'Variable', 'initialPrice', 'Fundamental value of the stock, changed by news'),
         @('dynamicThreshold', 'Variable', '0.03', 'Dynamic collar, relative to the last traded price'),
         @('staticThreshold', 'Variable', '0.08', 'Static collar, relative to the reference price'),
-        @('collarsActive', 'Variable (boolean)', 'true', 'Switches the volatility interruptions on or off')
+        @('collarsActive', 'Variable (boolean)', 'true', 'Switches the volatility interruptions on or off'),
+        @('activity', 'Variable', '1', 'Activity level of the day; multiplies the order sizes of the noise traders')
     ) @(3.2, 3.2, 2.3, 7.3) 'mainParams'
     Tbl 'Key functions present in the Main agent' @('Function', 'Description') @(
         @('roundTick(p)', 'Rounds a price to the tick size'),
@@ -81,7 +85,7 @@ $content['Volatility Interruptions and Reopening Auction'] = {
 }
 
 $content['Noise Trader agent type'] = {
-    Body 'Noise traders represent uninformed participants and provide the baseline trading volume and liquidity of the market. They have no statechart: each noise trader submits orders at random instants, according to a Poisson process with rate noiseRate per minute. Each order is a buy or a sell with equal probability, has a limit price drawn from a normal distribution centred on the mid price with relative standard deviation noiseSigma, and a quantity drawn uniformly between 100 and 1000 shares. Noise traders keep submitting orders during reservation periods; these orders wait in the pending queue and take part in the reopening auction, as in the real market.'
+    Body 'Noise traders represent uninformed participants and provide the baseline trading volume and liquidity of the market. They have no statechart: each noise trader submits orders at random instants, according to a Poisson process with rate noiseRate per minute. Each order is a buy or a sell with equal probability, has a limit price drawn from a normal distribution centred on the mid price with relative standard deviation noiseSigma, and a quantity drawn uniformly between 100 and 1000 shares and multiplied by the activity level of the day (variable activity of the Main agent). Every 510 minutes the event activityEvent updates the logarithm of this level as a first-order autoregressive process (persistence activityPersist, standard deviation activitySigma), and every news event raises it by activityNewsJump, so that trading volume is persistent from one day to the next and higher after news. This mechanism was added during the calibration (Section 6.3). Noise traders keep submitting orders during reservation periods; these orders wait in the pending queue and take part in the reopening auction, as in the real market.'
     Tbl 'Key variables and events present in the Noise Trader agent type' @('Name', 'Type', 'Description') @(
         @('cash', 'Variable (double)', 'Available cash; set to a very large value so that noise traders are never constrained'),
         @('position', 'Variable (int)', 'Number of shares held (may become negative)'),

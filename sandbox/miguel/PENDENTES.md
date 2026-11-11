@@ -31,7 +31,7 @@ Coisas do modelo que ficaram "provisórias" e que tenho de mudar mais tarde. Ris
 - [x] Escritas: 1 Introduction, 2 Problem Description, 4.1 Modelling Approach (26/10).
 
 ## Sempre que entrar um agente novo (semanas 2–3)
-Integrados a 27/10: Fundamentalist e Chartist (João), com a rede dos chartists no On startup. NewsAgent e MarketMaker (Matilde) e experiências Cenario1/2/4 (Margarida) também integrados a 27/10. Falta: dashboard e ecrã inicial (Matilde) e Cenario3 (Margarida).
+Integrados a 27/10: Fundamentalist e Chartist (João), com a rede dos chartists no On startup. NewsAgent e MarketMaker (Matilde) e experiências Cenario1/2/4 (Margarida) também integrados a 27/10. Cenario3 (Margarida) integrado a 11/11. Falta: dashboard e ecrã inicial (Matilde).
 
 Tirar as `//` da linha desse agente em:
 - [ ] **`onFill`** (Main): Fundamentalist · Chartist · MarketMaker
@@ -64,11 +64,11 @@ Corrida: nNoise 30, nFundamentalists 40, nChartists 30, choque de −10% ao minu
 - [ ] João: confirmar no documento *Trading safeguards* da Euronext os valores dos colares para o BCP (±3% / ±8%, 3 / 10 min) e citar com data.
 - [ ] João: pressuposto nº 3 (só negociação contínua 08:00–16:30; sem pré-abertura nem leilões de abertura e fecho).
 
-## Defaults calibrados no Main (depois da ronda 8; o João manda a lista final)
+## Defaults calibrados no Main ✅ feito a 11/11 (calibração fechada na ronda 7b; o Main passou a ser o margarida_v2.alp)
 Lista provisória do João (09/11); mudar tudo de uma vez, de preferência copiando as peças do `margarida_v2.alp`:
-- [ ] `nChartists` = 13
-- [ ] `newsRate` = 0.0026 (ou 0.002, conforme a ronda 8)
-- [ ] NewsAgent, transição das notícias: Action `normal(0.02, 0)` + `main.activity *= Math.exp(main.activityNewsJump);`; Rate `main.newsRate * Math.min(main.activity, 3)` (se a ronda 8 o mantiver)
-- [ ] Fundamentalist e Chartist: `cash` = 1e9 e `position` = 1000000000
-- [ ] Atividade dos noise traders: parâmetros `activityPersist`, `activitySigma`, `activityNewsJump`, variável `activity`, evento `activityEvent` e quantidade das ordens × `activity`
-- [ ] Depois: testes do livro → repor parâmetros normais → atualizar CONTRATO e a tabela de parâmetros do relatório → commit
+- [x] `nChartists` = 13
+- [x] `newsRate` = 0.002
+- [x] NewsAgent, transição das notícias: Action `normal(0.02, 0)` + `main.activity *= Math.exp(main.activityNewsJump);`; Rate fica `main.newsRate` (a ronda 8 foi desfeita)
+- [x] Fundamentalist e Chartist: `cash` = 1e9 e `position` = 1000000000
+- [x] Atividade dos noise traders: parâmetros `activityPersist`, `activitySigma`, `activityNewsJump`, variável `activity`, evento `activityEvent` e quantidade das ordens × `activity`
+- [x] Depois: testes do livro → repor parâmetros normais → atualizar CONTRATO e a tabela de parâmetros do relatório → commit
