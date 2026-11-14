@@ -317,6 +317,36 @@ traceln("nHalts=" + nHalts + "  timeHalted=" + timeHalted + "  maxDrawdown=" + m
 						</InitialValue>
 					</Properties>
 				</Variable>
+				<Variable Class="PlainVariable">
+					<Id>1794657188963</Id>
+					<Name><![CDATA[attention]]></Name>
+					<X>60</X><Y>400</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
+						<Type><![CDATA[double]]></Type>        
+						<InitialValue Class="CodeValue">
+							<Code><![CDATA[1]]></Code>
+						</InitialValue>
+					</Properties>
+				</Variable>
+				<Variable Class="PlainVariable">
+					<Id>1794657210619</Id>
+					<Name><![CDATA[dayOpen]]></Name>
+					<X>60</X><Y>450</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
+						<Type><![CDATA[double]]></Type>        
+						<InitialValue Class="CodeValue">
+							<Code><![CDATA[initialPrice]]></Code>
+						</InitialValue>
+					</Properties>
+				</Variable>
 				<Variable Class="Parameter">
 					<Id>1792673720434</Id>
 					<Name><![CDATA[nNoise]]></Name>
@@ -1109,6 +1139,126 @@ traceln("nHalts=" + nHalts + "  timeHalted=" + timeHalted + "  maxDrawdown=" + m
 						</ParameterEditor>
 					</Properties>                 
 				</Variable>
+				<Variable Class="Parameter">
+					<Id>1794657343333</Id>
+					<Name><![CDATA[attPersist]]></Name>
+					<X>190</X><Y>400</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" ModificatorType="STATIC">
+						<Type><![CDATA[double]]></Type>
+						<UnitType><![CDATA[NONE]]></UnitType>
+						<SdArray>false</SdArray>
+						<DefaultValue Class="CodeValue">
+							<Code><![CDATA[0.7]]></Code>
+						</DefaultValue>
+						<ParameterEditor>
+							<Id>1794657343331</Id>
+							<EditorContolType>TEXT_BOX</EditorContolType>
+							<MinSliderValue><![CDATA[0]]></MinSliderValue>
+							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
+							<DelimeterType>NO_DELIMETER</DelimeterType>
+						</ParameterEditor>
+					</Properties>                 
+				</Variable>
+				<Variable Class="Parameter">
+					<Id>1794657370868</Id>
+					<Name><![CDATA[attWeight]]></Name>
+					<X>190</X><Y>440</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" ModificatorType="STATIC">
+						<Type><![CDATA[double]]></Type>
+						<UnitType><![CDATA[NONE]]></UnitType>
+						<SdArray>false</SdArray>
+						<DefaultValue Class="CodeValue">
+							<Code><![CDATA[0.6]]></Code>
+						</DefaultValue>
+						<ParameterEditor>
+							<Id>1794657370866</Id>
+							<EditorContolType>TEXT_BOX</EditorContolType>
+							<MinSliderValue><![CDATA[0]]></MinSliderValue>
+							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
+							<DelimeterType>NO_DELIMETER</DelimeterType>
+						</ParameterEditor>
+					</Properties>                 
+				</Variable>
+				<Variable Class="Parameter">
+					<Id>1794657406733</Id>
+					<Name><![CDATA[useAttChart]]></Name>
+					<X>190</X><Y>490</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" ModificatorType="STATIC">
+						<Type><![CDATA[boolean]]></Type>
+						<UnitType><![CDATA[NONE]]></UnitType>
+						<SdArray>false</SdArray>
+						<DefaultValue Class="CodeValue">
+							<Code><![CDATA[true]]></Code>
+						</DefaultValue>
+						<ParameterEditor>
+							<Id>1794657406731</Id>
+							<EditorContolType>CHECK_BOX</EditorContolType>
+							<MinSliderValue><![CDATA[0]]></MinSliderValue>
+							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
+							<DelimeterType>NO_DELIMETER</DelimeterType>
+						</ParameterEditor>
+					</Properties>                 
+				</Variable>
+				<Variable Class="Parameter">
+					<Id>1794657464292</Id>
+					<Name><![CDATA[useAttNoise]]></Name>
+					<X>340</X><Y>400</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" ModificatorType="STATIC">
+						<Type><![CDATA[boolean]]></Type>
+						<UnitType><![CDATA[NONE]]></UnitType>
+						<SdArray>false</SdArray>
+						<DefaultValue Class="CodeValue">
+							<Code><![CDATA[false]]></Code>
+						</DefaultValue>
+						<ParameterEditor>
+							<Id>1794657464290</Id>
+							<EditorContolType>CHECK_BOX</EditorContolType>
+							<MinSliderValue><![CDATA[0]]></MinSliderValue>
+							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
+							<DelimeterType>NO_DELIMETER</DelimeterType>
+						</ParameterEditor>
+					</Properties>                 
+				</Variable>
+				<Variable Class="Parameter">
+					<Id>1794657489404</Id>
+					<Name><![CDATA[tradeDuringHalt]]></Name>
+					<X>340</X><Y>460</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" ModificatorType="STATIC">
+						<Type><![CDATA[boolean]]></Type>
+						<UnitType><![CDATA[NONE]]></UnitType>
+						<SdArray>false</SdArray>
+						<DefaultValue Class="CodeValue">
+							<Code><![CDATA[true]]></Code>
+						</DefaultValue>
+						<ParameterEditor>
+							<Id>1794657489402</Id>
+							<EditorContolType>CHECK_BOX</EditorContolType>
+							<MinSliderValue><![CDATA[0]]></MinSliderValue>
+							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
+							<DelimeterType>NO_DELIMETER</DelimeterType>
+						</ParameterEditor>
+					</Properties>                 
+				</Variable>
 			</Variables>
 			<Events>
 				<Event>
@@ -1177,7 +1327,10 @@ pricesFile.println(label + ";" + runId + ";" + time() + ";" + p + ";"
 						</RecurrenceCode>
 						<Condition><![CDATA[false]]></Condition>
 					</Properties>
-					<Action><![CDATA[activity = Math.exp(activityPersist * Math.log(activity) + normal(activitySigma, 0) - activityNewsJump * newsRate * 510);]]></Action>
+					<Action><![CDATA[activity = Math.exp(activityPersist * Math.log(activity) + normal(activitySigma, 0) - activityNewsJump * newsRate * 510);
+double r = Math.abs(Math.log(stock.lastPrice / dayOpen));
+dayOpen = stock.lastPrice;
+attention = Math.min(3, Math.exp(attPersist * Math.log(attention) + attWeight * (r / 0.0165 - 1)));]]></Action>
 				</Event>
 			</Events>
 			<Functions>
@@ -2912,7 +3065,7 @@ refPrice = lastPrice;]]></Body>
 						<Condition><![CDATA[false]]></Condition>
 					</Properties>
 					<Action><![CDATA[int side = randomTrue(0.5) ? 1 : -1;
-double p = main.stock.mid() * (1 + normal(main.noiseSigma, 0));
+double p = main.stock.mid() * (1 + normal(main.noiseSigma * (main.useAttNoise ? main.attention : 1), 0));
 main.stock.order(this, side, p, Math.max(1, (int) Math.round(uniform_discr(100, 1000) * main.activity)));]]></Action>
 				</Event>
 			</Events>
@@ -3573,6 +3726,7 @@ if (q >= 100) main.stock.order(this, -1, p, q);]]></EntryAction>
 							<Code><![CDATA[1]]></Code>
 							<Unit Class="RateUnits"><![CDATA[PER_MINUTE]]></Unit>
 						</Rate>
+						<Guard><![CDATA[!main.tradeDuringHalt]]></Guard>
 						<MessageType><![CDATA[Object]]></MessageType>
 						<DefaultTransition>true</DefaultTransition>
 						<FilterType><![CDATA[equalsTo]]></FilterType>
@@ -4024,6 +4178,7 @@ signalNeighbours();]]></EntryAction>
 					<ShowLabel>false</ShowLabel>
 					<Points>
 						<Point><X>0</X><Y>0</Y></Point>
+						<Point><X>30</X><Y>0</Y></Point>
 						<Point><X>98</X><Y>0</Y></Point>
 					</Points>
 					<IconOffset>20.0</IconOffset>
@@ -4034,7 +4189,7 @@ signalNeighbours();]]></EntryAction>
 						</Timeout>
 						<Condition><![CDATA[true]]></Condition>
 						<Rate Class="CodeUnitValue">
-							<Code><![CDATA[main.chartRate]]></Code>
+							<Code><![CDATA[main.chartRate * (main.useAttChart ? main.attention : 1)]]></Code>
 							<Unit Class="RateUnits"><![CDATA[PER_MINUTE]]></Unit>
 						</Rate>
 						<MessageType><![CDATA[Object]]></MessageType>
@@ -4370,6 +4525,7 @@ signalNeighbours();]]></EntryAction>
 					<ShowLabel>false</ShowLabel>
 					<Points>
 						<Point><X>0</X><Y>0</Y></Point>
+						<Point><X>0</X><Y>41</Y></Point>
 						<Point><X>0</X><Y>70</Y></Point>
 					</Points>
 					<IconOffset>20.0</IconOffset>
@@ -4383,6 +4539,7 @@ signalNeighbours();]]></EntryAction>
 							<Code><![CDATA[1]]></Code>
 							<Unit Class="RateUnits"><![CDATA[PER_MINUTE]]></Unit>
 						</Rate>
+						<Guard><![CDATA[!main.tradeDuringHalt]]></Guard>
 						<MessageType><![CDATA[String]]></MessageType>
 						<DefaultTransition>true</DefaultTransition>
 						<FilterType><![CDATA[equalsTo]]></FilterType>
@@ -5468,6 +5625,21 @@ main.activity *= Math.exp(main.activityNewsJump);]]></Action>
 				<Parameter>
 					<ParameterName><![CDATA[activityNewsJump]]></ParameterName>
 				</Parameter>
+				<Parameter>
+					<ParameterName><![CDATA[attPersist]]></ParameterName>
+				</Parameter>
+				<Parameter>
+					<ParameterName><![CDATA[attWeight]]></ParameterName>
+				</Parameter>
+				<Parameter>
+					<ParameterName><![CDATA[useAttChart]]></ParameterName>
+				</Parameter>
+				<Parameter>
+					<ParameterName><![CDATA[useAttNoise]]></ParameterName>
+				</Parameter>
+				<Parameter>
+					<ParameterName><![CDATA[tradeDuringHalt]]></ParameterName>
+				</Parameter>
 			</Parameters>
 			<PresentationProperties>
 				<EnableZoomAndPanning>true</EnableZoomAndPanning>
@@ -5602,6 +5774,21 @@ main.activity *= Math.exp(main.activityNewsJump);]]></Action>
 			<FreeformParamValue>	
 				<Id>1794133786385</Id>
 			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657343333</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657370868</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657406733</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657464292</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657489404</Id>
+			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
 				<Type>FIXED</Type>
@@ -5735,6 +5922,26 @@ main.activity *= Math.exp(main.activityNewsJump);]]></Action>
 			</RangeVariationParamValue>
 			<RangeVariationParamValue>	
 				<Id>1794133786385</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657343333</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657370868</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657406733</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657464292</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657489404</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
 			<ModelTimeProperties>
@@ -5876,6 +6083,21 @@ main.activity *= Math.exp(main.activityNewsJump);]]></Action>
 			</FreeformParamValue>
 			<FreeformParamValue>	
 				<Id>1794133786385</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657343333</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657370868</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657406733</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657464292</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657489404</Id>
 			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
@@ -6024,6 +6246,26 @@ main.activity *= Math.exp(main.activityNewsJump);]]></Action>
 				<Id>1794133786385</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657343333</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657370868</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657406733</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657464292</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657489404</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Stop at specified time]]></StopOption>
 				<InitialDate><![CDATA[1792627200000]]></InitialDate>	
@@ -6163,6 +6405,21 @@ main.activity *= Math.exp(main.activityNewsJump);]]></Action>
 			</FreeformParamValue>
 			<FreeformParamValue>	
 				<Id>1794133786385</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657343333</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657370868</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657406733</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657464292</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657489404</Id>
 			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
@@ -6329,6 +6586,26 @@ main.activity *= Math.exp(main.activityNewsJump);]]></Action>
 				<Id>1794133786385</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657343333</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657370868</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657406733</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657464292</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657489404</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Stop at specified time]]></StopOption>
 				<InitialDate><![CDATA[1792627200000]]></InitialDate>	
@@ -6468,6 +6745,21 @@ main.activity *= Math.exp(main.activityNewsJump);]]></Action>
 			</FreeformParamValue>
 			<FreeformParamValue>	
 				<Id>1794133786385</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657343333</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657370868</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657406733</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657464292</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657489404</Id>
 			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
@@ -6617,6 +6909,26 @@ main.activity *= Math.exp(main.activityNewsJump);]]></Action>
 			</RangeVariationParamValue>
 			<RangeVariationParamValue>	
 				<Id>1794133786385</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657343333</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657370868</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657406733</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657464292</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657489404</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
 			<ModelTimeProperties>

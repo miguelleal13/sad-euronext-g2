@@ -72,3 +72,9 @@ Lista provisória do João (09/11); mudar tudo de uma vez, de preferência copia
 - [x] Fundamentalist e Chartist: `cash` = 1e9 e `position` = 1000000000
 - [x] Atividade dos noise traders: parâmetros `activityPersist`, `activitySigma`, `activityNewsJump`, variável `activity`, evento `activityEvent` e quantidade das ordens × `activity`
 - [x] Depois: testes do livro → repor parâmetros normais → atualizar CONTRATO e a tabela de parâmetros do relatório → commit
+
+## Modelo final da calibração: ronda 8b, A2 ✅ feito a 14/11
+- [x] Main passou a ser a cópia `sandbox/margarida/Euronext_8b/Euronext_8b.alp` com `useAttChart` = true e `attWeight` = 0.6 (`tradeDuringHalt` = true já vinha); tirados do Cenario1 os valores da opção C (`attWeight` 0.3, `useAttNoise` true)
+- [x] CONTRATO e relatório (tabela do Main, noise traders) atualizados
+- [x] Testes do livro (11 PASS) → Ctrl+S → commit
+- [ ] João: Apêndices D e E, pressupostos (30 relaxado, atenção) e resposta ao professor

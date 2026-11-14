@@ -95,6 +95,10 @@ Todos os investidores têm as variáveis `double cash` e `int position` e um sta
 | `mmSpread` / `mmQty` | double / int | 0.004 / 2000 | |
 | `newsRate` | double | 0.002 | pequenas notícias por minuto (cerca de 1 por dia; calibrado na ronda 1) |
 | `activityPersist` / `activitySigma` / `activityNewsJump` | double | 0.6 / 0.05 / 0.4 | atividade diária dos noise traders (pressuposto 37; calibrado nas rondas 6 e 7) |
+| `attPersist` / `attWeight` | double | 0.7 / 0.6 | atenção diária dos chartists (ronda 8b, configuração A2) |
+| `useAttChart` | boolean | true | ritmo de decisão dos chartists = `chartRate × attention` |
+| `useAttNoise` | boolean | false | dispersão dos noise traders × `attention` (opção C da ronda 8b, não usada) |
+| `tradeDuringHalt` | boolean | true | fundamentalistas e chartists continuam a enviar ordens durante a reserva (vão para o `pending`) |
 
 ## `Main`: variáveis e funções (cenários, CSV e KPIs: Margarida; resto: Miguel)
 
@@ -109,6 +113,8 @@ Todos os investidores têm as variáveis `double cash` e `int position` e um sta
 | `peakPrice`, `maxDrawdown` | double | queda máxima (KPI) |
 | `nHalts`, `timeHalted` | int, double | KPIs das interrupções |
 | `activity` | double | nível de atividade do dia dos noise traders (começa em 1; muda no `activityEvent`, a cada 510 min, e sobe com cada notícia) |
+| `attention` | double | atenção do dia dos chartists (começa em 1; sobe depois de dias com movimentos grandes e desce aos poucos; atualizada no `activityEvent`) |
+| `dayOpen` | double | preço no início do dia (para medir o movimento diário no `activityEvent`) |
 | `broadcast(String msg)` | função | entrega `msg` ao statechart de todos os agentes |
 | `onFill(Agent t, int side, int q, double p)` | função | atualiza o `cash` e a `position` de quem negociou |
 | `roundTick(double p)` | função | arredonda ao tick |
