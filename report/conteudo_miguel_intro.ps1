@@ -79,6 +79,7 @@ $content['Modelling Approach'] = {
 
 $content['References'] = {
     $refs = @(
+        'Barber, B. M., & Odean, T. (2008). All that glitters: The effect of attention and news on the buying behavior of individual and institutional investors. Review of Financial Studies, 21(2), 785-818.',
         'Chiarella, C., & Iori, G. (2002). A simulation analysis of the microstructure of double auction markets. Quantitative Finance, 2(5), 346-353.',
         'ESMA (2020). Market impacts of circuit breakers: Evidence from EU trading venues. ESMA Economic Report.',
         'Euronext (2021). Trading Manual for the Euronext cash markets, version of 5 July 2021.',
@@ -86,4 +87,11 @@ $content['References'] = {
         'Lux, T., & Marchesi, M. (1999). Scaling and criticality in a stochastic multi-agent model of a financial market. Nature, 397, 498-500.'
     )
     foreach ($r in $refs) { Body $r }
+}
+
+$content['Limitations and Future Work'] = {
+    Body 'The results must be read in the light of the assumptions that could not be relaxed within the scope of Phase 1. Two of them are critical for the research question. First, fundamentalists and trend followers have no budget constraint: they never run out of cash or shares and are never forced to sell, so the model cannot reproduce the margin calls and forced liquidations that deepen real crashes. Second, the market maker has no inventory limit and never withdraws its quotes, whereas real liquidity providers widen their spreads or leave the book during periods of stress. Both assumptions make the simulated market more resilient than the real one during a crash; the depth of the falls and the loss of liquidity in the shock scenarios are therefore conservative estimates, and part of the effect of the collars on a market without this resilience may not be captured.'
+    Body 'Third, the model reproduces volatility clustering only partially (0.026 against 0.080 for BCP). Within a trading day, where the collars act, the model shows the expected dynamics of herding, liquidity and price jumps, but the agitation after a shock dissipates faster from one day to the next than in the real market. Recovery times after the shock should therefore be read as a lower bound, and the comparison between scenarios is more reliable than the absolute values, since all scenarios share this limitation.'
+    Body 'Other simplifications are less critical but limit the scope of the conclusions: a single stock is modelled, without contagion to other stocks or to the index; the trading day is a continuous session without opening and closing auctions; the shocks are stylised news events and not reproductions of historical crashes; and the behavioural parameters of the agents are not observable, so they were taken from the literature, calibrated against daily stylised facts and tested in the sensitivity analysis.'
+    Body 'These limitations suggest several directions for future work. Budget constraints with leverage and margin calls, and a market maker that withdraws when its inventory or losses exceed a limit, would make the market fragile in the way real markets are during crashes, which is precisely when the collars are expected to matter. Agents that switch between fundamentalist and trend-following strategies according to their recent performance, as in Lux and Marchesi (1999), are the standard mechanism to generate stronger volatility clustering. Extending the model to several PSI stocks would allow the study of contagion and of the interaction between the collars of different stocks, and adding the opening and closing auctions would complete the Euronext trading day. Finally, intraday data would allow the model to be calibrated at the time scale at which the collars operate.'
 }
