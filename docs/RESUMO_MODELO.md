@@ -162,7 +162,7 @@ O agente de topo. Tem as populações, os parâmetros globais, os KPIs e os fich
 | Evento | Quando | O que faz |
 |---|---|---|
 | `logEvent` | a cada minuto | atualiza `peakPrice` e `maxDrawdown`; escreve uma linha no `precos.csv` |
-| `activityEvent` | a cada 510 min (uma vez por dia) | (1) atualiza a `activity`: `exp(activityPersist·log(activity) + N(0, activitySigma) − activityNewsJump·newsRate·510)`; (2) mede o movimento do dia `r = |log(lastPrice/dayOpen)|`; (3) atualiza a `attention`: `min(3, exp(attPersist·log(attention) + attWeight·(r/0.0165 − 1)))` |
+| `activityEvent` | a cada 510 min (uma vez por dia) | (1) atualiza a `activity`: `exp(activityPersist·log(activity) + N(0, activitySigma) − activityNewsJump·newsRate·510)`; (2) mede o movimento do dia `r = \|log(lastPrice/dayOpen)\|`; (3) atualiza a `attention`: `min(3, exp(attPersist·log(attention) + attWeight·(r/0.0165 − 1)))` |
 
 O termo `− activityNewsJump·newsRate·510` desconta o aumento médio que as notícias dão num dia, para a atividade não crescer sem parar. O `0.0165` é o movimento diário "normal": acima disso a atenção sobe, abaixo desce.
 
@@ -234,7 +234,7 @@ Não é um agente: é só a **ficha** de uma ordem. Não tem lógica; quem a pre
 | `order(trader, side, price, qty)` | **porta de entrada**: cria o `Order` (id, preço arredondado, hora, `expiry = agora + orderLife·U(0.3, 1.7)`). Se `halted` → vai para o `pending`; senão `addToBook` + `match` |
 | `addToBook(o)` | põe a ordem em `bids` (side 1) ou `asks` (side −1) |
 | `match()` | enquanto não está em reserva e há ordens dos dois lados: compara a melhor compra com a melhor venda; se não se cruzam, pára; se se cruzam, o preço é o da ordem **que já estava no livro** (id mais baixo); pergunta ao `collarHit`; se não dispara, `execute` com a quantidade menor; repete |
-| `collarHit(p)` | se os colares estão ligados: dinâmico = `|p/lastPrice − 1| > 3%`; estático = `|p/refPrice − 1| > 8%`. Se disparar, manda ao statechart `"STATIC_REPEAT"` (estático no mesmo sentido do anterior), `"STATIC"` ou `"DYNAMIC"`, e devolve `true` (o negócio não acontece) |
+| `collarHit(p)` | se os colares estão ligados: dinâmico = `\|p/lastPrice − 1\| > 3%`; estático = `\|p/refPrice − 1\| > 8%`. Se disparar, manda ao statechart `"STATIC_REPEAT"` (estático no mesmo sentido do anterior), `"STATIC"` ou `"DYNAMIC"`, e devolve `true` (o negócio não acontece) |
 | `execute(b, a, p, q)` | `lastPrice = p`, `volume += q`, tira `q` às duas ordens, `onFill` para comprador e vendedor; a ordem que fica a 0 sai da fila (a outra fica com o resto = execução parcial) |
 | `cancelAll(a)` | apaga todas as ordens de um agente |
 | `bestBid()`, `bestAsk()`, `mid()`, `spread()` | melhor compra, melhor venda, ponto médio (se faltar um lado usa `lastPrice`), diferença |
@@ -412,10 +412,10 @@ Na calibração cada corrida tem 250 dias (127 500 min).
 |---|---|---|---|
 | 1 | Volatilidade diária | 0.0207 | ±25% |
 | 2 | Curtose em excesso | 2.41 | > 1 e ±50% |
-| 3 | Clustering da volatilidade (autocorr. de |r|) | 0.080 | > 0.05 |
+| 3 | Clustering da volatilidade (autocorr. de \|r\|) | 0.080 | > 0.05 |
 | 4 | Ausência de autocorrelação dos retornos | 0.004 | entre −0.1 e 0.1 |
-| 5 | Dias com |r| > 3% | 12.9% | ±50% |
-| 6 | Correlação volume–|r| | 0.636 | > 0 |
+| 5 | Dias com \|r\| > 3% | 12.9% | ±50% |
+| 6 | Correlação volume–\|r\| | 0.636 | > 0 |
 | 7 | Persistência do volume | 0.470 | > 0 |
 
 **Porquê 2023–2024:** vinha do plano do projeto e foi fixado antes de correr o modelo; é recente e sem crises do BCP. 2025 ficou de fora (e tem o choque das tarifas de abril de 2025: −9,9% a 4/4). Teste de robustez com 2023, 2024 e 2025 na secção 3.2: os factos principais são estáveis; os que variam mais (clustering, autocorrelação, persistência do volume) são os que custaram a calibrar.
