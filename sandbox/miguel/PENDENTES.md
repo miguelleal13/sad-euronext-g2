@@ -31,7 +31,7 @@ Coisas do modelo que ficaram "provisórias" e que tenho de mudar mais tarde. Ris
 - [x] Escritas: 1 Introduction, 2 Problem Description, 4.1 Modelling Approach (26/10).
 
 ## Sempre que entrar um agente novo (semanas 2–3)
-Integrados a 27/10: Fundamentalist e Chartist (João), com a rede dos chartists no On startup. NewsAgent e MarketMaker (Matilde) e experiências Cenario1/2/4 (Margarida) também integrados a 27/10. Falta: dashboard e ecrã inicial (Matilde) e Cenario3 (Margarida).
+Integrados a 27/10: Fundamentalist e Chartist (João), com a rede dos chartists no On startup. NewsAgent e MarketMaker (Matilde) e experiências Cenario1/2/4 (Margarida) também integrados a 27/10. Cenario3 (Margarida) integrado a 11/11. Falta: dashboard e ecrã inicial (Matilde).
 
 Tirar as `//` da linha desse agente em:
 - [ ] **`onFill`** (Main): Fundamentalist · Chartist · MarketMaker
@@ -60,5 +60,21 @@ Corrida: nNoise 30, nFundamentalists 40, nChartists 30, choque de −10% ao minu
 - [ ] O preço estabiliza em ~0.43, abaixo do novo valor fundamental (~0.44–0.45).
 
 ## Para outros confirmarem (não é código meu)
+- [x] (09/11) João: confirmar no manual da Euronext o que acontece quando o leilão de reabertura não consegue fixar preço dentro do colar de ±6% (pressuposto 36). Confirmado no Trading Manual (05/07/2021), secção 4.2.4: a regra do modelo é igual à da Euronext.
 - [ ] João: confirmar no documento *Trading safeguards* da Euronext os valores dos colares para o BCP (±3% / ±8%, 3 / 10 min) e citar com data.
 - [ ] João: pressuposto nº 3 (só negociação contínua 08:00–16:30; sem pré-abertura nem leilões de abertura e fecho).
+
+## Defaults calibrados no Main ✅ feito a 11/11 (calibração fechada na ronda 7b; o Main passou a ser o margarida_v2.alp)
+Lista provisória do João (09/11); mudar tudo de uma vez, de preferência copiando as peças do `margarida_v2.alp`:
+- [x] `nChartists` = 13
+- [x] `newsRate` = 0.002
+- [x] NewsAgent, transição das notícias: Action `normal(0.02, 0)` + `main.activity *= Math.exp(main.activityNewsJump);`; Rate fica `main.newsRate` (a ronda 8 foi desfeita)
+- [x] Fundamentalist e Chartist: `cash` = 1e9 e `position` = 1000000000
+- [x] Atividade dos noise traders: parâmetros `activityPersist`, `activitySigma`, `activityNewsJump`, variável `activity`, evento `activityEvent` e quantidade das ordens × `activity`
+- [x] Depois: testes do livro → repor parâmetros normais → atualizar CONTRATO e a tabela de parâmetros do relatório → commit
+
+## Modelo final da calibração: ronda 8b, A2 ✅ feito a 14/11
+- [x] Main passou a ser a cópia `sandbox/margarida/Euronext_8b/Euronext_8b.alp` com `useAttChart` = true e `attWeight` = 0.6 (`tradeDuringHalt` = true já vinha); tirados do Cenario1 os valores da opção C (`attWeight` 0.3, `useAttNoise` true)
+- [x] CONTRATO e relatório (tabela do Main, noise traders) atualizados
+- [x] Testes do livro (11 PASS) → Ctrl+S → commit
+- [ ] João: Apêndices D e E, pressupostos (30 relaxado, atenção) e resposta ao professor

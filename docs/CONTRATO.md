@@ -32,7 +32,7 @@ O livro de ordens é um sistema de filas em Java: `bids` e `asks` são `Priority
 | `refPrice` | `double` | preço de referência estático (o do último leilão) |
 | `ma` | `double` | média móvel do preço (para os investidores de tendência) |
 | `halted` | `boolean` | `true` durante uma reserva (interrupção) |
-| `volume` | `int` | volume acumulado |
+| `volume` | `long` | volume acumulado (long: passa de 2 147 milhões em 250 dias) |
 | `lastStaticDir` | `int` | sentido do último colar estático do dia (+1/−1) |
 | `statechart` | Statechart | Continuous, ReservDynamic, ReservStatic, ReservStatic10, Auction |
 
@@ -71,12 +71,13 @@ Todos os investidores têm as variáveis `double cash` e `int position` e um sta
 | Nome | Tipo | Valor | Notas |
 |---|---|---|---|
 | `nFundamentalists` | int | 40 | calibrar |
-| `nChartists` | int | 30 | calibrar / cenário 3 |
+| `nChartists` | int | 13 | calibrado (ronda 5) / cenário 3 |
 | `nNoise` | int | 30 | calibrar |
 | `initialPrice` | double | 0.50 | aproximadamente o BCP (€) |
 | `tickSize` | double | 0.0001 | |
 | `orderLife` | double | 35 | minutos de vida média de uma ordem não executada |
 | `maWindow` | double | 50 | memória da média móvel `stock.ma` (minutos); `ma += (lastPrice - ma) / maWindow` |
+| `auctionCollar` | double | 0.06 | colar do leilão de reabertura: o preço do leilão fica a ±6% do último preço antes da reserva (regra da Euronext para o PSI) |
 | `runTests` | boolean | false | `true` corre o `stock.testBook()` no arranque (com `nNoise = 0`) |
 | `collarSet` | int | 2 | 0 = sem colares, 1 = 2%/5%, 2 = 3%/8% (atual), 3 = 5%/10%, 4 = personalizado |
 | `customDyn` / `customStat` | double | 0.03 / 0.08 | usados quando `collarSet = 4` (limiares ótimos) |
@@ -92,7 +93,12 @@ Todos os investidores têm as variáveis `double cash` e `int position` e um sta
 | `panicDuration` | double | 10 | minutos |
 | `noiseRate` / `noiseSigma` | double | 1 / 0.002 | |
 | `mmSpread` / `mmQty` | double / int | 0.004 / 2000 | |
-| `newsRate` | double | 0.0004 | pequenas notícias por minuto (cerca de 1 a cada 5 dias) |
+| `newsRate` | double | 0.002 | pequenas notícias por minuto (cerca de 1 por dia; calibrado na ronda 1) |
+| `activityPersist` / `activitySigma` / `activityNewsJump` | double | 0.6 / 0.05 / 0.4 | atividade diária dos noise traders (pressuposto 37; calibrado nas rondas 6 e 7) |
+| `attPersist` / `attWeight` | double | 0.7 / 0.6 | atenção diária dos chartists (ronda 8b, configuração A2) |
+| `useAttChart` | boolean | true | ritmo de decisão dos chartists = `chartRate × attention` |
+| `useAttNoise` | boolean | false | dispersão dos noise traders × `attention` (opção C da ronda 8b, não usada) |
+| `tradeDuringHalt` | boolean | true | fundamentalistas e chartists continuam a enviar ordens durante a reserva (vão para o `pending`) |
 
 ## `Main`: variáveis e funções (cenários, CSV e KPIs: Margarida; resto: Miguel)
 
@@ -106,6 +112,9 @@ Todos os investidores têm as variáveis `double cash` e `int position` e um sta
 | `nextOrderId` | long | |
 | `peakPrice`, `maxDrawdown` | double | queda máxima (KPI) |
 | `nHalts`, `timeHalted` | int, double | KPIs das interrupções |
+| `activity` | double | nível de atividade do dia dos noise traders (começa em 1; muda no `activityEvent`, a cada 510 min, e sobe com cada notícia) |
+| `attention` | double | atenção do dia dos chartists (começa em 1; sobe depois de dias com movimentos grandes e desce aos poucos; atualizada no `activityEvent`) |
+| `dayOpen` | double | preço no início do dia (para medir o movimento diário no `activityEvent`) |
 | `broadcast(String msg)` | função | entrega `msg` ao statechart de todos os agentes |
 | `onFill(Agent t, int side, int q, double p)` | função | atualiza o `cash` e a `position` de quem negociou |
 | `roundTick(double p)` | função | arredonda ao tick |

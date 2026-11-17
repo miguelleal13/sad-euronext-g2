@@ -1,7 +1,9 @@
 """KPIs dos cenários (proposta: volatilidade, liquidez e recuperação).
 
 Lê model/Euronext_Main/output/precos.csv e halts.csv e escreve data/processed/kpis.xlsx com 3 folhas:
-  halts  - uma linha por interrupção: volatilidade e spread 2/5/10 min antes e depois, gap do leilão
+  halts  - uma linha por interrupção: volatilidade e spread 2/5/10 min antes e depois, gap do leilão.
+           Reservas seguidas (a seguinte começa até MERGE_GAP min depois do fim da anterior) contam como
+           uma só interrupção, como uma reserva prolongada da Euronext; n_reservas diz quantas juntou
   runs   - uma linha por corrida: queda máxima, volume, tempo em interrupção, recuperação de metade da queda
   resumo - média e intervalo de confiança de 95% por cenário (label)
   esma   - validação (ESMA, 2020): em cada cenário, % de interrupções em que a volatilidade desce
@@ -23,6 +25,7 @@ PRICES = OUT_DIR / "precos.csv"
 HALTS = OUT_DIR / "halts.csv"
 RESULT = ROOT / "data" / "processed" / "kpis.xlsx"
 WINDOWS = [2, 5, 10]
+MERGE_GAP = 1.0     # minutos: reservas separadas por menos do que isto formam uma só interrupção
 
 
 def load():
@@ -36,6 +39,25 @@ def load():
     return p, h
 
 
+def merge_halts(h):
+    """Junta reservas seguidas numa só interrupção: início da primeira, fim da última,
+    preço antes da primeira e preço do último leilão."""
+    rows = []
+    for (label, run), g in h.sort_values(["run", "start"]).groupby(["label", "run"], sort=False):
+        cur = None
+        for _, x in g.iterrows():
+            if cur is not None and x["start"] - cur["end"] <= MERGE_GAP:
+                cur["end"], cur["auctionPrice"] = x["end"], x["auctionPrice"]
+                cur["n_reservas"] += 1
+            else:
+                if cur is not None:
+                    rows.append(cur)
+                cur = {"label": label, "run": run, "start": x["start"], "end": x["end"],
+                       "prePrice": x["prePrice"], "auctionPrice": x["auctionPrice"], "n_reservas": 1}
+        rows.append(cur)
+    return pd.DataFrame(rows)
+
+
 def halt_kpis(p, h):
     by_run = dict(tuple(p.groupby("run")))      # separa as corridas uma vez só (o ficheiro tem milhões de linhas)
     rows = []
@@ -44,6 +66,7 @@ def halt_kpis(p, h):
         if g is None:
             continue
         row = {"label": x["label"], "run": x["run"], "start": x["start"], "dur": x["end"] - x["start"],
+               "n_reservas": x["n_reservas"],
                "gap_leilao": x["auctionPrice"] / x["prePrice"] - 1}
         for w in WINDOWS:
             before = g[(g["time"] >= x["start"] - w) & (g["time"] < x["start"])]
@@ -72,6 +95,7 @@ def run_kpis(p, h):
             "queda_maxima": dd.max(),
             "volume_total": g["volume"].iloc[-1],
             "n_interrupcoes": len(hh),
+            "n_reservas": int(hh["n_reservas"].sum()) if len(hh) else 0,
             "tempo_em_interrupcao": (hh["end"] - hh["start"]).sum() if len(hh) else 0.0,
             "min_recuperar_metade": t[i + rec[0]] - t[i] if len(rec) and dd.max() > 0 else np.nan,
             "curtose_ret_1min": g["ret"].kurt(),
@@ -108,6 +132,10 @@ def esma(halts):
 
 def main():
     p, h = load()
+    if not h.empty:
+        n0 = len(h)
+        h = merge_halts(h)
+        print(f"{n0} reservas -> {len(h)} interrupções (reservas seguidas a menos de {MERGE_GAP} min juntas)")
     halts = halt_kpis(p, h) if not h.empty else pd.DataFrame()
     runs = run_kpis(p, h)
     res = summary(runs)

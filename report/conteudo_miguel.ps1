@@ -18,11 +18,22 @@ $content['Main agent'] = {
         @('noiseSigma', 'Parameter', '0.002', 'Dispersion of the noise traders limit prices around the mid price'),
         @('orderLife', 'Parameter', '35', 'Mean lifetime of an order that is not executed (min)'),
         @('maWindow', 'Parameter', '50', 'Memory of the moving average used by trend followers (min)'),
+        @('auctionCollar', 'Parameter', '0.06', 'Auction collar: the reopening auction price is limited to this distance from the last price before the reservation'),
+        @('activityPersist', 'Parameter', '0.6', 'Persistence of the daily activity level of the noise traders'),
+        @('activitySigma', 'Parameter', '0.05', 'Standard deviation of the daily change in the activity level'),
+        @('activityNewsJump', 'Parameter', '0.4', 'Increase in the logarithm of the activity level with each news event'),
+        @('attPersist', 'Parameter', '0.7', 'Persistence of the daily attention level of the trend followers'),
+        @('attWeight', 'Parameter', '0.6', 'Increase in the logarithm of the attention level after a day with a large price move'),
+        @('useAttChart', 'Parameter (boolean)', 'true', 'Multiplies the decision rate of the trend followers by the attention level'),
+        @('useAttNoise', 'Parameter (boolean)', 'false', 'Multiplies the price dispersion of the noise traders by the attention level (tested in the calibration, not used)'),
+        @('tradeDuringHalt', 'Parameter (boolean)', 'true', 'Fundamentalists and trend followers keep submitting orders during a reservation period'),
         @('runTests', 'Parameter (boolean)', 'false', 'Runs the order book tests at start-up'),
         @('fundamentalValue', 'Variable', 'initialPrice', 'Fundamental value of the stock, changed by news'),
         @('dynamicThreshold', 'Variable', '0.03', 'Dynamic collar, relative to the last traded price'),
         @('staticThreshold', 'Variable', '0.08', 'Static collar, relative to the reference price'),
-        @('collarsActive', 'Variable (boolean)', 'true', 'Switches the volatility interruptions on or off')
+        @('collarsActive', 'Variable (boolean)', 'true', 'Switches the volatility interruptions on or off'),
+        @('activity', 'Variable', '1', 'Activity level of the day; multiplies the order sizes of the noise traders'),
+        @('attention', 'Variable', '1', 'Attention level of the day; rises after days with large price moves and decays over the following days')
     ) @(3.2, 3.2, 2.3, 7.3) 'mainParams'
     Tbl 'Key functions present in the Main agent' @('Function', 'Description') @(
         @('roundTick(p)', 'Rounds a price to the tick size'),
@@ -74,13 +85,13 @@ $content['Volatility Interruptions and Reopening Auction'] = {
         @('ReservStatic10', 'Static collar breached again in the same direction', 'To Auction after haltLong (10 min)'),
         @('Auction', 'Reopening auction: the pending orders enter the book', 'To Continuous after 0.01 min, executing runAuction() and endHalt()')
     ) @(3.2, 5.5, 7.3) 'stockStates'
-    Body 'The reopening auction sets a single uncrossing price. For every candidate price p (the limit prices present in the book), the demand is the quantity of bids with a price greater than or equal to p and the supply is the quantity of asks with a price lower than or equal to p; the executable volume is the minimum of the two. The auction selects the price with the largest executable volume and, in case of a tie, the one closest to the last traded price. All crossing orders are executed at that single price, which becomes the new reference price of the static collar.'
+    Body 'The reopening auction sets a single uncrossing price. For every candidate price p (the limit prices present in the book), the demand is the quantity of bids with a price greater than or equal to p and the supply is the quantity of asks with a price lower than or equal to p; the executable volume is the minimum of the two. The auction selects the price with the largest executable volume and, in case of a tie, the one closest to the last traded price. Following the Euronext rules for PSI constituents, the auction price is limited to ±6% (parameter auctionCollar) of the last price before the reservation: if the best price lies outside this range, it is set to the closest limit and only the orders that cross at that price are executed. If no order can be executed within the collar while the book remains crossed outside it, the last price is moved to the collar limit and a new reservation follows, so that the reference approaches the price at which the market wants to trade by at most 6% per auction. This follows the Euronext procedure, in which the thresholds are modified and, depending on the direction of the market, the upper or lower threshold becomes the new reference price (Euronext, 2021, section 4.2.4); consecutive reservations less than one minute apart are therefore counted as a single interruption in the analysis. All crossing orders are executed at that single price, which becomes the new reference price of the static collar.'
     Body '{F:halts} shows the mechanism at work in a deliberately volatile market (noise traders with a price dispersion of 5%): every HALT is followed by a REOPEN 3.01 minutes later, that is, the 3-minute reservation plus the auction.'
     Fig (Join-Path $figDir 'reservations_demo.png') 'Reservation periods in a volatile market: every HALT is followed by a REOPEN 3.01 minutes later' 6.0 'halts'
 }
 
 $content['Noise Trader agent type'] = {
-    Body 'Noise traders represent uninformed participants and provide the baseline trading volume and liquidity of the market. They have no statechart: each noise trader submits orders at random instants, according to a Poisson process with rate noiseRate per minute. Each order is a buy or a sell with equal probability, has a limit price drawn from a normal distribution centred on the mid price with relative standard deviation noiseSigma, and a quantity drawn uniformly between 100 and 1000 shares. Noise traders keep submitting orders during reservation periods; these orders wait in the pending queue and take part in the reopening auction, as in the real market.'
+    Body 'Noise traders represent uninformed participants and provide the baseline trading volume and liquidity of the market. They have no statechart: each noise trader submits orders at random instants, according to a Poisson process with rate noiseRate per minute. Each order is a buy or a sell with equal probability, has a limit price drawn from a normal distribution centred on the mid price with relative standard deviation noiseSigma, and a quantity drawn uniformly between 100 and 1000 shares and multiplied by the activity level of the day (variable activity of the Main agent). Every 510 minutes the event activityEvent updates the logarithm of this level as a first-order autoregressive process (persistence activityPersist, standard deviation activitySigma), and every news event raises it by activityNewsJump, so that trading volume is persistent from one day to the next and higher after news. This mechanism was added during the calibration (Section 6.3). Noise traders keep submitting orders during reservation periods, and so do fundamentalists and trend followers in the calibrated model (parameter tradeDuringHalt); these orders wait in the pending queue and take part in the reopening auction, as in the real market.'
     Tbl 'Key variables and events present in the Noise Trader agent type' @('Name', 'Type', 'Description') @(
         @('cash', 'Variable (double)', 'Available cash; set to a very large value so that noise traders are never constrained'),
         @('position', 'Variable (int)', 'Number of shares held (may become negative)'),
