@@ -187,6 +187,7 @@ try {
         @(1, 'Data and Stylised Facts'),
         @(2, 'Data Sources'),
         @(2, 'Stylised Facts of the BCP Stock'),
+        @(2, 'Real Information Shocks'),
         @(2, 'Key Assumptions'),
         @(1, 'System Modelling'),
         @(2, 'Modelling Approach'),
