@@ -27,7 +27,7 @@ FACTS = ["volatilidade_diaria", "curtose_excesso", "autocorr_abs_retornos_lag1",
          "pct_dias_var_maior_3pct", "corr_volume_absret", "autocorr_volume_lag1"]
 
 
-def run_facts(path):
+def run_facts(path, prefix="anova"):
     rows, carry = [], None
 
     def one(g):
@@ -37,7 +37,7 @@ def run_facts(path):
         return {"label": g["label"].iloc[0], "run": g["run"].iloc[0], **{k: s[k] for k in FACTS}}
 
     for chunk in pd.read_csv(path, sep=";", names=COLS, dtype={"label": str, "run": str}, chunksize=2_000_000):
-        chunk = chunk[chunk["label"].str.startswith("anova")]
+        chunk = chunk[chunk["label"].str.startswith(prefix)]
         if carry is not None:
             chunk = pd.concat([carry, chunk])
         if chunk.empty:
