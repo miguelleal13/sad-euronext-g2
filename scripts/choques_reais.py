@@ -35,10 +35,10 @@ START, END = "2023-01-01", "2024-12-31"
 SECTOR = ["^SX7E", "EXX1.DE", "SX7EEX.DE"]   # EURO STOXX Banks (índice ou ETF), pela ordem
 
 
-def sector_returns():
+def sector_returns(end="2025-01-10"):
     for t in SECTOR:
         try:
-            d = yf.download(t, start="2022-12-01", end="2025-01-10", auto_adjust=False, progress=False)
+            d = yf.download(t, start="2022-12-01", end=end, auto_adjust=False, progress=False)
         except Exception:
             continue
         if len(d):
@@ -54,11 +54,11 @@ PSI_EX_BCP = ["EDP.LS", "EDPR.LS", "GALP.LS", "JMT.LS", "NOS.LS", "SON.LS", "CTT
               "RENE.LS", "ALTR.LS", "COR.LS", "IBS.LS", "EGL.LS"]   # ações do PSI em 2023-24, sem o BCP
 
 
-def portugal_returns():
+def portugal_returns(end="2025-01-10"):
     rets = []
     for t in PSI_EX_BCP:
         try:
-            d = yf.download(t, start="2022-12-01", end="2025-01-10", auto_adjust=False, progress=False)
+            d = yf.download(t, start="2022-12-01", end=end, auto_adjust=False, progress=False)
         except Exception:
             continue
         if len(d):
