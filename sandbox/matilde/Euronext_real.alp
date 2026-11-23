@@ -20,7 +20,7 @@
 			<Name><![CDATA[Main]]></Name>
 			<StartupCode><![CDATA[try {
     java.util.List<String> L = java.nio.file.Files.readAllLines(
-        java.nio.file.Paths.get("../../data/processed/choques_reais.csv"));
+	java.nio.file.Paths.get("../../data/processed/" + shocksFile));
     int n = L.size() - 1;
     shockSector = new double[n];
     shockNews = new double[n];
@@ -1527,6 +1527,30 @@ traceln("nHalts=" + nHalts + "  timeHalted=" + timeHalted + "  maxDrawdown=" + m
 						</DefaultValue>
 						<ParameterEditor>
 							<Id>1795451776259</Id>
+							<EditorContolType>TEXT_BOX</EditorContolType>
+							<MinSliderValue><![CDATA[0]]></MinSliderValue>
+							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
+							<DelimeterType>NO_DELIMETER</DelimeterType>
+						</ParameterEditor>
+					</Properties>                 
+				</Variable>
+				<Variable Class="Parameter">
+					<Id>1795461295274</Id>
+					<Name><![CDATA[shocksFile]]></Name>
+					<X>-1090</X><Y>700</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" ModificatorType="STATIC">
+						<Type><![CDATA[String]]></Type>
+						<UnitType><![CDATA[NONE]]></UnitType>
+						<SdArray>false</SdArray>
+						<DefaultValue Class="CodeValue">
+							<Code><![CDATA["choques_reais.csv"]]></Code>
+						</DefaultValue>
+						<ParameterEditor>
+							<Id>1795461295272</Id>
 							<EditorContolType>TEXT_BOX</EditorContolType>
 							<MinSliderValue><![CDATA[0]]></MinSliderValue>
 							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
@@ -6018,6 +6042,9 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 				<Parameter>
 					<ParameterName><![CDATA[residBlock]]></ParameterName>
 				</Parameter>
+				<Parameter>
+					<ParameterName><![CDATA[shocksFile]]></ParameterName>
+				</Parameter>
 			</Parameters>
 			<PresentationProperties>
 				<EnableZoomAndPanning>true</EnableZoomAndPanning>
@@ -6181,6 +6208,9 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 			</FreeformParamValue>
 			<FreeformParamValue>	
 				<Id>1795451776261</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1795461295274</Id>
 			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
@@ -6357,6 +6387,10 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 				<Id>1795451776261</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1795461295274</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Stop at specified time]]></StopOption>
 				<InitialDate><![CDATA[1792627200000]]></InitialDate>	
@@ -6526,6 +6560,9 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 			</FreeformParamValue>
 			<FreeformParamValue>	
 				<Id>1795451776261</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1795461295274</Id>
 			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
@@ -6714,6 +6751,10 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 				<Id>1795451776261</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1795461295274</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Stop at specified time]]></StopOption>
 				<InitialDate><![CDATA[1792627200000]]></InitialDate>	
@@ -6883,6 +6924,9 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 			</FreeformParamValue>
 			<FreeformParamValue>	
 				<Id>1795451776261</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1795461295274</Id>
 			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
@@ -7089,6 +7133,10 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 				<Id>1795451776261</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1795461295274</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Stop at specified time]]></StopOption>
 				<InitialDate><![CDATA[1792627200000]]></InitialDate>	
@@ -7258,6 +7306,9 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 			</FreeformParamValue>
 			<FreeformParamValue>	
 				<Id>1795451776261</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1795461295274</Id>
 			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
@@ -7449,6 +7500,10 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 				<Id>1795451776261</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1795461295274</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Stop at specified time]]></StopOption>
 				<InitialDate><![CDATA[1792627200000]]></InitialDate>	
@@ -7466,6 +7521,364 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 				<UseReplication>true</UseReplication>
 				<FixedReplicationsNumber>true</FixedReplicationsNumber>
 				<ReplicationPerIteration>30</ReplicationPerIteration>
+				<MinimumReplication>2</MinimumReplication>
+				<MaximumReplication>10</MaximumReplication>
+				<ConfidenceLevel>LEVEL_80</ConfidenceLevel>
+				<ErrorPercent>0.5</ErrorPercent>
+				<ExpressionForConfidenceComputation><![CDATA[0]]></ExpressionForConfidenceComputation>
+			</ReplicationsProperties>
+		</ParamVariationExperiment>
+		<!--   =========  Parameter Variation Experiment   ========  -->
+		<ParamVariationExperiment ActiveObjectClassId="1792673663013">
+			<Id>1795461421280</Id>
+			<Name><![CDATA[Teste]]></Name>
+			<CommandLineArguments><![CDATA[]]></CommandLineArguments>
+			<MaximumMemory>512</MaximumMemory>
+			<RandomNumberGenerationType>customGenerator</RandomNumberGenerationType>
+			<CustomGeneratorCode>new Random(1000 + getCurrentReplication())</CustomGeneratorCode>
+			<SeedValue>1</SeedValue>
+			<SelectionModeForSimultaneousEvents>LIFO</SelectionModeForSimultaneousEvents>
+			<VmArgs><![CDATA[]]></VmArgs>
+			<LoadRootFromSnapshot>false</LoadRootFromSnapshot>
+
+
+			<AllowParallelEvaluations>false</AllowParallelEvaluations>
+			<UseFreeformParameters>false</UseFreeformParameters>
+			<NumberOfRuns>10</NumberOfRuns>
+			<FreeformParamValue>	
+				<Id>1792673720434</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1792673839357</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1792674084480</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1792674106724</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1792674163079</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1792674180580</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1792674192176</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1792674207111</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1792674219562</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1792675620342</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793110731140</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793110731162</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793110731166</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793110731170</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793111762811</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793111762821</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793111762825</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793112481108</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793112481112</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793112481116</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793112481120</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793112481124</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793112481128</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793112481132</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793123605133</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793123605137</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793123605141</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793123605145</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793123605149</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1793872657201</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794077505721</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794077531229</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794133786385</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657343333</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657370868</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657406733</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657464292</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794657489404</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794945860512</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1794946738756</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1795432970694</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1795432975693</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1795451776261</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1795461295274</Id>
+			</FreeformParamValue>
+			<RangeVariationParamValue>	
+				<Id>1792673720434</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1792673839357</Id>
+				<Type>FIXED</Type>
+				<Expression Class="CodeValue">
+					<Code><![CDATA[0.4647]]></Code>
+				</Expression>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1792674084480</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1792674106724</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1792674163079</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1792674180580</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1792674192176</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1792674207111</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1792674219562</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1792675620342</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793110731140</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793110731162</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793110731166</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793110731170</Id>
+				<Type>FIXED</Type>
+				<Expression Class="CodeValue">
+					<Code><![CDATA["teste"]]></Code>
+				</Expression>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793111762811</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793111762821</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793111762825</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793112481108</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793112481112</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793112481116</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793112481120</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793112481124</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793112481128</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793112481132</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793123605133</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793123605137</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793123605141</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793123605145</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793123605149</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1793872657201</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794077505721</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794077531229</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794133786385</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657343333</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657370868</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657406733</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657464292</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794657489404</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794945860512</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1794946738756</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1795432970694</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1795432975693</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1795451776261</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1795461295274</Id>
+				<Type>FIXED</Type>
+				<Expression Class="CodeValue">
+					<Code><![CDATA["choques_reais_teste.csv"]]></Code>
+				</Expression>
+			</RangeVariationParamValue>
+			<ModelTimeProperties>
+				<StopOption><![CDATA[Stop at specified time]]></StopOption>
+				<InitialDate><![CDATA[1792627200000]]></InitialDate>	
+				<InitialTime><![CDATA[0.0]]></InitialTime>	
+				<FinalDate><![CDATA[1806703200000]]></FinalDate>	
+				<FinalTime><![CDATA[234600.0]]></FinalTime>	
+			</ModelTimeProperties>
+			<PresentationProperties>
+				<EnableZoomAndPanning>true</EnableZoomAndPanning>
+				<Title><![CDATA[Euronext_Main : Cenario1]]></Title>
+				<EnableDeveloperPanel>true</EnableDeveloperPanel>
+				<ShowDeveloperPanelOnStart>false</ShowDeveloperPanelOnStart>
+			</PresentationProperties>
+			<ReplicationsProperties>
+				<UseReplication>true</UseReplication>
+				<FixedReplicationsNumber>true</FixedReplicationsNumber>
+				<ReplicationPerIteration>10</ReplicationPerIteration>
 				<MinimumReplication>2</MinimumReplication>
 				<MaximumReplication>10</MaximumReplication>
 				<ConfidenceLevel>LEVEL_80</ConfidenceLevel>
