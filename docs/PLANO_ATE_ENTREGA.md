@@ -19,17 +19,18 @@
 ## A seguir: as corridas
 
 7. **João e Margarida:** teste fora da amostra de 2020–2021 (crise da COVID).
-8. **Margarida:** Cenário 2, choque com e sem colares (o principal).
-9. **Margarida:** Cenários 3 e 4 e os limiares ótimos.
-10. **Margarida:** análise de sensibilidade aos 5 parâmetros que mais pesam.
+8. **João:** verificação ao minuto. A calibração é toda com dados diários, mas os colares atuam ao minuto. Com os dados de minuto a minuto do BCP que o João tem guardado, comparar o BCP com o modelo nos retornos de 1 minuto: a agitação (volatilidade), os saltos grandes (curtose) e como a agitação se distribui ao longo do dia. Se não bater perfeitamente, entra no relatório como limitação, mas mostra que olhámos para a escala em que os colares atuam.
+9. **Margarida:** Cenário 2, choque com e sem colares (o principal).
+10. **Margarida:** Cenários 3 e 4 e os limiares ótimos.
+11. **Margarida:** análise de sensibilidade aos 5 parâmetros que mais pesam.
 
 ## No fim: resultados e relatório
 
-11. **João:** KPIs, probabilidade de crash, análise multicritério e tabela de recomendação.
-12. **Miguel:** atualizar os objetivos do relatório (secção 1.2).
-13. **João:** parágrafo na secção 6.3 sobre o que a calibração prova (os investidores transformam a informação real em preços).
-14. **Grupo:** conclusões a responder às perguntas 1 e 2 da proposta, uma a uma, e a dizer que as perguntas 3 e 4 ficaram fora do âmbito.
-15. **Miguel:** congelar o modelo e rever o relatório final antes de 2 de dezembro.
+12. **João:** KPIs, probabilidade de crash, análise multicritério e tabela de recomendação.
+13. **Miguel:** atualizar os objetivos do relatório (secção 1.2).
+14. **João:** parágrafo na secção 6.3 sobre o que a calibração prova (os investidores transformam a informação real em preços) e o resultado da verificação ao minuto.
+15. **Grupo:** conclusões a responder às perguntas 1 e 2 da proposta, uma a uma, e a dizer que as perguntas 3 e 4 ficaram fora do âmbito.
+16. **Miguel:** congelar o modelo e rever o relatório final antes de 2 de dezembro.
 
 ---
 
@@ -38,7 +39,6 @@
 - Correr os cenários em três regimes de mercado (calmo, atual e crise bancária).
 - Correr o Cenário 2 numa janela calma de 2025–2026.
 - Comparar a informação que entra no modelo com o preço que sai, para mostrar o que os investidores acrescentam.
-- Verificação com os dados de minuto a minuto do BCP.
 - Atualizar os resumos em PDF do Miguel (ainda falam do modelo antigo).
 
 **Atenção:** os resultados antigos dos cenários foram feitos com o modelo antigo e têm de ser corridos de novo.
