@@ -186,9 +186,9 @@ Fazer no **modelo principal** só depois de o Miguel confirmar o passo 4. Como m
 
 **6.8** Gravar, commit da cópia, avisar o Miguel.
 
-## Passo 7 · João e Margarida · Teste fora da amostra 2020–2021
+## Passo 7 · João e Margarida · Teste fora da amostra 2020–2021 (já em curso)
 
-O João prepara os dados e as instruções. Em resumo, é igual ao teste de 2025–2026:
+Este teste já está a ser feito. Fica aqui o resumo do que tem de ser cumprido, igual ao teste de 2025–2026:
 
 1. Experiência igual à `Teste`, com `shocksFile` = `"choques_reais_teste2020.csv"`, `startDay` = **0**, `initialPrice` = fecho do BCP na véspera do primeiro dia do ficheiro, Stop = número de dias do ficheiro × 510.
 2. 10 replicações. Correr **uma vez**, sem mexer em nenhum parâmetro depois de ver o resultado.
