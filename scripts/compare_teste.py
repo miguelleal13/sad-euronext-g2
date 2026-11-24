@@ -3,8 +3,8 @@
 Os factos-alvo do teste são calculados exatamente como os do treino (target_stats.compute), mas no período de teste.
 Os critérios de "bate" são os mesmos de docs/FACTOS_ESTILIZADOS.md, aplicados aos valores do BCP no teste.
 
-Uso: python scripts/compare_teste.py PASTA      (pasta com o precos.csv da corrida de teste; label a começar por "teste")
-     python scripts/compare_teste.py PASTA baseline   (se o label começar por outro prefixo)
+Uso: python scripts/compare_teste.py PASTA                                   (teste 2025-2026, label "teste")
+     python scripts/compare_teste.py PASTA teste2020 2020-01-01 2021-12-31   (outro período: prefixo do label, início, fim)
 """
 import sys
 from pathlib import Path
@@ -22,7 +22,8 @@ TEST = ("2025-01-01", "2026-12-31")
 def main():
     folder = Path(sys.argv[1])
     prefix = sys.argv[2] if len(sys.argv) > 2 else "teste"
-    real = compute(*TEST)
+    period = (sys.argv[3], sys.argv[4]) if len(sys.argv) > 4 else TEST
+    real = compute(*period)
     model, median, n = model_stats(prefix, folder / "precos.csv")
     rows = [{"facto": k, "BCP teste": real[k], "modelo": model[k], "mediana": median[k],
              "bate": "sim" if ok(real[k], model[k]) else "NAO"} for k, ok in FACTS]
@@ -30,7 +31,8 @@ def main():
     print(f"Teste {real['periodo']}: {n} corridas\n")
     print(t.to_string(index=False, float_format=lambda v: f"{v:.4f}"))
     print(f"\nFactos que batem: {(t['bate'] == 'sim').sum()} / {len(t)}")
-    out = ROOT / "data" / "processed" / "teste_2025_2026.xlsx"
+    out = ROOT / "data" / "processed" / (f"{prefix}_{period[0][:4]}_{period[1][:4]}.xlsx" if len(sys.argv) > 4
+                                         else "teste_2025_2026.xlsx")
     t.to_excel(out, index=False)
     print(f"Guardado em {out}")
 

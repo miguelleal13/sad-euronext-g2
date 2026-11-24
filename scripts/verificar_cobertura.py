@@ -18,7 +18,8 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
-PERIODS = [("treino 2023-24", "choques_reais.csv"), ("teste 2025-26", "choques_reais_teste.csv")]
+PERIODS = [("treino 2023-24", "choques_reais.csv"), ("teste 2025-26", "choques_reais_teste.csv"),
+           ("teste 2020-21", "choques_reais_teste2020.csv")]
 
 
 def main():
@@ -61,12 +62,12 @@ def main():
         big["período"] = name
         bigdays.append(big.reset_index()[["período", "data", "r", "mercado", "choque_noticia", "tipo", "fonte"]])
     s = pd.DataFrame(summary)
-    b = pd.concat(bigdays) if bigdays else pd.DataFrame()
+    b = pd.concat(bigdays, ignore_index=True) if bigdays else pd.DataFrame()
     pd.set_option("display.width", 220)
     print(s.T.to_string(header=False))
     if len(b):
-        print("\nMaiores dias do teste e fonte principal:")
-        t = b[b["período"].str.startswith("teste")]
+        print("\nMaiores dias dos testes e fonte principal:")
+        t = b[b["período"] != "treino 2023-24"]
         print(t.reindex(t["r"].abs().sort_values(ascending=False).index).head(20)
               .to_string(index=False, float_format=lambda v: f"{v:+.4f}"))
     out = ROOT / "data" / "processed" / "cobertura.xlsx"

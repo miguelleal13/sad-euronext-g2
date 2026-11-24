@@ -7,12 +7,14 @@ O site do BCP bloqueia pedidos automáticos, por isso as páginas são guardadas
 Este script lê essas páginas, classifica cada comunicado com as mesmas regras de 2023-2024 e acrescenta-os ao
 noticias_bcp.csv (sem duplicar o que já lá estiver). As regras de classificação são as mesmas do treino.
 
-Uso: python scripts/comunicados_bcp.py
+Uso: python scripts/comunicados_bcp.py              (2025 e 2026)
+     python scripts/comunicados_bcp.py 2020 2021    (outros anos)
 """
 import csv
 import html
 import io
 import re
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -59,7 +61,8 @@ def parse(path, year):
 
 def main():
     rows = []
-    for year in (2025, 2026):
+    years = [int(y) for y in sys.argv[1:]] or [2025, 2026]
+    for year in years:
         p = RAW / f"comunicados_bcp_{year}.html"
         if not p.exists():
             print(f"AVISO: falta {p.name} (ver instruções no topo do script)")

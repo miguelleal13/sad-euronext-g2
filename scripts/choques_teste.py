@@ -10,8 +10,9 @@ os comunicados/acontecimentos com data (data/raw/noticias_bcp.csv).
 O choque de cada comunicado no teste é o retorno anormal do BCP no dia de reação, calculado com o beta do treino.
 (O choque de um acontecimento é sempre medido no próprio dia em que acontece: é o mesmo princípio do treino.)
 
-Uso: python scripts/choques_teste.py     (descarrega os índices do Yahoo, como choques_reais.py)
-Escreve data/processed/choques_reais_teste.csv (mesmo formato do choques_reais.csv) e choques_reais_teste.xlsx
+Uso: python scripts/choques_teste.py                                   (teste 2025-2026)
+     python scripts/choques_teste.py 2020-01-01 2021-12-31 teste2020     (outro período de teste)
+Escreve data/processed/choques_reais_<nome>.csv (mesmo formato do choques_reais.csv) e .xlsx
 """
 import sys
 from pathlib import Path
@@ -24,15 +25,17 @@ from choques_reais import portugal_returns, sector_returns  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 TRAIN = ("2023-01-01", "2024-12-31")
-TEST = ("2025-01-01", "2026-12-31")
+TEST = (sys.argv[1], sys.argv[2]) if len(sys.argv) > 2 else ("2025-01-01", "2026-12-31")
+NAME = sys.argv[3] if len(sys.argv) > 3 else "teste"
 
 
 def main():
     p = pd.read_csv(ROOT / "data" / "raw" / "bcp_daily.csv", index_col=0, parse_dates=True)
     r = np.log(p["Adj Close"]).diff().rename("bcp")
-    s, ticker = sector_returns(end="2026-12-31")
+    start = (pd.Timestamp(min(TEST[0], TRAIN[0])) - pd.Timedelta(days=40)).strftime("%Y-%m-%d")
+    s, ticker = sector_returns(end="2026-12-31", start=start)
     s.index = pd.to_datetime(s.index).tz_localize(None).normalize()
-    pt, n_pt = portugal_returns(end="2026-12-31")
+    pt, n_pt = portugal_returns(end="2026-12-31", start=start)
     allx = pd.concat([r, s], axis=1).dropna()
     allx["pt"] = pt.reindex(allx.index).fillna(0.0) if pt is not None else 0.0
     n = pd.read_csv(ROOT / "data" / "raw" / "noticias_bcp.csv", sep=";", parse_dates=["data"])
@@ -92,13 +95,13 @@ def main():
         ("beta ao mercado português (do treino)", round(beta_pt, 3)),
         ("comunicados/acontecimentos no teste", len(nte)), ("dias com choque de notícia", len(days)),
         ("tipos sem dia de reação medido no treino (usam o próprio dia)", ", ".join(novos) or "nenhum"),
-        ("preço inicial do teste (fecho 31/12/2024)", round(float(p.loc[:"2024-12-31", "Close"].iloc[-1]), 4)),
+        ("preço inicial do teste (último fecho antes do início)", round(float(p.loc[:pd.Timestamp(TEST[0]) - pd.Timedelta(days=1), "Close"].iloc[-1]), 4)),
         ("parte da variância do BCP (teste) explicada pelo setor", round(out["choque_setor"].var() / tot, 3)),
         ("parte da variância do BCP (teste) nos choques de notícias",
          round((out["choque_noticia"] ** 2).sum() / (tot * len(te)), 3)),
         ("desvio-padrão diário do BCP no teste", round(np.sqrt(tot), 4)),
     ], columns=["medida", "valor"])
-    path = ROOT / "data" / "processed" / "choques_reais_teste"
+    path = ROOT / "data" / "processed" / f"choques_reais_{NAME}"
     out.to_csv(path.with_suffix(".csv"), sep=";", index=False)
     with pd.ExcelWriter(path.with_suffix(".xlsx")) as xw:
         resumo.to_excel(xw, sheet_name="resumo", index=False)
