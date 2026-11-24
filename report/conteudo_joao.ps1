@@ -63,6 +63,14 @@ $content['Real Information Shocks'] = {
         @('Euro-zloty (Polish subsidiary)', '0.003', '0.000', '-0.5', 'Excluded')
     ) @(6.0, 1.8, 2.8, 1.2, 3.6) 'factorTests'
     Body 'About 42% of the daily variance of BCP cannot be associated with any identified source of information. This part is closely linked to trading activity: its correlation with abnormal volume is 0.43, and its variance on the quarter of days with the highest volume is 2.25 times its average. This is consistent with the evidence that a large part of stock price movements is not explained by public news (Roll, 1988; Cutler, Poterba & Summers, 1989) and that trading itself generates volatility (French & Roll, 1986). The model was first run without this part, to test whether the trading of the agents could generate it (round 9, Section 6.3). The ANOVA and the screening experiment showed that no combination of the unobservable parameters does so without creating price reversals that BCP does not show: in BCP these movements have no memory from one day to the next (autocorrelation 0.007), like new information. They were therefore added as an unidentified information channel: on each day without an identified event, the model draws one of the 417 residual movements of BCP on such days in 2023–2024. The draws are made in blocks of 8 consecutive days starting at a random day (a block bootstrap, with block length close to the cube root of the sample size), which keeps the short memory of these movements (autocorrelation of their absolute value 0.078) without replaying them in their real order, and a different sequence is drawn in each replication. The model therefore uses the size, shape and short memory of these movements, but not their dates.'
+    Body 'Using only the unidentified movements of 2023–2024 assumes that their size is typical of the present BCP. This was checked year by year from 2010 to 2026, with the betas of the model, using a robust measure of dispersion (1.4826 times the median absolute deviation) that is not distorted by the price jumps caused by the capital increases of the bank ({T:residYears}). During the crisis of the bank (2011–2017: sovereign debt crisis, state support and several capital increases) the unidentified movements were about twice as large as today. From 2018 onwards their size is stable, between 0.8% and 1.7% per day, with a median of 1.28%; the 1.24% of 2023–2024 is typical of this period, so the pool was not extended. The same table explains part of the out-of-sample results (Section 6.4): 2025 and 2026 had smaller unidentified movements than usual (1.10% and 0.81%). In a banking crisis like that of 2011–2017 this information would be about twice as large, so the crash scenarios of the model, which represent the present BCP, are conservative in this respect.'
+    Tbl 'Size of the unidentified daily movements of BCP by year (robust standard deviation, betas of 2023–2024)' @('Period', 'Years', 'Robust s.d. per day', 'Context') @(
+        @('Before the crisis', '2010', '1.25%', '—'),
+        @('Crisis of the bank', '2011–2017', '1.9% to 2.6%', 'Sovereign debt crisis, state support, capital increases'),
+        @('Present BCP', '2018–2022', '1.13% to 1.69%', 'Includes COVID-19 (2020: 1.41%) and 2022 (1.69%)'),
+        @('Calibration pool', '2023–2024', '1.31% / 1.16% (1.24% together)', 'Median of 2018–2026: 1.28%'),
+        @('Out-of-sample test', '2025–2026', '1.10% / 0.81%', 'Calmer than usual')
+    ) @(3.4, 2.4, 4.0, 6.0) 'residYears'
     Body 'The same data were used to measure the daily dynamics of trading volume, replacing values that had been calibrated before. A regression of the logarithm of daily volume (in deviation from its 60-day moving average) on its previous value, on announcement days and on the absolute sector and unidentified movements of the same day gives a persistence of 0.41 (t = 11.3), an increase of 0.33 on announcement days (t = 7.2), an increase of 0.14 for each 1.65% of sector move (t = 4.7) and of 0.285 for each 1.65% of unidentified move (t = 9.8); these values are used for the activity level of the noise traders. The same data show no increase in volume on the day after a large price move (coefficient -0.065, t = -2.6), which contradicts the attention mechanism introduced in round 8b of the calibration; that mechanism was therefore switched off. Finally, the initial price of the model is the closing price of BCP on 30 December 2022 (0.1464 €), and the sector shock of each day is spread evenly over the session, since one-minute BCP data show the variance spread almost uniformly across the continuous session.'
 }
 
@@ -142,6 +150,8 @@ $content['APPENDIX E: Assumptions Register'] = {
         @('40', 'Unidentified information (about 42% of the variance of BCP): on days without events, one of the 417 real residual movements of 2023–2024 is drawn, in blocks of 8 consecutive days starting at random; different in each replication', 'block of 8 days', 'ANOVA and screening: the agents cannot generate it without reversals; residuals have no memory (0.007); block length about the cube root of 417', 'C'),
         @('41', 'Influential parameters without data: number of trend followers and noise traders, trend follower threshold, order lifetime, order rate of noise traders, decision rates, panic duration', 'see Appendix E rows 7-15', 'Identified by the ANOVA and the screening experiment (Section 6.3); tested in the sensitivity analysis of the scenarios', 'S'),
         @('42', 'Out-of-sample test 2025-2026: betas, reaction days and unidentified movements taken from 2023-2024; only the real 2025-2026 returns of the sector and of the Portuguese market and the dated events are used', '460 days', 'Prevents the test data from being used to adjust the model (Section 6.4)', 'V')
+        @('43', 'The unidentified movements of 2023–2024 are representative of the present BCP', 'robust s.d. 1.24% per day', 'Yearly measurement 2010–2026: median of 2018–2026 is 1.28%; in the crisis of 2011–2017 they were about twice as large (Section 3.3)', '—'),
+        @('44', 'Acceptance of the stylised facts: initial criteria set by judgement, complemented by the 95% block-bootstrap interval of each fact of BCP', 'blocks of 10 days, 3000 samples', 'A model value inside the interval cannot be distinguished from BCP by chance (Section 6.3)', 'C')
     ) @(0.8, 6.0, 2.6, 5.2, 1.4) 'assumptions'
 }
 
@@ -225,21 +235,31 @@ $content['Calibration'] = {
         @('panicDuration', 'Screening', '-0.70', '~0', '+0.16'),
         @('mmSpread, mmQty (market maker)', 'Screening', '~0', '~0', '~0')
     ) @(5.6, 2.0, 2.6, 2.4, 2.6) 'paramEffects'
+    Body 'The acceptance criteria of {T:facts} were set at the start of the project by judgement, informed by the year-to-year variation of the facts of BCP and by the qualitative tests used in the agent-based literature, and some of them are loose (for example, any positive correlation between volume and volatility). They were therefore complemented by a criterion derived from the data: the 95% interval of each fact that BCP itself could have produced by chance over a period of the same length, obtained by resampling the real trading days in blocks of 10 consecutive days (3000 block-bootstrap samples). A model value inside this interval cannot be distinguished statistically from BCP. The calibrated model meets this stricter criterion for all seven facts ({T:bootTrain}), although the volume-volatility correlation is close to the lower limit.'
+    Tbl 'Data-based acceptance intervals (block bootstrap, 95%) and the calibrated model, 2023–2024' @('Stylised fact', 'BCP', '95% interval of BCP', 'Initial criterion', 'Round 11') @(
+        @('Daily volatility', '0.0207', '0.0184 to 0.0231', '0.0155 to 0.0259', '0.0212'),
+        @('Excess kurtosis', '2.41', '0.91 to 3.77', '1.21 to 3.62', '2.08'),
+        @('Volatility clustering', '0.080', '-0.032 to 0.151', '> 0.05', '0.077'),
+        @('Autocorrelation of returns', '0.004', '-0.083 to 0.071', '-0.1 to 0.1', '-0.017'),
+        @('Days with |r| > 3%', '12.9%', '9.6% to 16.5%', '6.5% to 19.4%', '14.1%'),
+        @('Correlation volume-|r|', '0.636', '0.540 to 0.705', '> 0', '0.546'),
+        @('Autocorrelation of volume', '0.470', '0.275 to 0.543', '> 0', '0.462')
+    ) @(4.4, 1.6, 3.4, 3.2, 1.8) 'bootTrain'
     Body 'The calibration was closed with round 11. Volatility clustering, which had failed since round 7, is reproduced, and the remaining differences to BCP are small. With about 42% of its variance coming from unidentified movements, the model does not explain why those movements occur; it reproduces their statistical properties. The influential unobservable parameters identified above are used in the sensitivity analysis of the crash scenarios (Chapter 7), to check whether the recommendation on the collars depends on them.'
 }
 
 $content['Validation'] = {
     Body 'The calibrated model was validated out of sample on January 2025 to October 2026 (460 trading days), a period that was not used in the calibration and that includes the market-wide sell-off of April 2025. The model was run with the real shocks of this period and no change to any parameter. To keep the test honest, the betas to the sector and to the Portuguese market and the reaction day of each type of announcement were those estimated on 2023–2024, the unidentified movements were still drawn from those of 2023–2024, and only the real 2025–2026 returns of the sector and of the Portuguese market and the dated events (118 BCP announcements, 8 political events and 7 changes in the sovereign rating) were used. The test was run once, after the calibration was closed. The same rules for selecting events cover this period at least as well as the calibration period: 25% of the days with moves above 3% have no identified source, against 46% in 2023–2024.'
-    Tbl 'Out-of-sample test: model against BCP, January 2025 to October 2026' @('Stylised fact', 'BCP 2025–2026', 'Model (mean of 10 replications)', 'Criterion met') @(
-        @('Daily volatility', '0.0184', '0.0207', 'Yes'),
-        @('Excess kurtosis', '2.20', '2.13', 'Yes'),
-        @('Volatility clustering (autocorr. |r|)', '0.156', '0.097', 'Yes'),
-        @('Autocorrelation of returns', '-0.051', '0.033', 'Yes'),
-        @('Days with |r| > 3%', '11.3%', '13.8%', 'Yes'),
-        @('Correlation volume-|r|', '0.535', '0.534', 'Yes'),
-        @('Autocorrelation of volume', '0.251', '0.464', 'Yes')
-    ) @(6.0, 2.4, 4.2, 2.6) 'oosTest'
-    Body 'The model reproduces the seven stylised facts of BCP in the test period, and the mean daily return of the replications has a correlation of 0.84 with the real daily return. Three differences should be noted. Volatility is 12% higher than in BCP, because the model draws the unidentified movements of 2023–2024, which were larger than those of 2025–2026, where the market explained a larger share of the variance (74% against 39%). Volatility clustering is lower than in BCP (0.097 against 0.156), as the agitation after the April 2025 sell-off was more persistent than the model generates. Volume persistence is higher than in BCP (0.46 against 0.25), since the volume parameters were measured in 2023–2024, when the real persistence was 0.47.'
+    Tbl 'Out-of-sample test: model against BCP, January 2025 to October 2026' @('Stylised fact', 'BCP 2025–2026', '95% interval of BCP', 'Model (mean of 10 replications)', 'Initial criterion met') @(
+        @('Daily volatility', '0.0184', '0.0160 to 0.0207', '0.0207', 'Yes'),
+        @('Excess kurtosis', '2.20', '0.30 to 4.56', '2.13', 'Yes'),
+        @('Volatility clustering (autocorr. |r|)', '0.156', '0.006 to 0.240', '0.097', 'Yes'),
+        @('Autocorrelation of returns', '-0.051', '-0.172 to 0.088', '0.033', 'Yes'),
+        @('Days with |r| > 3%', '11.3%', '7.4% to 15.4%', '13.8%', 'Yes'),
+        @('Correlation volume-|r|', '0.535', '0.438 to 0.673', '0.534', 'Yes'),
+        @('Autocorrelation of volume', '0.251', '0.077 to 0.427', '0.464', 'Yes')
+    ) @(4.6, 2.2, 3.2, 3.2, 2.2) 'oosTest'
+    Body 'The model meets the initial criteria for the seven stylised facts of BCP in the test period and the stricter data-based intervals for five of them (volatility is at the upper limit and volume persistence is above it), and the mean daily return of the replications has a correlation of 0.84 with the real daily return. Three differences should be noted. Volatility is 12% higher than in BCP, because the model draws the unidentified movements of 2023–2024, which were larger than those of 2025–2026, where the market explained a larger share of the variance (74% against 39%). Volatility clustering is lower than in BCP (0.097 against 0.156), as the agitation after the April 2025 sell-off was more persistent than the model generates. Volume persistence is higher than in BCP (0.46 against 0.25), since the volume parameters were measured in 2023–2024, when the real persistence was 0.47.'
 }
 
 $content['APPENDIX D: Calibration Log'] = {
