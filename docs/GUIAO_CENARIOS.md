@@ -186,16 +186,7 @@ Fazer no **modelo principal** só depois de o Miguel confirmar o passo 4. Como m
 
 **6.8** Gravar, commit da cópia, avisar o Miguel.
 
-## Passo 7 · João e Margarida · Teste fora da amostra 2020–2021 (já em curso)
-
-Este teste já está a ser feito. Fica aqui o resumo do que tem de ser cumprido, igual ao teste de 2025–2026:
-
-1. Experiência igual à `Teste`, com `shocksFile` = `"choques_reais_teste2020.csv"`, `startDay` = **0**, `initialPrice` = fecho do BCP na véspera do primeiro dia do ficheiro, Stop = número de dias do ficheiro × 510.
-2. 10 replicações. Correr **uma vez**, sem mexer em nenhum parâmetro depois de ver o resultado.
-3. Calcular os 7 factos com o `compare_model.py` e comparar com o BCP de 2020–2021.
-4. O resultado entra na secção 6.4 do relatório, bata ou não bata. Se não bater, explicar porquê (por exemplo, o tamanho dos movimentos não explicados na COVID).
-
-## Passo 8 · João · Verificação ao minuto
+## Passo 7 · João · Verificação ao minuto
 
 **Porquê:** a calibração é toda com dados diários, mas os colares atuam ao minuto.
 
@@ -212,7 +203,9 @@ Este teste já está a ser feito. Fica aqui o resumo do que tem de ser cumprido,
 5. Atenção ao nível de preço: o BCP está a cerca de 1,08 € em 2026 e o modelo a cerca de 0,35 €, por isso o tick (0,0001 €) pesa três vezes mais no modelo. Comparar em retornos e não em euros, e dizer isto no relatório.
 6. Escrever o resultado na secção 6.3, mesmo que não bata perfeitamente (fica como limitação).
 
-## Passos 9 a 11 · Margarida · As corridas
+## Passos 8 a 10 · Margarida · As corridas
+
+**Só começar depois de haver o resultado do teste fora da amostra de 2020–2021** (que já está a ser feito em paralelo): se o modelo falhar muito na crise, o grupo pode querer rever alguma coisa antes dos cenários.
 
 Para **cada** experiência (Base, Cenário 2, Cenário 3, Cenário 4, Limiares), por esta ordem:
 
@@ -222,7 +215,7 @@ Para **cada** experiência (Base, Cenário 2, Cenário 3, Cenário 4, Limiares),
 4. Correr `python scripts/kpis_choque.py <pasta>` (para a Base, que não tem choque, usar o mesmo instante 30 600 como referência).
 5. Fazer commit do Excel que sai em `data/processed/` e avisar o João.
 
-**Passo 11 · Análise de sensibilidade.** Repetir o **Cenário 2** mudando cada um dos 5 parâmetros que mais pesam, um de cada vez, para −50% e +50% do valor:
+**Passo 10 · Análise de sensibilidade.** Repetir o **Cenário 2** mudando cada um dos 5 parâmetros que mais pesam, um de cada vez, para −50% e +50% do valor:
 
 - `orderLife` (35 → 17.5 e 52.5)
 - `noiseRate` (1 → 0.5 e 1.5)
@@ -232,7 +225,7 @@ Para **cada** experiência (Base, Cenário 2, Cenário 3, Cenário 4, Limiares),
 
 Para cada um: experiência com o parâmetro em Range com os dois valores, `collarSet` 0 e 2, e os comuns. Se o tempo for curto, usar 10 replicações. O que interessa é saber se **o efeito dos colares** (a diferença entre com e sem colares) muda de sinal ou de tamanho.
 
-## Passo 12 · João · Resultados
+## Passo 11 · João · Resultados
 
 1. Juntar os KPIs de todas as experiências.
 2. Para cada cenário: média e intervalo de confiança de 95% de cada indicador, com e sem colares, e teste da diferença (t de Welch).
@@ -240,7 +233,7 @@ Para cada um: experiência com o parâmetro em Range com os dois valores, `colla
 4. **Pergunta 2:** queda evitada e perda de liquidez por conjunto de colares e duração (Cenário 4 e Limiares), análise multicritério e tabela de recomendação.
 5. Sensibilidade: se a recomendação se mantém quando os 5 parâmetros mudam.
 
-## Passo 13 · Miguel · Objetivos do relatório (secção 1.2)
+## Passo 12 · Miguel · Objetivos do relatório (secção 1.2)
 
 Pedir ao Claude para aplicar estas mudanças em `report/conteudo_miguel_intro.ps1` e regenerar o relatório:
 
@@ -248,18 +241,18 @@ Pedir ao Claude para aplicar estas mudanças em `report/conteudo_miguel_intro.ps
 - Ponto 5: "search for the thresholds that minimise the maximum fall for an acceptable loss of liquidity (traded volume, spread and time without trading)."
 - Ponto 3 fica como está (é cumprido pelos passos 5 e 6.4).
 
-## Passo 14 · João · Secção 6.3
+## Passo 13 · João · Secção 6.3
 
-Acrescentar um parágrafo que diga o que a calibração prova: o modelo recebe a informação real e os investidores artificiais transformam-na em preços sem distorcer as suas propriedades; os colares atuam precisamente nessa transformação. Juntar o resultado da verificação ao minuto (passo 8).
+Acrescentar um parágrafo que diga o que a calibração prova: o modelo recebe a informação real e os investidores artificiais transformam-na em preços sem distorcer as suas propriedades; os colares atuam precisamente nessa transformação. Juntar o resultado da verificação ao minuto (passo 7).
 
-## Passo 15 · Grupo · Conclusões
+## Passo 14 · Grupo · Conclusões
 
 1. Responder à **pergunta 1** da proposta com a mesma formulação: "How do the share of trend followers and herding affect the probability and size of crashes?"
 2. Responder à **pergunta 2**: "Which collar thresholds and reservation durations reduce the maximum fall the most without excessively harming liquidity?"
 3. Dizer que as perguntas 3 e 4 (alavancagem e contágio) ficaram fora do âmbito, por indicação dos professores, e ligá-las às limitações do capítulo 10.
 4. Uma frase de recomendação clara, sem dar conselho de investimento.
 
-## Passo 16 · Miguel · Congelar e rever (até 1 de dezembro)
+## Passo 15 · Miguel · Congelar e rever (até 1 de dezembro)
 
 1. Depois das últimas corridas, ninguém mexe mais no modelo principal. Commit final com a mensagem "modelo congelado".
 2. Regenerar o relatório e ler tudo do princípio ao fim: números iguais entre o texto e as tabelas, referências a figuras e tabelas sem erros, todas as secções preenchidas.
