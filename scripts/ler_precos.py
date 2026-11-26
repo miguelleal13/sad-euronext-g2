@@ -7,7 +7,8 @@ coladas (uma linha com 13 campos em vez de 7). Este módulo:
      temporários, por isso não importa se as corridas estão seguidas ou misturadas;
   2. ignora as linhas estragadas (número de campos errado ou números que não se leem) e conta-as;
   3. ignora as "corridas" falsas feitas de bocados de linhas (menos de 90% das linhas da maior corrida);
-  4. retira preços impossíveis de um só minuto (saltam mais de 3% e voltam logo), que vêm de linhas coladas;
+  4. SÓ SE O FICHEIRO VIER ESTRAGADO: retira preços de um só minuto que saltam mais de 3% e voltam logo, que podem
+     vir de linhas coladas. Num ficheiro limpo nada é retirado, porque esses saltos são do próprio modelo;
   5. devolve cada corrida ordenada pelo tempo, sem minutos repetidos, e diz quanto perdeu.
 """
 import shutil
@@ -103,14 +104,20 @@ def runs(path, label_filter=""):
         print(f"  {len(real)} corridas verdadeiras; {fake} bocados de linhas coladas ignorados"
               + (f"; linhas por corrida: {min(rc):,} a {max(rc):,}" if real else ""), flush=True)
         labels = {r: c.most_common(1)[0][0] for r, c in labels.items()}   # o label verdadeiro é o mais frequente
+        damaged = bad > 0 or mixed or fake > 0
+        if not damaged:
+            print("  ficheiro limpo: nenhum preço é retirado (os saltos de um minuto são do próprio modelo)", flush=True)
         spikes_total = 0
         for run in real:
             g = pd.read_csv(files[run], sep=";", names=COLS, dtype={"label": str, "run": str})
             g = g[g["label"] == labels[run]]
             g = g.sort_values("time", kind="stable").drop_duplicates("time", keep="last").reset_index(drop=True)
-            g, k = _drop_spikes(g)
-            spikes_total += k
+            if damaged:
+                g, k = _drop_spikes(g)
+                spikes_total += k
             yield labels[run], run, g
-        print(f"  {spikes_total} preços isolados impossíveis (picos de um minuto) retirados no total", flush=True)
+        if damaged:
+            print(f"  ficheiro estragado: {spikes_total} picos de um minuto retirados (podem incluir alguns do próprio modelo)",
+                  flush=True)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
