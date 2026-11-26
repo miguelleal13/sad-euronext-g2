@@ -2,7 +2,8 @@
 
 A calibração é toda com dados diários, mas os colares atuam ao minuto. Este script compara, nos
 retornos de 1 minuto:
-  - a agitação (desvio-padrão), os saltos grandes (curtose em excesso), a % de minutos sem variação
+  - a agitação (desvio-padrão), a autocorrelação de um minuto para o seguinte (negativa = vaivém entre o
+    preço de compra e o de venda, "bid-ask bounce"), os saltos grandes (curtose em excesso), a % de minutos sem variação
     e a % de minutos com |retorno| acima de 0.5%;
   - como a agitação se distribui ao longo do dia (variância média por blocos de 30 minutos,
     dividida pela média do dia, para comparar a FORMA e não o nível).
@@ -48,6 +49,7 @@ def stats(r, label):
     return {
         "série": label, "minutos": len(r),
         "desvio-padrão (todos)": r.std(), "curtose em excesso (todos)": r.kurt(),
+        "autocorrelação lag 1": r.autocorr(1),
         "% minutos sem variação": 100 * (r == 0).mean(),
         "% minutos com |r| > 0.5%": 100 * (r.abs() > BIG).mean(),
         "desvio-padrão (sem zeros)": nz.std(), "curtose em excesso (sem zeros)": nz.kurt(),
@@ -98,21 +100,24 @@ def real_returns():
 
 
 def model_returns(folder, filtro):
-    rets, mins, labels, nruns, price, ticks = [], [], set(), 0, [], []
+    rets, mins, labels, nruns, price, ticks, mids = [], [], set(), 0, [], [], []
     for label, run, g in ler_precos.runs(Path(folder) / "precos.csv", filtro):
         labels.add(label); nruns += 1
         dia = ((g["time"] - 1) // DAY).astype(int)
         mn = ((g["time"] - 1) % DAY).astype(int)
         for _, idx in g.groupby(dia).groups.items():
             p = g.loc[idx, "price"].to_numpy(); m = mn.loc[idx].to_numpy()
+            mid = ((g.loc[idx, "bid"] + g.loc[idx, "ask"]) / 2).to_numpy()
+            ok_mid = (g.loc[idx, "ask"] > g.loc[idx, "bid"]).to_numpy()      # sem livro cruzado (reservas)
             r = np.diff(np.log(p)); mm = m[1:]
+            rmid = np.diff(np.log(np.where(ok_mid & (mid > 0), mid, np.nan)))
             keep = (mm > LO) & (mm < HI) & (np.diff(m) == 1)
-            rets.append(r[keep]); mins.append(mm[keep]); price.append(p.mean())
+            rets.append(r[keep]); mins.append(mm[keep]); price.append(p.mean()); mids.append(rmid[keep])
         ticks.append(tick_of(g["price"]))
     if not rets:
         raise SystemExit("Nenhuma corrida encontrada (confirma a pasta e o texto do label).")
     return (np.concatenate(rets), np.concatenate(mins), sorted(labels), nruns, float(np.mean(price)),
-            float(np.nanmedian(ticks)))
+            float(np.nanmedian(ticks)), np.concatenate(mids))
 
 
 def main():
@@ -120,15 +125,18 @@ def main():
         raise SystemExit(__doc__)
     folder, filtro = sys.argv[1], (sys.argv[2] if len(sys.argv) > 2 else "")
     rr, rm, ndays, preal, t0, t1, nspk, treal = real_returns()
-    mr, mm, labels, nruns, pmod, tmod = model_returns(folder, filtro)
+    mr, mm, labels, nruns, pmod, tmod, mmid = model_returns(folder, filtro)
     print(f"BCP: {ndays} dias entre {t0:%d/%m/%Y} e {t1:%d/%m/%Y}; preço médio {preal:.3f} €; "
           f"{nspk} prints isolados impossíveis retirados; janela comparada 09:05-16:25 (o Yahoo não tem 08:00-09:00)")
     print(f"Modelo: {nruns} corridas; labels usados: {', '.join(labels)}; preço médio {pmod:.3f} €")
     if len(labels) > 1 and not filtro:
         print("AVISO: há mais do que um label (ex.: com e sem colares). Indica o texto do label da Base com collarSet = 2.")
 
-    s = pd.DataFrame([stats(rr, "BCP real"), stats(mr, "modelo")]).set_index("série").T
+    s = pd.DataFrame([stats(rr, "BCP real"), stats(mr, "modelo"),
+                      stats(mmid, "modelo (preço médio compra/venda)")]).set_index("série").T
     s["modelo ÷ BCP"] = s["modelo"] / s["BCP real"]
+    print("Nota: 'modelo (preço médio compra/venda)' usa (bid+ask)/2 em vez do último negócio, o que tira o vaivém "
+          "entre os dois preços; o BCP do Yahoo só tem o preço dos negócios.")
     tick = pd.DataFrame({"BCP real": [treal, 100 * treal / preal], "modelo": [tmod, 100 * tmod / pmod]},
                         index=["tick inferido dos preços (€)", "tick em % do preço"])
     prof = pd.DataFrame({"BCP real": profile(rr, rm), "modelo": profile(mr, mm)})
