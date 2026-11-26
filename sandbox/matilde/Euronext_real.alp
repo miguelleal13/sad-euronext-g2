@@ -53,6 +53,11 @@
     error("Erro a ler os CSVs: " + e);
 }
 
+double stopT = getEngine().getStopTime();
+int needed = Double.isInfinite(stopT) ? 1 : (int) Math.ceil(stopT / 510);
+if (startDay < 0 || startDay + needed > shockSector.length)
+    error("startDay = " + startDay + " com " + needed + " dias passa o fim de " + shocksFile + " (" + shockSector.length + " dias)");
+    
 if (runTests) stock.testBook();
 switch (collarSet) {
     case 0: collarsActive = false; break;
@@ -1558,6 +1563,30 @@ traceln("nHalts=" + nHalts + "  timeHalted=" + timeHalted + "  maxDrawdown=" + m
 						</ParameterEditor>
 					</Properties>                 
 				</Variable>
+				<Variable Class="Parameter">
+					<Id>1795622033451</Id>
+					<Name><![CDATA[startDay]]></Name>
+					<X>-940</X><Y>700</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" ModificatorType="STATIC">
+						<Type><![CDATA[int]]></Type>
+						<UnitType><![CDATA[NONE]]></UnitType>
+						<SdArray>false</SdArray>
+						<DefaultValue Class="CodeValue">
+							<Code><![CDATA[0]]></Code>
+						</DefaultValue>
+						<ParameterEditor>
+							<Id>1795622033448</Id>
+							<EditorContolType>TEXT_BOX</EditorContolType>
+							<MinSliderValue><![CDATA[0]]></MinSliderValue>
+							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
+							<DelimeterType>NO_DELIMETER</DelimeterType>
+						</ParameterEditor>
+					</Properties>                 
+				</Variable>
 			</Variables>
 			<Events>
 				<Event>
@@ -1626,7 +1655,7 @@ pricesFile.println(label + ";" + runId + ";" + time() + ";" + p + ";"
 						</RecurrenceCode>
 						<Condition><![CDATA[false]]></Condition>
 					</Properties>
-					<Action><![CDATA[int d = (int) Math.floor(time() / 510 + 1e-9);
+					<Action><![CDATA[int d = startDay + (int) Math.floor(time() / 510 + 1e-9);
 boolean newsDay = realShocks && d < shockNews.length && shockNews[d] != 0;
 
 if (useResid && resid != null && !newsDay) {
@@ -5752,7 +5781,7 @@ main.activity *= Math.exp(main.activityNewsJump);]]></Action>
 						</RecurrenceCode>
 						<Condition><![CDATA[false]]></Condition>
 					</Properties>
-					<Action><![CDATA[int d = (int) Math.floor(time() / 510);
+					<Action><![CDATA[int d = main.startDay + (int) Math.floor(time() / 510);
 if (main.realShocks && d < main.shockSector.length)
     main.fundamentalValue *= Math.exp((main.shockSector[d] + main.shockPT[d] + main.residToday) / 510);]]></Action>
 				</Event>
@@ -5786,7 +5815,7 @@ if (main.realShocks && d < main.shockSector.length)
 						</RecurrenceCode>
 						<Condition><![CDATA[false]]></Condition>
 					</Properties>
-					<Action><![CDATA[int d = (int) Math.floor(time() / 510 + 1e-9);
+					<Action><![CDATA[int d = main.startDay + (int) Math.floor(time() / 510 + 1e-9);
 if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
     main.fundamentalValue *= Math.exp(main.shockNews[d]);]]></Action>
 				</Event>
@@ -5918,6 +5947,9 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 				</Parameter>
 				<Parameter>
 					<ParameterName><![CDATA[initialPrice]]></ParameterName>
+					<ParameterValue Class="CodeValue">
+						<Code><![CDATA[0.3494]]></Code>
+					</ParameterValue>
 				</Parameter>
 				<Parameter>
 					<ParameterName><![CDATA[tickSize]]></ParameterName>
@@ -5996,6 +6028,9 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 				</Parameter>
 				<Parameter>
 					<ParameterName><![CDATA[shockOn]]></ParameterName>
+					<ParameterValue Class="CodeValue">
+						<Code><![CDATA[true]]></Code>
+					</ParameterValue>
 				</Parameter>
 				<Parameter>
 					<ParameterName><![CDATA[shockTime]]></ParameterName>
@@ -6045,6 +6080,12 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 				<Parameter>
 					<ParameterName><![CDATA[shocksFile]]></ParameterName>
 				</Parameter>
+				<Parameter>
+					<ParameterName><![CDATA[startDay]]></ParameterName>
+					<ParameterValue Class="CodeValue">
+						<Code><![CDATA[369]]></Code>
+					</ParameterValue>
+				</Parameter>
 			</Parameters>
 			<PresentationProperties>
 				<EnableZoomAndPanning>true</EnableZoomAndPanning>
@@ -6058,8 +6099,8 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 				<StopOption><![CDATA[Stop at specified time]]></StopOption>
 				<InitialDate><![CDATA[1792627200000]]></InitialDate>
 				<InitialTime><![CDATA[0.0]]></InitialTime>
-				<FinalDate><![CDATA[1808202600000]]></FinalDate>
-				<FinalTime><![CDATA[259590.0]]></FinalTime>
+				<FinalDate><![CDATA[1796299200000]]></FinalDate>
+				<FinalTime><![CDATA[61200.0]]></FinalTime>
 			</ModelTimeProperties>
 			<BypassInitialScreen>true</BypassInitialScreen>
 		</SimulationExperiment>
@@ -6211,6 +6252,9 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 			</FreeformParamValue>
 			<FreeformParamValue>	
 				<Id>1795461295274</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1795622033451</Id>
 			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
@@ -6391,6 +6435,10 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 				<Id>1795461295274</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1795622033451</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Stop at specified time]]></StopOption>
 				<InitialDate><![CDATA[1792627200000]]></InitialDate>	
@@ -6563,6 +6611,9 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 			</FreeformParamValue>
 			<FreeformParamValue>	
 				<Id>1795461295274</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1795622033451</Id>
 			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
@@ -6755,6 +6806,10 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 				<Id>1795461295274</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1795622033451</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Stop at specified time]]></StopOption>
 				<InitialDate><![CDATA[1792627200000]]></InitialDate>	
@@ -6927,6 +6982,9 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 			</FreeformParamValue>
 			<FreeformParamValue>	
 				<Id>1795461295274</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1795622033451</Id>
 			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
@@ -7137,6 +7195,10 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 				<Id>1795461295274</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1795622033451</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Stop at specified time]]></StopOption>
 				<InitialDate><![CDATA[1792627200000]]></InitialDate>	
@@ -7309,6 +7371,9 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 			</FreeformParamValue>
 			<FreeformParamValue>	
 				<Id>1795461295274</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1795622033451</Id>
 			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
@@ -7504,6 +7569,10 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 				<Id>1795461295274</Id>
 				<Type>FIXED</Type>
 			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1795622033451</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Stop at specified time]]></StopOption>
 				<InitialDate><![CDATA[1792627200000]]></InitialDate>	
@@ -7676,6 +7745,9 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 			</FreeformParamValue>
 			<FreeformParamValue>	
 				<Id>1795461295274</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1795622033451</Id>
 			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
@@ -7862,6 +7934,10 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 					<Code><![CDATA["choques_reais_teste.csv"]]></Code>
 				</Expression>
 			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1795622033451</Id>
+				<Type>FIXED</Type>
+			</RangeVariationParamValue>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Stop at specified time]]></StopOption>
 				<InitialDate><![CDATA[1792627200000]]></InitialDate>	
@@ -7878,7 +7954,7 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 			<ReplicationsProperties>
 				<UseReplication>true</UseReplication>
 				<FixedReplicationsNumber>true</FixedReplicationsNumber>
-				<ReplicationPerIteration>10</ReplicationPerIteration>
+				<ReplicationPerIteration>1</ReplicationPerIteration>
 				<MinimumReplication>2</MinimumReplication>
 				<MaximumReplication>10</MaximumReplication>
 				<ConfidenceLevel>LEVEL_80</ConfidenceLevel>
@@ -8034,6 +8110,9 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 			</FreeformParamValue>
 			<FreeformParamValue>	
 				<Id>1795461295274</Id>
+			</FreeformParamValue>
+			<FreeformParamValue>	
+				<Id>1795622033451</Id>
 			</FreeformParamValue>
 			<RangeVariationParamValue>	
 				<Id>1792673720434</Id>
@@ -8219,6 +8298,10 @@ if (main.realShocks && d < main.shockNews.length && main.shockNews[d] != 0)
 				<Expression Class="CodeValue">
 					<Code><![CDATA["choques_reais_teste2020.csv"]]></Code>
 				</Expression>
+			</RangeVariationParamValue>
+			<RangeVariationParamValue>	
+				<Id>1795622033451</Id>
+				<Type>FIXED</Type>
 			</RangeVariationParamValue>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Stop at specified time]]></StopOption>
