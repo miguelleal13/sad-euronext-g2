@@ -6,7 +6,9 @@ coladas (uma linha com 13 campos em vez de 7). Este módulo:
   1. lê o ficheiro linha a linha (aguenta vários GB) e separa as linhas por corrida em ficheiros
      temporários, por isso não importa se as corridas estão seguidas ou misturadas;
   2. ignora as linhas estragadas (número de campos errado ou números que não se leem) e conta-as;
-  3. devolve cada corrida ordenada pelo tempo, sem minutos repetidos.
+  3. ignora as "corridas" falsas feitas de bocados de linhas (menos de 90% das linhas da maior corrida);
+  4. retira preços impossíveis de um só minuto (saltam mais de 3% e voltam logo), que vêm de linhas coladas;
+  5. devolve cada corrida ordenada pelo tempo, sem minutos repetidos, e diz quanto perdeu.
 """
 import shutil
 import tempfile
@@ -15,6 +17,29 @@ from pathlib import Path
 import pandas as pd
 
 COLS = ["label", "run", "time", "price", "bid", "ask", "volume"]
+MIN_SHARE = 0.9      # uma corrida verdadeira tem pelo menos 90% das linhas da maior
+SPIKE = 0.03         # pico: salta mais de 3% e volta no minuto seguinte para onde estava (dentro de 1%)
+
+
+def _drop_spikes(g):
+    """Retira preços de um só minuto que saltam e voltam logo (vêm de linhas coladas de outra corrida).
+    Um choque verdadeiro não volta para trás no minuto seguinte, por isso não é afetado."""
+    import numpy as np
+    total = 0
+    for _ in range(3):
+        lp = np.log(g["price"].to_numpy())
+        if len(lp) < 3:
+            break
+        up = lp[1:-1] - lp[:-2]
+        down = lp[2:] - lp[1:-1]
+        back = np.abs(lp[2:] - lp[:-2])
+        bad = (np.abs(up) > SPIKE) & (np.abs(down) > SPIKE) & (np.sign(up) != np.sign(down)) & (back < 0.01)
+        idx = np.flatnonzero(bad) + 1
+        if not len(idx):
+            break
+        total += len(idx)
+        g = g.drop(g.index[idx]).reset_index(drop=True)
+    return g, total
 
 
 def _ok(parts):
@@ -63,12 +88,27 @@ def runs(path, label_filter=""):
                 with open(files[run], "a", encoding="utf-8") as o:
                     o.writelines(lines)
         mixed = switches > len(files)
-        print(f"  {n:,} linhas; {bad} estragadas e ignoradas; {len(files)} corridas"
-              + ("; corridas MISTURADAS no ficheiro (réplicas em paralelo), separadas pelo script" if mixed else ""),
-              flush=True)
+        print(f"  {n:,} linhas; {bad} estragadas e ignoradas"
+              + ("; corridas MISTURADAS no ficheiro (réplicas em paralelo)" if mixed else ""), flush=True)
+        # corridas verdadeiras têm quase todas as linhas; bocados de linhas coladas criam "corridas" falsas pequenas
+        counts = {}
         for run, fp in files.items():
-            g = pd.read_csv(fp, sep=";", names=COLS, dtype={"label": str, "run": str})
+            with open(fp, "r", encoding="utf-8") as fh:
+                counts[run] = sum(1 for _ in fh)
+        top = max(counts.values()) if counts else 0
+        real = [r for r in files if counts[r] >= MIN_SHARE * top]
+        fake = len(files) - len(real)
+        rc = [counts[r] for r in real]
+        print(f"  {len(real)} corridas verdadeiras; {fake} bocados de linhas coladas ignorados"
+              + (f"; linhas por corrida: {min(rc):,} a {max(rc):,}" if real else ""), flush=True)
+        spikes_total = 0
+        for run in real:
+            g = pd.read_csv(files[run], sep=";", names=COLS, dtype={"label": str, "run": str})
+            g = g[g["label"] == labels[run]]
             g = g.sort_values("time", kind="stable").drop_duplicates("time", keep="last").reset_index(drop=True)
+            g, k = _drop_spikes(g)
+            spikes_total += k
             yield labels[run], run, g
+        print(f"  {spikes_total} preços isolados impossíveis (picos de um minuto) retirados no total", flush=True)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)

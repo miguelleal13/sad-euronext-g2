@@ -116,7 +116,10 @@ def main():
         if g["time"].min() > T0 or g["time"].max() < T0 + 6 * DAY:
             print(f"  AVISO: corrida {run} ({label}) incompleta ({len(g)} minutos); fica de fora")
             continue
-        rows.append({"label": label, "run": run, **run_kpis(g, halts_by_run.get(run, empty))})
+        try:
+            rows.append({"label": label, "run": run, **run_kpis(g, halts_by_run.get(run, empty))})
+        except ValueError as e:
+            print(f"  AVISO: corrida {run} ({label}) sem dados suficientes à volta do choque ({e}); fica de fora")
 
     runs = pd.DataFrame(rows)
     # fatores lidos do label, quando existem (ex.: shock_c2_h5_n13); labels de outro formato ficam vazios
