@@ -11,6 +11,7 @@ coladas (uma linha com 13 campos em vez de 7). Este módulo:
   5. devolve cada corrida ordenada pelo tempo, sem minutos repetidos, e diz quanto perdeu.
 """
 import shutil
+from collections import Counter
 import tempfile
 from pathlib import Path
 
@@ -73,7 +74,7 @@ def runs(path, label_filter=""):
                 if run != last:
                     switches += 1
                     last = run
-                labels.setdefault(run, parts[0])
+                labels.setdefault(run, Counter())[parts[0]] += 1
                 buf.setdefault(run, []).append(line if line.endswith("\n") else line + "\n")
                 if len(buf[run]) >= 50_000:
                     files.setdefault(run, tmp / f"{len(files)}.csv")
@@ -101,6 +102,7 @@ def runs(path, label_filter=""):
         rc = [counts[r] for r in real]
         print(f"  {len(real)} corridas verdadeiras; {fake} bocados de linhas coladas ignorados"
               + (f"; linhas por corrida: {min(rc):,} a {max(rc):,}" if real else ""), flush=True)
+        labels = {r: c.most_common(1)[0][0] for r, c in labels.items()}   # o label verdadeiro é o mais frequente
         spikes_total = 0
         for run in real:
             g = pd.read_csv(files[run], sep=";", names=COLS, dtype={"label": str, "run": str})
