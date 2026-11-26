@@ -40,6 +40,7 @@ DAY, CUT = 510, 5
 OPEN_MIN = 8 * 60                    # 08:00 em Lisboa = minuto 0 do dia do modelo
 REAL_FIRST = 60                      # o Yahoo só tem dados do BCP a partir das 09:00 (minuto 60)
 LO, HI = REAL_FIRST + CUT, DAY - CUT  # janela comparada nos dois: 09:05 a 16:25
+THIN = 0.01                          # livro "fino": só um lado, ou spread acima de 1% do preço
 BIG = 0.005                          # |retorno| > 0.5% num minuto
 
 
@@ -100,7 +101,7 @@ def real_returns():
 
 
 def model_returns(folder, filtro):
-    rets, mins, labels, nruns, price, ticks, mids = [], [], set(), 0, [], [], []
+    rets, mins, labels, nruns, price, ticks, mids, thin = [], [], set(), 0, [], [], [], []
     for label, run, g in ler_precos.runs(Path(folder) / "precos.csv", filtro):
         labels.add(label); nruns += 1
         dia = ((g["time"] - 1) // DAY).astype(int)
@@ -108,7 +109,10 @@ def model_returns(folder, filtro):
         for _, idx in g.groupby(dia).groups.items():
             p = g.loc[idx, "price"].to_numpy(); m = mn.loc[idx].to_numpy()
             mid = ((g.loc[idx, "bid"] + g.loc[idx, "ask"]) / 2).to_numpy()
-            ok_mid = (g.loc[idx, "ask"] > g.loc[idx, "bid"]).to_numpy()      # sem livro cruzado (reservas)
+            bid, ask = g.loc[idx, "bid"].to_numpy(), g.loc[idx, "ask"].to_numpy()
+            spr = np.where((bid > 0) & (ask > bid), (ask - bid) / ((ask + bid) / 2), np.inf)
+            ok_mid = spr < THIN                                               # livro com os dois lados e spread normal
+            thin.append(~ok_mid[1:][(m[1:] > LO) & (m[1:] < HI)])
             r = np.diff(np.log(p)); mm = m[1:]
             rmid = np.diff(np.log(np.where(ok_mid & (mid > 0), mid, np.nan)))
             keep = (mm > LO) & (mm < HI) & (np.diff(m) == 1)
@@ -117,7 +121,7 @@ def model_returns(folder, filtro):
     if not rets:
         raise SystemExit("Nenhuma corrida encontrada (confirma a pasta e o texto do label).")
     return (np.concatenate(rets), np.concatenate(mins), sorted(labels), nruns, float(np.mean(price)),
-            float(np.nanmedian(ticks)), np.concatenate(mids))
+            float(np.nanmedian(ticks)), np.concatenate(mids), 100 * np.concatenate(thin).mean())
 
 
 def main():
@@ -125,7 +129,7 @@ def main():
         raise SystemExit(__doc__)
     folder, filtro = sys.argv[1], (sys.argv[2] if len(sys.argv) > 2 else "")
     rr, rm, ndays, preal, t0, t1, nspk, treal = real_returns()
-    mr, mm, labels, nruns, pmod, tmod, mmid = model_returns(folder, filtro)
+    mr, mm, labels, nruns, pmod, tmod, mmid, pthin = model_returns(folder, filtro)
     print(f"BCP: {ndays} dias entre {t0:%d/%m/%Y} e {t1:%d/%m/%Y}; preço médio {preal:.3f} €; "
           f"{nspk} prints isolados impossíveis retirados; janela comparada 09:05-16:25 (o Yahoo não tem 08:00-09:00)")
     print(f"Modelo: {nruns} corridas; labels usados: {', '.join(labels)}; preço médio {pmod:.3f} €")
@@ -136,7 +140,9 @@ def main():
                       stats(mmid, "modelo (preço médio compra/venda)")]).set_index("série").T
     s["modelo ÷ BCP"] = s["modelo"] / s["BCP real"]
     print("Nota: 'modelo (preço médio compra/venda)' usa (bid+ask)/2 em vez do último negócio, o que tira o vaivém "
-          "entre os dois preços; o BCP do Yahoo só tem o preço dos negócios.")
+          "entre os dois preços; só nos minutos com os dois lados do livro e spread abaixo de 1%. "
+          "O BCP do Yahoo só tem o preço dos negócios.")
+    print(f"Minutos do modelo com livro fino (só um lado, ou spread acima de 1%): {pthin:.2f}%")
     tick = pd.DataFrame({"BCP real": [treal, 100 * treal / preal], "modelo": [tmod, 100 * tmod / pmod]},
                         index=["tick inferido dos preços (€)", "tick em % do preço"])
     prof = pd.DataFrame({"BCP real": profile(rr, rm), "modelo": profile(mr, mm)})
@@ -155,7 +161,7 @@ def main():
         s.to_excel(xw, sheet_name="estatisticas")
         tick.to_excel(xw, sheet_name="tick")
         prof.to_excel(xw, sheet_name="ao_longo_do_dia")
-        pd.DataFrame([("dias do BCP", ndays), ("período do BCP", f"{t0:%d/%m/%Y} a {t1:%d/%m/%Y}"),
+        pd.DataFrame([("minutos do modelo com livro fino (%)", pthin), ("dias do BCP", ndays), ("período do BCP", f"{t0:%d/%m/%Y} a {t1:%d/%m/%Y}"),
                       ("corridas do modelo", nruns), ("labels do modelo", ", ".join(labels)),
                       ("minutos cortados no início e no fim de cada dia", CUT)],
                      columns=["medida", "valor"]).to_excel(xw, sheet_name="dados", index=False)
