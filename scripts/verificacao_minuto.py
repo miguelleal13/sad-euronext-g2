@@ -10,12 +10,16 @@ retornos de 1 minuto:
 Regras (iguais para os dois lados):
   - retornos só dentro do mesmo dia (sem a noite): no modelo, dentro de cada bloco de 510 minutos;
     no BCP, dentro de cada sessão (08:00-16:30 de Lisboa = 510 minutos);
-  - tiram-se os primeiros e os últimos 5 minutos de cada dia (o modelo não tem leilões de abertura e fecho);
+  - tiram-se os últimos 5 minutos de cada dia e os primeiros 5 da janela (o modelo não tem leilões);
   - minutos sem negócio: no BCP os minutos em falta são preenchidos com o último preço (retorno 0), como
     no modelo, que grava o preço todos os minutos. Os resultados saem também SEM os minutos de retorno 0
     nos dois lados, para mostrar que a conclusão não depende desta escolha.
-Nível de preço: o BCP está perto de 1 € e o modelo perto de 0,35 €; o tick (0,0001 €) pesa cerca de
-3 vezes mais no modelo. Por isso compara-se em retornos e o script mostra o tick em % do preço.
+Nível de preço e tick: o BCP está perto de 1,1 € com tick de 0,0005 € (cerca de 0,045% do preço); o modelo
+está perto de 0,35 € com tick de 0,0001 € (cerca de 0,03%). Compara-se em retornos e o script mostra o
+tick (inferido dos preços) em % do preço nos dois.
+Horário: o Yahoo só tem os minutos do BCP das 09:00 às 16:30 (mais o leilão de fecho às 16:35, que fica de
+fora); o modelo tem 08:00-16:30. Compara-se só a janela comum, 09:05-16:25.
+Prints isolados impossíveis (saltam mais de 3% e voltam logo) são retirados dos dois lados.
 
 Uso: python scripts/verificacao_minuto.py PASTA_DA_BASE [texto_do_label]
      PASTA_DA_BASE = pasta com o precos.csv da experiência Base
@@ -32,8 +36,9 @@ import ler_precos
 
 ROOT = Path(__file__).resolve().parent.parent
 DAY, CUT = 510, 5
-OPEN_MIN = 8 * 60                    # 08:00 em Lisboa
-TICK = 0.0001
+OPEN_MIN = 8 * 60                    # 08:00 em Lisboa = minuto 0 do dia do modelo
+REAL_FIRST = 60                      # o Yahoo só tem dados do BCP a partir das 09:00 (minuto 60)
+LO, HI = REAL_FIRST + CUT, DAY - CUT  # janela comparada nos dois: 09:05 a 16:25
 BIG = 0.005                          # |retorno| > 0.5% num minuto
 
 
@@ -56,6 +61,14 @@ def profile(r, minute):
     return v / v.mean()
 
 
+def tick_of(prices):
+    """Tick inferido dos preços: a diferença positiva mais frequente entre preços distintos."""
+    u = np.unique(np.round(np.asarray(prices, dtype=float), 6))
+    dd = np.round(np.diff(u), 6)
+    dd = dd[dd > 0]
+    return float(pd.Series(dd).mode().iloc[0]) if len(dd) else np.nan
+
+
 def real_returns():
     f = ROOT / "data" / "raw" / "bcp_1min.csv"
     d = pd.read_csv(f)
@@ -63,26 +76,29 @@ def real_returns():
     ts = pd.to_datetime(d[tcol], utc=True, errors="coerce")
     d = d.assign(ts=ts.dt.tz_convert("Europe/Lisbon")).dropna(subset=["ts"])
     pcol = next(c for c in ["Close", "close", "Adj Close", "price", "Price"] if c in d.columns)
-    d = d[["ts", pcol]].rename(columns={pcol: "p"}).drop_duplicates("ts").sort_values("ts")
+    d = d[["ts", pcol]].rename(columns={pcol: "price"}).drop_duplicates("ts").sort_values("ts")
     d["dia"] = d["ts"].dt.date
     d["min"] = d["ts"].dt.hour * 60 + d["ts"].dt.minute - OPEN_MIN
-    d = d[(d["min"] >= 0) & (d["min"] < DAY)]
-    rets, mins, days, price = [], [], 0, []
-    for _, g in d.groupby("dia"):
-        s = g.set_index("min")["p"].reindex(range(DAY)).ffill()      # minutos sem negócio = último preço
-        if s.notna().sum() < DAY / 2:                                  # dia com muitas falhas no arquivo
+    d = d[(d["min"] >= 0) & (d["min"] < DAY)]          # sem o leilão de fecho (16:30-16:35)
+    rets, mins, price, spikes, used = [], [], [], 0, []
+    for dia, g in d.groupby("dia"):
+        g, k = ler_precos._drop_spikes(g.reset_index(drop=True))   # prints isolados impossíveis
+        spikes += k
+        if ((g["min"] >= LO) & (g["min"] < HI)).sum() < 100:     # dia com muitas falhas (ou incompleto)
             continue
+        s = g.set_index("min")["price"].reindex(range(DAY)).ffill()  # minutos sem negócio = último preço
         r = np.log(s).diff()
-        keep = (r.index > CUT) & (r.index < DAY - CUT)
-        rets.append(r[keep].to_numpy()); mins.append(r.index[keep].to_numpy()); days += 1
-        price.append(s.mean())
+        keep = (r.index > LO) & (r.index < HI)
+        rets.append(r[keep].to_numpy()); mins.append(r.index[keep].to_numpy())
+        price.append(g["price"].mean()); used.append(dia)
     if not rets:
         raise SystemExit("Nenhum dia completo no bcp_1min.csv (confirma o ficheiro).")
-    return np.concatenate(rets), np.concatenate(mins), days, float(np.mean(price)), d["ts"].min(), d["ts"].max()
+    return (np.concatenate(rets), np.concatenate(mins), len(used), float(np.mean(price)),
+            min(used), max(used), spikes, tick_of(d["price"]))
 
 
 def model_returns(folder, filtro):
-    rets, mins, labels, nruns, price = [], [], set(), 0, []
+    rets, mins, labels, nruns, price, ticks = [], [], set(), 0, [], []
     for label, run, g in ler_precos.runs(Path(folder) / "precos.csv", filtro):
         labels.add(label); nruns += 1
         dia = ((g["time"] - 1) // DAY).astype(int)
@@ -90,33 +106,36 @@ def model_returns(folder, filtro):
         for _, idx in g.groupby(dia).groups.items():
             p = g.loc[idx, "price"].to_numpy(); m = mn.loc[idx].to_numpy()
             r = np.diff(np.log(p)); mm = m[1:]
-            keep = (mm > CUT) & (mm < DAY - CUT) & (np.diff(m) == 1)
+            keep = (mm > LO) & (mm < HI) & (np.diff(m) == 1)
             rets.append(r[keep]); mins.append(mm[keep]); price.append(p.mean())
+        ticks.append(tick_of(g["price"]))
     if not rets:
         raise SystemExit("Nenhuma corrida encontrada (confirma a pasta e o texto do label).")
-    return np.concatenate(rets), np.concatenate(mins), sorted(labels), nruns, float(np.mean(price))
+    return (np.concatenate(rets), np.concatenate(mins), sorted(labels), nruns, float(np.mean(price)),
+            float(np.nanmedian(ticks)))
 
 
 def main():
     if len(sys.argv) < 2:
         raise SystemExit(__doc__)
     folder, filtro = sys.argv[1], (sys.argv[2] if len(sys.argv) > 2 else "")
-    rr, rm, ndays, preal, t0, t1 = real_returns()
-    mr, mm, labels, nruns, pmod = model_returns(folder, filtro)
-    print(f"BCP: {ndays} dias completos entre {t0:%d/%m/%Y} e {t1:%d/%m/%Y}; preço médio {preal:.3f} €")
+    rr, rm, ndays, preal, t0, t1, nspk, treal = real_returns()
+    mr, mm, labels, nruns, pmod, tmod = model_returns(folder, filtro)
+    print(f"BCP: {ndays} dias entre {t0:%d/%m/%Y} e {t1:%d/%m/%Y}; preço médio {preal:.3f} €; "
+          f"{nspk} prints isolados impossíveis retirados; janela comparada 09:05-16:25 (o Yahoo não tem 08:00-09:00)")
     print(f"Modelo: {nruns} corridas; labels usados: {', '.join(labels)}; preço médio {pmod:.3f} €")
     if len(labels) > 1 and not filtro:
         print("AVISO: há mais do que um label (ex.: com e sem colares). Indica o texto do label da Base com collarSet = 2.")
 
     s = pd.DataFrame([stats(rr, "BCP real"), stats(mr, "modelo")]).set_index("série").T
     s["modelo ÷ BCP"] = s["modelo"] / s["BCP real"]
-    tick = pd.DataFrame({"BCP real": [100 * TICK / preal], "modelo": [100 * TICK / pmod]},
-                        index=["tick (0,0001 €) em % do preço"])
+    tick = pd.DataFrame({"BCP real": [treal, 100 * treal / preal], "modelo": [tmod, 100 * tmod / pmod]},
+                        index=["tick inferido dos preços (€)", "tick em % do preço"])
     prof = pd.DataFrame({"BCP real": profile(rr, rm), "modelo": profile(mr, mm)})
     prof.index = [f"{OPEN_MIN // 60 + b // 60:02d}:{b % 60:02d}" for b in prof.index]
     pd.set_option("display.width", 200)
     print("\n" + s.to_string(float_format=lambda v: f"{v:.5f}"))
-    print("\n" + tick.to_string(float_format=lambda v: f"{v:.4f}%"))
+    print("\n" + tick.to_string(float_format=lambda v: f"{v:.4f}"))
     print("\nAgitação ao longo do dia (variância do bloco de 30 min ÷ média do dia; 1 = média):")
     print(prof.to_string(float_format=lambda v: f"{v:.2f}"))
     print(f"\nCorrelação entre as duas formas ao longo do dia: {prof['BCP real'].corr(prof['modelo']):.2f}")
