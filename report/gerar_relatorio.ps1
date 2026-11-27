@@ -131,6 +131,7 @@ try {
     . (Join-Path $PSScriptRoot 'conteudo_miguel.ps1')
     . (Join-Path $PSScriptRoot 'conteudo_miguel_intro.ps1')
     . (Join-Path $PSScriptRoot 'conteudo_joao.ps1')
+    . (Join-Path $PSScriptRoot 'conteudo_joao_resultados.ps1')
 
     # ---------------- Cover ----------------
     1..5 | ForEach-Object { Para '' }
@@ -218,13 +219,13 @@ try {
         @(2, 'Sensitivity Analysis'),
         @(2, 'Monte Carlo Replications'),
         @(1, 'Results'),
-        @(2, 'Baseline Scenario'),
-        @(2, 'Large Shock with and without Collars'),
-        @(2, 'Shock with a High Share of Trend Followers'),
-        @(2, 'Collar Thresholds and Reservation Duration'),
-        @(2, 'Optimal Thresholds'),
-        @(2, 'Sensitivity Analysis'),
-        @(2, 'Monte Carlo Replications'),
+        @(2, 'Baseline Scenario: Results'),
+        @(2, 'Large Shock with and without Collars: Results'),
+        @(2, 'Shock with a High Share of Trend Followers: Results'),
+        @(2, 'Collar Thresholds and Reservation Duration: Results'),
+        @(2, 'Optimal Thresholds: Results'),
+        @(2, 'Sensitivity Analysis: Results'),
+        @(2, 'Monte Carlo Replications: Results'),
         @(1, 'Discussion and Interpretation of Results'),
         @(1, 'Conclusions'),
         @(2, 'Final Considerations'),

@@ -1,8 +1,8 @@
 """KPIs do choque por corrida (Base, Cenários 2, 3, 4, Limiares e sensibilidade).
 
 Os indicadores estão fixados em docs/KPIS_CENARIOS.md ANTES das corridas.
-Lê o precos.csv aos bocados (não carrega o ficheiro todo para a memória), por isso aguenta vários GB.
-Cada corrida tem de estar seguida no ficheiro (é o que o AnyLogic grava).
+Lê o precos.csv com scripts/ler_precos.py: aguenta vários GB, corridas misturadas (réplicas em paralelo)
+e linhas estragadas (ignoradas e contadas).
 
 Escreve data/processed/kpis_choque_<nome da pasta>.xlsx com 2 folhas:
   runs   - uma linha por corrida, com todos os indicadores (ver KPIS abaixo)
@@ -22,6 +22,8 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+import ler_precos
+
 ROOT = Path(__file__).resolve().parent.parent
 DIR = Path(sys.argv[1])
 T0 = float(sys.argv[2]) if len(sys.argv) > 2 else 30600.0
@@ -29,7 +31,6 @@ CRASH = float(sys.argv[3]) if len(sys.argv) > 3 else -0.15
 CRASH_ALT = float(sys.argv[4]) if len(sys.argv) > 4 else None
 DAY = 510
 RESULT = ROOT / "data" / "processed" / f"kpis_choque_{DIR.name}.xlsx"
-COLS = ["label", "run", "time", "price", "bid", "ask", "volume"]
 KPIS = [
     # estabilidade
     "queda_max_dia", "queda_a_mais", "crash", "crash_alt", "queda_30min", "ret_fecho", "ret_5d", "recupera_meia_min",
@@ -110,23 +111,17 @@ def main():
          if hfile.exists() and hfile.stat().st_size > 0 else pd.DataFrame(columns=["label", "run", "start", "end"]))
     halts_by_run = dict(tuple(h.groupby("run")))
     empty = h.iloc[0:0]
-    rows, carry, n = [], None, 0
-    for chunk in pd.read_csv(DIR / "precos.csv", sep=";", names=COLS, dtype={"label": str, "run": str},
-                             chunksize=2_000_000):
-        if carry is not None:
-            chunk = pd.concat([carry, chunk])
-        last_run = chunk["run"].iloc[-1]
-        done, carry = chunk[chunk["run"] != last_run], chunk[chunk["run"] == last_run]
-        for run, g in done.groupby("run", sort=False):
-            rows.append({"label": g["label"].iloc[0], "run": run, **run_kpis(g, halts_by_run.get(run, empty))})
-        n += len(chunk) - len(carry)
-        print(f"  {n:,} linhas lidas, {len(rows)} corridas", flush=True)
-    for run, g in carry.groupby("run", sort=False):
-        rows.append({"label": g["label"].iloc[0], "run": run, **run_kpis(g, halts_by_run.get(run, empty))})
+    rows = []
+    for label, run, g in ler_precos.runs(DIR / "precos.csv"):
+        if g["time"].min() > T0 or g["time"].max() < T0 + 6 * DAY:
+            print(f"  AVISO: corrida {run} ({label}) incompleta ({len(g)} minutos); fica de fora")
+            continue
+        try:
+            rows.append({"label": label, "run": run, **run_kpis(g, halts_by_run.get(run, empty))})
+        except ValueError as e:
+            print(f"  AVISO: corrida {run} ({label}) sem dados suficientes à volta do choque ({e}); fica de fora")
 
     runs = pd.DataFrame(rows)
-    if runs["run"].duplicated().any():
-        raise SystemExit("ERRO: há corridas partidas no ficheiro (não estão seguidas); os KPIs estariam errados")
     # fatores lidos do label, quando existem (ex.: shock_c2_h5_n13); labels de outro formato ficam vazios
     for col, pat in [("colares", r"_c(\d+)"), ("reserva_min", r"_h([\d.]+)"), ("n_chartists", r"_n(\d+)")]:
         runs.insert(1, col, pd.to_numeric(runs["label"].str.extract(pat)[0], errors="coerce"))
