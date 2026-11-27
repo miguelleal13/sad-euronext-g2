@@ -7,7 +7,12 @@ NÃO são os colares (o label sem o "_cX") e compara cada conjunto de colares co
 Regra de leitura fixada antes: uma conclusão sobre o crash só é robusta se tiver o mesmo sentido com os dois
 limiares e com a queda a mais.
 
+Quando uma experiência não tem corridas sem colares (ex.: Limiares, só com colares personalizados), usa as
+corridas sem colares de outra experiência com as mesmas condições (mesmos parâmetros fora dos colares e as mesmas
+sementes), indicada com --base (ex.: o Cenário 2).
+
 Uso: python scripts/resultados_cenarios.py cenario2_comstartday cenario3_comStartDay ...
+     python scripts/resultados_cenarios.py cenarioLimiar --base cenario2_comstartday
 Escreve data/processed/resultados_cenarios.xlsx (folhas "continuos" e "crash")
 """
 import re
@@ -38,16 +43,37 @@ def welch(x, y):
     return d, d - q * se, d + q * se, 2 * stats.t.sf(abs(d / se), dfree)
 
 
+def cond(label):
+    """Condições fora dos colares: sem o nome do cenário, o conjunto de colares e os limiares personalizados."""
+    s = "_" + re.sub(r"^[^_]+_", "", label)
+    return re.sub(r"_(c\d+|d[\d.]+|s[\d.]+)(?=_|$)", "", s).lstrip("_")
+
+
+def load(name):
+    return pd.read_excel(ROOT / "data" / "processed" / f"kpis_choque_{name}.xlsx", sheet_name="runs")
+
+
 def main():
-    if len(sys.argv) < 2:
+    args = sys.argv[1:]
+    if not args:
         raise SystemExit(__doc__)
+    bases = []
+    if "--base" in args:
+        i = args.index("--base")
+        bases, args = args[i + 1:], args[:i]
+    ref = pd.concat([load(b) for b in bases]) if bases else pd.DataFrame(columns=["label", "colares"])
+    if len(ref):
+        ref = ref[ref["colares"] == 0].assign(cond=lambda d: d["label"].map(cond))
     cont, crash = [], []
-    for name in sys.argv[1:]:
-        r = pd.read_excel(ROOT / "data" / "processed" / f"kpis_choque_{name}.xlsx", sheet_name="runs")
+    for name in args:
+        r = load(name)
         r["grupo"] = r["label"].map(lambda s: re.sub(r"_c\d+", "", s))
         for grupo, g in r.groupby("grupo"):
             base = g[g["colares"] == 0]
+            if base.empty and len(ref):
+                base = ref[ref["cond"] == cond(g["label"].iloc[0])]
             if base.empty:
+                print(f"  AVISO: {grupo} sem corridas sem colares para comparar")
                 continue
             for c, h in g[g["colares"] != 0].groupby("colares"):
                 for k in KPIS:
