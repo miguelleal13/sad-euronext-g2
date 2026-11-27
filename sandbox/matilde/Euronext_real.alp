@@ -8366,20 +8366,6 @@ public class Order implements Serializable {
 }]]></Text>
 		</JavaClass>
 	</JavaClasses>
-	<ModelResources>
-		<Resource>
-			<Id>1793110736907</Id>
-			<Path><![CDATA[output/halts.csv]]></Path>
-			<ReferencedFromUserCode>false</ReferencedFromUserCode>
-			<Location>FILE_SYSTEM</Location>
-		</Resource>
-		<Resource>
-			<Id>1793110736929</Id>
-			<Path><![CDATA[output/precos.csv]]></Path>
-			<ReferencedFromUserCode>false</ReferencedFromUserCode>
-			<Location>FILE_SYSTEM</Location>
-		</Resource>
-	</ModelResources>
     <RequiredLibraryReference>
 		<LibraryName><![CDATA[com.anylogic.libraries.modules.markup_descriptors]]></LibraryName>
 		<VersionMajor>1</VersionMajor>
