@@ -3,7 +3,9 @@
 Quando o AnyLogic corre várias réplicas ao mesmo tempo (vários núcleos), todas escrevem no mesmo
 ficheiro: as linhas de corridas diferentes ficam misturadas e, de vez em quando, duas linhas ficam
 coladas (uma linha com 13 campos em vez de 7). Este módulo:
-  1. lê o ficheiro linha a linha (aguenta vários GB) e separa as linhas por corrida em ficheiros
+  0. verifica primeiro (sem escrever nada) se o ficheiro está limpo e com as corridas seguidas: se estiver, lê-o
+     aos bocados e entrega cada corrida diretamente, sem ficheiros temporários (para ficheiros de vários GB);
+  1. senão, lê o ficheiro linha a linha e separa as linhas por corrida em ficheiros
      temporários, por isso não importa se as corridas estão seguidas ou misturadas;
   2. ignora as linhas estragadas (número de campos errado ou números que não se leem) e conta-as;
   3. ignora as "corridas" falsas feitas de bocados de linhas (menos de 90% das linhas da maior corrida);
@@ -55,8 +57,62 @@ def _ok(parts):
     return t > 0 and p > 0
 
 
+def _scan(path):
+    """1.ª passagem, rápida e sem escrever nada: conta linhas estragadas e vê se as corridas estão seguidas."""
+    n = bad = 0
+    seen, last, contiguous = set(), None, True
+    with open(path, "r", encoding="utf-8", errors="replace") as f:
+        for line in f:
+            n += 1
+            parts = line.split(";", 2)
+            if len(parts) < 3 or line.count(";") != 6:
+                bad += 1
+                continue
+            run = parts[1]
+            if run != last:
+                if run in seen:
+                    contiguous = False
+                    break
+                seen.add(run)
+                last = run
+            if n % 10_000_000 == 0:
+                print(f"  a verificar: {n:,} linhas", flush=True)
+    return contiguous and bad == 0, n
+
+
+def _stream(path, label_filter):
+    """Ficheiro limpo e com as corridas seguidas: lê aos bocados e entrega cada corrida quando acaba (sem disco)."""
+    carry, total, nruns = None, 0, 0
+    for chunk in pd.read_csv(path, sep=";", names=COLS, dtype={"label": str, "run": str}, chunksize=2_000_000):
+        total += len(chunk)
+        if carry is not None:
+            chunk = pd.concat([carry, chunk])
+        last = chunk["run"].iloc[-1]
+        done, carry = chunk[chunk["run"] != last], chunk[chunk["run"] == last]
+        for run, g in done.groupby("run", sort=False):
+            if label_filter and label_filter not in g["label"].iloc[0]:
+                continue
+            nruns += 1
+            yield g["label"].iloc[0], run, g.sort_values("time").drop_duplicates("time", keep="last").reset_index(drop=True)
+        print(f"  {total:,} linhas lidas, {nruns} corridas", flush=True)
+    if carry is not None and len(carry):
+        for run, g in carry.groupby("run", sort=False):
+            if label_filter and label_filter not in g["label"].iloc[0]:
+                continue
+            nruns += 1
+            yield g["label"].iloc[0], run, g.sort_values("time").drop_duplicates("time", keep="last").reset_index(drop=True)
+    print(f"  ficheiro limpo e com as corridas seguidas: {nruns} corridas lidas diretamente; nenhum preço é retirado",
+          flush=True)
+
+
 def runs(path, label_filter=""):
     """Gera (label, run, DataFrame ordenado pelo tempo) para cada corrida do precos.csv."""
+    clean, n = _scan(path)
+    if clean:
+        yield from _stream(path, label_filter)
+        return
+    print("  ficheiro com linhas estragadas ou corridas misturadas: separar por corrida (usa disco temporário)",
+          flush=True)
     tmp = Path(tempfile.mkdtemp(prefix="precos_"))
     buf, files, labels = {}, {}, {}
     n = bad = switches = 0
